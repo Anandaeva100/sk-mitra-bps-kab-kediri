@@ -11,7 +11,6 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Widgets;
-use Filament\Navigation\NavigationItem;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -24,21 +23,6 @@ class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
-        // Menyusun otomatis link navigasi bulan Januari - Desember
-        $months = [
-            'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
-            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-        ];
-        $monthNavigationItems = [];
-
-        foreach ($months as $month) {
-            $monthNavigationItems[] = NavigationItem::make($month)
-                ->group('Monitoring Survei')
-                ->icon('heroicon-o-calendar')
-                // Mengarahkan ke rute index MonitoringSurveyResource sambil membawa filter bulan otomatis
-                ->url(fn (): string => MonitoringSurveyResource::getUrl('index', ['tableFilters[bulan][value]' => $month]));
-        }
-
         return $panel
             ->default()
             ->id('admin')
@@ -50,13 +34,11 @@ class AdminPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
-                // Dashboard bawaan sengaja dikosongkan agar diganti RekapanSemuaData
+                // Dashboard
             ])
             ->resources([
                 MonitoringSurveyResource::class,
             ])
-            // MENAMPILKAN MENU BULAN JANUARI - DESEMBER KE SIDEBAR SECARA PAKSA & AMAN
-            ->navigationItems($monthNavigationItems)
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
                 Widgets\AccountWidget::class,
