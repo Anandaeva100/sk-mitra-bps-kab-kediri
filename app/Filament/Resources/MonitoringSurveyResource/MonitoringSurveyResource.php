@@ -20,11 +20,16 @@ class MonitoringSurveyResource extends Resource
     protected static ?string $model = MonitoringSurvey::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    
+    // NAMA GROUP NAVIGATION
+    // Ubah ke 'Monitoring' (bukan 'Monitoring Survei') agar menyatu di bagian bawah
+    protected static ?string $navigationGroup = 'Monitoring';
+
     protected static ?string $modelLabel = 'Data Survei';
     protected static ?string $pluralModelLabel = 'Data Survei';
 
-    // Menyembunyikan menu bawaan "Data Survei" agar tidak double dengan list bulanan
-    protected static bool $shouldRegisterNavigation = false;
+    // Menampilkan menu "Data Survei" di dalam grup "Monitoring"
+    protected static bool $shouldRegisterNavigation = true;
 
     public static function form(Form $form): Form
     {
@@ -42,6 +47,7 @@ class MonitoringSurveyResource extends Resource
                             ])
                             ->required()
                             ->searchable(),
+
                         Select::make('bulan')
                             ->label('Bulan Kegiatan')
                             ->options([
@@ -107,6 +113,7 @@ class MonitoringSurveyResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
