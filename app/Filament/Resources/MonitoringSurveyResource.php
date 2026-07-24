@@ -4,7 +4,6 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\MonitoringSurveyResource\Pages;
 use App\Models\MonitoringSurvey;
-use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -20,29 +19,29 @@ class MonitoringSurveyResource extends Resource
     protected static ?string $model = MonitoringSurvey::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
-    
-    // NAMA GROUP NAVIGATION
-    // Ubah ke 'Monitoring' (bukan 'Monitoring Survei') agar menyatu di bagian bawah
+
     protected static ?string $navigationGroup = 'Monitoring';
 
     protected static ?string $modelLabel = 'Data Survei';
+
     protected static ?string $pluralModelLabel = 'Data Survei';
 
-    // Menampilkan menu "Data Survei" di dalam grup "Monitoring"
     protected static bool $shouldRegisterNavigation = true;
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
+
                 Section::make('Informasi Kegiatan')
                     ->schema([
+
                         Select::make('nama_kegiatan')
                             ->label('Nama Kegiatan / Survei')
                             ->options([
-                                'Survei Angkatan Kerja Nasional (SAKERNAS)' => 'SAKERNAS',
-                                'Survei Sosial Ekonomi Nasional (SUSENAS)' => 'SUSENAS',
-                                'Survei Harga Konsumen (SHK)' => 'Survei Harga Konsumen',
+                                'SAKERNAS' => 'Survei Angkatan Kerja Nasional (SAKERNAS)',
+                                'SUSENAS' => 'Survei Sosial Ekonomi Nasional (SUSENAS)',
+                                'SHK' => 'Survei Harga Konsumen (SHK)',
                                 'Pendaftaran Mitra BPS 2026' => 'Pendaftaran Mitra BPS 2026',
                             ])
                             ->required()
@@ -51,42 +50,69 @@ class MonitoringSurveyResource extends Resource
                         Select::make('bulan')
                             ->label('Bulan Kegiatan')
                             ->options([
-                                'Januari' => 'Januari', 'Februari' => 'Februari', 'Maret' => 'Maret',
-                                'April' => 'April', 'Mei' => 'Mei', 'Juni' => 'Juni',
-                                'Juli' => 'Juli', 'Agustus' => 'Agustus', 'September' => 'September',
-                                'Oktober' => 'Oktober', 'November' => 'November', 'Desember' => 'Desember',
+                                'Januari' => 'Januari',
+                                'Februari' => 'Februari',
+                                'Maret' => 'Maret',
+                                'April' => 'April',
+                                'Mei' => 'Mei',
+                                'Juni' => 'Juni',
+                                'Juli' => 'Juli',
+                                'Agustus' => 'Agustus',
+                                'September' => 'September',
+                                'Oktober' => 'Oktober',
+                                'November' => 'November',
+                                'Desember' => 'Desember',
                             ])
                             ->required(),
-                    ])->columns(2),
+
+                    ])
+                    ->columns(2),
 
                 Section::make('Informasi Mitra & Honor')
                     ->schema([
-                        TextInput::make('nama_pml')->required()->label('Nama PML'),
-                        TextInput::make('nama_pcl')->required()->label('Nama PCL'),
-                        
+
+                        TextInput::make('nama_pml')
+                            ->label('Nama PML')
+                            ->required(),
+
+                        TextInput::make('nama_pcl')
+                            ->label('Nama PCL')
+                            ->required(),
+
                         TextInput::make('beban_banyak')
-                            ->numeric()
-                            ->required()
                             ->label('Beban / Banyak')
-                            ->live()
-                            ->afterStateUpdated(fn ($state, Forms\Set $set, Forms\Get $get) => 
-                                $set('honor_total', intval($state) * floatval($get('rate_honor')))
-                            ),
-                            
-                        TextInput::make('rate_honor')
                             ->numeric()
                             ->required()
-                            ->label('Rate Honor')
-                            ->live()
-                            ->afterStateUpdated(fn ($state, Forms\Set $set, Forms\Get $get) => 
-                                $set('honor_total', floatval($state) * intval($get('beban_banyak')))
-                            ),
-                            
-                        TextInput::make('honor_total')
+                            ->live(),
+
+                        TextInput::make('rate_honor')
+                            ->label('Rate Honor (Rp)')
                             ->numeric()
-                            ->readOnly()
-                            ->label('Honor Total (Otomatis)'),
-                    ])->columns(3),
+                            ->prefix('Rp')
+                            ->required()
+                            ->live(),
+
+                        TextInput::make('honor_total')
+                            ->label('Honor Total')
+                            ->disabled()
+                            ->dehydrated(false)
+                            ->formatStateUsing(function ($get) {
+
+                                $beban = (float) ($get('beban_banyak') ?? 0);
+                                $rate = (float) ($get('rate_honor') ?? 0);
+
+                                return 'Rp ' . number_format(
+                                    $beban * $rate,
+                                    0,
+                                    ',',
+                                    '.'
+                                );
+
+                            }),
+
+                    ])
+                    ->columns(3),
+
             ]);
     }
 
@@ -94,40 +120,83 @@ class MonitoringSurveyResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('nama_kegiatan')->searchable()->sortable()->label('Kegiatan'),
-                TextColumn::make('bulan')->label('Bulan'),
-                TextColumn::make('nama_pml')->searchable()->label('Nama PML'),
-                TextColumn::make('nama_pcl')->searchable()->label('Nama PCL'),
-                TextColumn::make('beban_banyak')->alignCenter()->label('Beban'),
-                TextColumn::make('rate_honor')->money('IDR', locale: 'id')->label('Rate Honor'),
-                TextColumn::make('honor_total')->money('IDR', locale: 'id')->label('Honor Total'),
+
+                TextColumn::make('nama_kegiatan')
+                    ->label('Kegiatan')
+                    ->searchable()
+                    ->sortable(),
+
+                TextColumn::make('bulan')
+                    ->label('Bulan'),
+
+                TextColumn::make('nama_pml')
+                    ->label('Nama PML')
+                    ->searchable(),
+
+                TextColumn::make('nama_pcl')
+                    ->label('Nama PCL')
+                    ->searchable(),
+
+                TextColumn::make('beban_banyak')
+                    ->label('Beban')
+                    ->alignCenter(),
+
+                TextColumn::make('rate_honor')
+                    ->label('Rate Honor')
+                    ->money('IDR', locale: 'id'),
+
+                TextColumn::make('honor_total')
+                    ->label('Honor Total')
+                    ->money('IDR', locale: 'id'),
+
             ])
             ->filters([
+
                 SelectFilter::make('bulan')
                     ->options([
-                        'Januari' => 'Januari', 'Februari' => 'Februari', 'Maret' => 'Maret',
-                        'April' => 'April', 'Mei' => 'Mei', 'Juni' => 'Juni',
-                        'Juli' => 'Juli', 'Agustus' => 'Agustus', 'September' => 'September',
-                        'Oktober' => 'Oktober', 'November' => 'November', 'Desember' => 'Desember',
+                        'Januari' => 'Januari',
+                        'Februari' => 'Februari',
+                        'Maret' => 'Maret',
+                        'April' => 'April',
+                        'Mei' => 'Mei',
+                        'Juni' => 'Juni',
+                        'Juli' => 'Juli',
+                        'Agustus' => 'Agustus',
+                        'September' => 'September',
+                        'Oktober' => 'Oktober',
+                        'November' => 'November',
+                        'Desember' => 'Desember',
                     ]),
+
             ])
             ->actions([
+
                 Tables\Actions\EditAction::make(),
+
                 Tables\Actions\DeleteAction::make(),
+
             ])
             ->bulkActions([
+
                 Tables\Actions\BulkActionGroup::make([
+
                     Tables\Actions\DeleteBulkAction::make(),
+
                 ]),
+
             ]);
     }
 
     public static function getPages(): array
     {
         return [
+
             'index' => Pages\ListMonitoringSurveys::route('/'),
+
             'create' => Pages\CreateMonitoringSurvey::route('/create'),
+
             'edit' => Pages\EditMonitoringSurvey::route('/{record}/edit'),
+
         ];
     }
 }
