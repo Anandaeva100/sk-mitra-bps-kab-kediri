@@ -9,11 +9,12 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
 
 class MonitoringSurveyResource extends Resource
 {
@@ -129,6 +130,9 @@ class MonitoringSurveyResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->filtersLayout(Tables\Enums\FiltersLayout::AboveContent)
+            ->deferFilters(false)
+            
             ->columns([
 
                 Tables\Columns\TextColumn::make('no')
@@ -167,6 +171,7 @@ class MonitoringSurveyResource extends Resource
             ->filters([
 
                 SelectFilter::make('bulan')
+                    ->label('Bulan')
                     ->options([
                         'Januari' => 'Januari',
                         'Februari' => 'Februari',
@@ -181,6 +186,38 @@ class MonitoringSurveyResource extends Resource
                         'November' => 'November',
                         'Desember' => 'Desember',
                     ]),
+                
+                SelectFilter::make('nama_kegiatan')
+                    ->label('Kegiatan')
+                    ->options(function () {
+                        return MonitoringSurvey::query()
+                            ->distinct()
+                            ->orderBy('nama_kegiatan')
+                            ->pluck('nama_kegiatan', 'nama_kegiatan')
+                            ->toArray();
+                    }),
+
+                SelectFilter::make('nama_pml')
+                    ->label('PML')
+                    ->searchable()
+                    ->options(function () {
+                        return MonitoringSurvey::query()
+                            ->distinct()
+                            ->orderBy('nama_pml')
+                            ->pluck('nama_pml', 'nama_pml')
+                            ->toArray();
+                    }),
+
+                SelectFilter::make('nama_pcl')
+                    ->label('PCL')
+                    ->searchable()
+                    ->options(function () {
+                        return MonitoringSurvey::query()
+                            ->distinct()
+                            ->orderBy('nama_pcl')
+                            ->pluck('nama_pcl', 'nama_pcl')
+                            ->toArray();
+                    }),
 
             ])
             ->actions([
