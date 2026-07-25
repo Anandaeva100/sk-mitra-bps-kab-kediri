@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\MonitoringSurveyResource\Pages;
 use App\Models\MonitoringSurvey;
+use App\Models\SurveyActivity;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -18,15 +19,24 @@ class MonitoringSurveyResource extends Resource
 {
     protected static ?string $model = MonitoringSurvey::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
 
-    protected static ?string $navigationGroup = 'Monitoring';
+    protected static ?string $navigationGroup = null;
+
+    protected static ?int $navigationSort = 2;
+
+    protected static ?string $navigationLabel = 'Data Survei';
 
     protected static ?string $modelLabel = 'Data Survei';
 
     protected static ?string $pluralModelLabel = 'Data Survei';
 
     protected static bool $shouldRegisterNavigation = true;
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
 
     public static function form(Form $form): Form
     {
@@ -38,14 +48,14 @@ class MonitoringSurveyResource extends Resource
 
                         Select::make('nama_kegiatan')
                             ->label('Nama Kegiatan / Survei')
-                            ->options([
-                                'SAKERNAS' => 'Survei Angkatan Kerja Nasional (SAKERNAS)',
-                                'SUSENAS' => 'Survei Sosial Ekonomi Nasional (SUSENAS)',
-                                'SHK' => 'Survei Harga Konsumen (SHK)',
-                                'Pendaftaran Mitra BPS 2026' => 'Pendaftaran Mitra BPS 2026',
-                            ])
-                            ->required()
-                            ->searchable(),
+                            ->options(function () {
+                                return SurveyActivity::where('status', 'Aktif')
+                                    ->orderBy('nama_kegiatan')
+                                    ->pluck('nama_kegiatan', 'nama_kegiatan');
+                            })
+                            ->searchable()
+                            ->preload()
+                            ->required(),
 
                         Select::make('bulan')
                             ->label('Bulan Kegiatan')
@@ -120,6 +130,10 @@ class MonitoringSurveyResource extends Resource
     {
         return $table
             ->columns([
+
+                Tables\Columns\TextColumn::make('no')
+                    ->label('No.')
+                    ->rowIndex(),
 
                 TextColumn::make('nama_kegiatan')
                     ->label('Kegiatan')
