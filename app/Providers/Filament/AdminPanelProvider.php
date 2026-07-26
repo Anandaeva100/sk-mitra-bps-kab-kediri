@@ -17,6 +17,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\HtmlString;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
@@ -28,13 +29,39 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            
+            // -----------------------------------------------------------------
+            // 1. SETTING BRAND (LOGO BPS + TEKS "BPS Kabupaten Kediri")
+            // -----------------------------------------------------------------
+            ->brandName('BPS Kabupaten Kediri')
+            ->brandLogo(fn () => new HtmlString('
+                <div class="flex items-center gap-x-3">
+                    <img src="' . asset('images/logobps.png') . '" class="h-8 w-auto" alt="Logo BPS">
+                    <span class="text-base font-bold text-gray-900 dark:text-white tracking-wide">
+                        BPS Kabupaten Kediri
+                    </span>
+                </div>
+            '))
+
+            // -----------------------------------------------------------------
+            // 2. FITUR SIDEBAR BISA DIPERKECIL / DIPERBESAR
+            // (Saat awal buka, sidebar tetap tampil terbuka penuh)
+            // -----------------------------------------------------------------
+            ->sidebarCollapsibleOnDesktop()
+
+            // -----------------------------------------------------------------
+            // 3. WARNA ORANYE KHAS BPS (AMBER / ORANGE)
+            // -----------------------------------------------------------------
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::Amber, // Menggunakan warna Oranye Khas BPS
             ])
+
+            // (Widget Tanggal di topbar sudah DIHAPUS sesuai permintaan)
+
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
-                // Dashboard
+                Pages\Dashboard::class,
             ])
             ->resources([
                 MonitoringSurveyResource::class,
@@ -42,7 +69,6 @@ class AdminPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
                 Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
