@@ -29,6 +29,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->registration() // Opsi registrasi dari branch main
             
             // -----------------------------------------------------------------
             // 1. SETTING BRAND (LOGO BPS + TEKS "BPS Kabupaten Kediri")
@@ -45,7 +46,6 @@ class AdminPanelProvider extends PanelProvider
 
             // -----------------------------------------------------------------
             // 2. FITUR SIDEBAR BISA DIPERKECIL / DIPERBESAR
-            // (Saat awal buka, sidebar tetap tampil terbuka penuh)
             // -----------------------------------------------------------------
             ->sidebarCollapsibleOnDesktop()
 
@@ -53,10 +53,8 @@ class AdminPanelProvider extends PanelProvider
             // 3. WARNA ORANYE KHAS BPS (AMBER / ORANGE)
             // -----------------------------------------------------------------
             ->colors([
-                'primary' => Color::Amber, // Menggunakan warna Oranye Khas BPS
+                'primary' => Color::Amber,
             ])
-
-            // (Widget Tanggal di topbar sudah DIHAPUS sesuai permintaan)
 
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')

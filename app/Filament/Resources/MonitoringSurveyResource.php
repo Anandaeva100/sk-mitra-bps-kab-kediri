@@ -4,29 +4,40 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\MonitoringSurveyResource\Pages;
 use App\Models\MonitoringSurvey;
+use App\Models\SurveyActivity;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
 
 class MonitoringSurveyResource extends Resource
 {
     protected static ?string $model = MonitoringSurvey::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
 
-    protected static ?string $navigationGroup = 'Monitoring';
+    protected static ?string $navigationGroup = null;
+
+    protected static ?int $navigationSort = 2;
+
+    protected static ?string $navigationLabel = 'Data Survei';
 
     protected static ?string $modelLabel = 'Data Survei';
 
     protected static ?string $pluralModelLabel = 'Data Survei';
 
     protected static bool $shouldRegisterNavigation = true;
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
 
     public static function form(Form $form): Form
     {
@@ -38,14 +49,14 @@ class MonitoringSurveyResource extends Resource
 
                         Select::make('nama_kegiatan')
                             ->label('Nama Kegiatan / Survei')
-                            ->options([
-                                'SAKERNAS' => 'Survei Angkatan Kerja Nasional (SAKERNAS)',
-                                'SUSENAS' => 'Survei Sosial Ekonomi Nasional (SUSENAS)',
-                                'SHK' => 'Survei Harga Konsumen (SHK)',
-                                'Pendaftaran Mitra BPS 2026' => 'Pendaftaran Mitra BPS 2026',
-                            ])
-                            ->required()
-                            ->searchable(),
+                            ->options(function () {
+                                return SurveyActivity::where('status', 'Aktif')
+                                    ->orderBy('nama_kegiatan')
+                                    ->pluck('nama_kegiatan', 'nama_kegiatan');
+                            })
+                            ->searchable()
+                            ->preload()
+                            ->required(),
 
                         Select::make('bulan')
                             ->label('Bulan Kegiatan')
@@ -119,7 +130,14 @@ class MonitoringSurveyResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->filtersLayout(Tables\Enums\FiltersLayout::AboveContent)
+            ->deferFilters(false)
+            
             ->columns([
+
+                Tables\Columns\TextColumn::make('no')
+                    ->label('No.')
+                    ->rowIndex(),
 
                 TextColumn::make('nama_kegiatan')
                     ->label('Kegiatan')
@@ -153,6 +171,7 @@ class MonitoringSurveyResource extends Resource
             ->filters([
 
                 SelectFilter::make('bulan')
+                    ->label('Bulan')
                     ->options([
                         'Januari' => 'Januari',
                         'Februari' => 'Februari',
@@ -167,6 +186,38 @@ class MonitoringSurveyResource extends Resource
                         'November' => 'November',
                         'Desember' => 'Desember',
                     ]),
+                
+                SelectFilter::make('nama_kegiatan')
+                    ->label('Kegiatan')
+                    ->options(function () {
+                        return MonitoringSurvey::query()
+                            ->distinct()
+                            ->orderBy('nama_kegiatan')
+                            ->pluck('nama_kegiatan', 'nama_kegiatan')
+                            ->toArray();
+                    }),
+
+                SelectFilter::make('nama_pml')
+                    ->label('PML')
+                    ->searchable()
+                    ->options(function () {
+                        return MonitoringSurvey::query()
+                            ->distinct()
+                            ->orderBy('nama_pml')
+                            ->pluck('nama_pml', 'nama_pml')
+                            ->toArray();
+                    }),
+
+                SelectFilter::make('nama_pcl')
+                    ->label('PCL')
+                    ->searchable()
+                    ->options(function () {
+                        return MonitoringSurvey::query()
+                            ->distinct()
+                            ->orderBy('nama_pcl')
+                            ->pluck('nama_pcl', 'nama_pcl')
+                            ->toArray();
+                    }),
 
             ])
             ->actions([
