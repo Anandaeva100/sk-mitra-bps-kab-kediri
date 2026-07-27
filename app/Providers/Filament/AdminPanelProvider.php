@@ -17,6 +17,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\HtmlString;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
@@ -25,35 +26,34 @@ class AdminPanelProvider extends PanelProvider
     {
         return $panel
             ->default()
-
             ->id('admin')
-
             ->path('admin')
-
             ->login()
-
             ->registration()
 
+            // -----------------------------------------------------------------
+            // Brand
+            // -----------------------------------------------------------------
+            ->brandName('BPS Kabupaten Kediri')
+
+            ->brandLogo(fn () => new HtmlString('
+                <div class="flex items-center gap-x-3">
+                    <img src="' . asset('images/logobps.png') . '" class="h-8 w-auto" alt="Logo BPS">
+                    <span class="text-base font-bold text-gray-900 dark:text-white tracking-wide">
+                        BPS Kabupaten Kediri
+                    </span>
+                </div>
+            '))
+
+            // Sidebar dapat di-collapse
+            ->sidebarCollapsibleOnDesktop()
+
+            // Warna utama
             ->colors([
                 'primary' => Color::Amber,
             ])
 
-            /*
-            |--------------------------------------------------------------------------
-            | Brand
-            |--------------------------------------------------------------------------
-            */
-
-            ->brandLogo(asset('images/logo-bps.png'))
-            ->brandLogoHeight('32px')
-            ->brandName(fn () => 'Monitoring Honor Mitra BPS')
-
-            /*
-            |--------------------------------------------------------------------------
-            | Resources
-            |--------------------------------------------------------------------------
-            */
-
+            // Resources
             ->discoverResources(
                 in: app_path('Filament/Resources'),
                 for: 'App\\Filament\\Resources'
@@ -65,7 +65,7 @@ class AdminPanelProvider extends PanelProvider
             )
 
             ->pages([
-                //
+                Pages\Dashboard::class,
             ])
 
             ->resources([
@@ -79,7 +79,6 @@ class AdminPanelProvider extends PanelProvider
 
             ->widgets([
                 Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
             ])
 
             ->middleware([
