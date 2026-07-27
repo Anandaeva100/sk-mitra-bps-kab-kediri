@@ -31,6 +31,29 @@ class MonitoringHonorResource extends Resource
 
     protected static ?int $navigationSort = 4;
 
+    /**
+     * 1. Menampilkan badge angka di sidebar khusus mitra yang MELEBIHI BATAS HONOR
+     */
+    public static function getNavigationBadge(): ?string
+    {
+        $count = DB::table('monitoring_surveys')
+            ->select('nama_pcl')
+            ->groupBy('nama_pcl')
+            ->havingRaw('SUM(honor_total) >= ?', [self::BATAS_HONOR])
+            ->get()
+            ->count();
+
+        return $count > 0 ? (string) $count : null;
+    }
+
+    /**
+     * 2. Memberikan warna MERAH pada badge sidebar
+     */
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'danger';
+    }
+
     public static function form(Form $form): Form
     {
         return $form->schema([]);

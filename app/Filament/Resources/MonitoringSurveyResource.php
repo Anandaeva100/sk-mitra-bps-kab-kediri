@@ -34,9 +34,12 @@ class MonitoringSurveyResource extends Resource
 
     protected static bool $shouldRegisterNavigation = true;
 
+    /**
+     * Mengembalikan null agar badge angka (12) di menu Data Survei hilang
+     */
     public static function getNavigationBadge(): ?string
     {
-        return static::getModel()::count();
+        return null;
     }
 
     public static function form(Form $form): Form
