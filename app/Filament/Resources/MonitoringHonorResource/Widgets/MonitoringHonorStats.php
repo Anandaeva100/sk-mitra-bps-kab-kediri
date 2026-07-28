@@ -11,47 +11,57 @@ class MonitoringHonorStats extends BaseWidget
 {
     private const BATAS_HONOR = 3700000;
 
+    protected $listeners = ['updateStats' => '$refresh'];
+
     protected function getStats(): array
     {
-        // Total Mitra (Nama PCL unik)
-        $totalMitra = MonitoringSurvey::distinct('nama_pcl')->count('nama_pcl');
+        $activeTab = request()->query('activeTab');
 
-        // Total Honor seluruh mitra
-        $totalHonor = MonitoringSurvey::sum('honor_total');
+        if (! $activeTab && request()->header('referer')) {
+            $refererUrl = parse_url(request()->header('referer'), PHP_URL_QUERY);
+            parse_str($refererUrl ?? '', $queryParams);
+            $activeTab = $queryParams['activeTab'] ?? null;
+        }
 
-        // Mitra yang melebihi batas honor
-        $mitraMelebihiBatas = MonitoringSurvey::select(
-                'nama_pcl',
-                DB::raw('SUM(honor_total) as total_honor')
-            )
+        $bulan = ($activeTab === 'semua' || empty($activeTab))
+            ? null
+            : ucfirst($activeTab);
+
+        $query = MonitoringSurvey::query();
+
+        if ($bulan) {
+            $query->where('bulan', $bulan);
+        }
+
+        $totalMitra = (clone $query)
+            ->distinct('nama_pcl')
+            ->count('nama_pcl');
+
+        $totalHonor = (clone $query)
+            ->sum('honor_total');
+
+        $mitraMelebihiBatas = (clone $query)
+            ->select('nama_pcl', DB::raw('SUM(honor_total) as total_honor'))
             ->groupBy('nama_pcl')
             ->having('total_honor', '>=', self::BATAS_HONOR)
             ->get()
             ->count();
 
         return [
-
             Stat::make('Total Mitra', $totalMitra)
-                ->description('Mitra aktif')
-                ->descriptionIcon('heroicon-o-users')
+                ->description($bulan ? 'Mitra bulan ' . $bulan : 'Seluruh mitra')
+                ->descriptionIcon('heroicon-m-user-group') // Gunakan heroicon-m- (solid/micro)
                 ->color('primary'),
 
-            Stat::make(
-                'Total Honor',
-                'Rp ' . number_format($totalHonor, 0, ',', '.')
-            )
-                ->description('Akumulasi seluruh honor')
-                ->descriptionIcon('heroicon-o-banknotes')
+            Stat::make('Total Honor', 'Rp ' . number_format($totalHonor, 0, ',', '.'))
+                ->description($bulan ? 'Honor bulan ' . $bulan : 'Akumulasi seluruh honor')
+                ->descriptionIcon('heroicon-m-banknotes')
                 ->color('success'),
 
-            Stat::make(
-                'Melebihi Batas Honor',
-                $mitraMelebihiBatas
-            )
+            Stat::make('Melebihi Batas Honor', $mitraMelebihiBatas)
                 ->description('≥ Rp ' . number_format(self::BATAS_HONOR, 0, ',', '.'))
-                ->descriptionIcon('heroicon-o-exclamation-triangle')
+                ->descriptionIcon('heroicon-m-exclamation-triangle')
                 ->color('danger'),
-
         ];
     }
 }
