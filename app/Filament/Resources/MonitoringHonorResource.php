@@ -6,7 +6,6 @@ use App\Filament\Resources\MonitoringHonorResource\Pages;
 use App\Models\MonitoringSurvey;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BadgeColumn;
@@ -61,19 +60,24 @@ class MonitoringHonorResource extends Resource
 
     /**
      * Query Monitoring Honor
-     * Mengelompokkan berdasarkan Nama PCL
+     * Mengelompokkan berdasarkan Bulan & Nama PCL, serta mengurutkan Bulan & Nama A-Z
      */
     public static function getEloquentQuery(): Builder
     {
+        $orderBulan = "FIELD(bulan, 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember')";
+
         return parent::getEloquentQuery()
             ->select([
                 DB::raw('MIN(id) as id'),
+                'bulan',
                 'nama_pcl',
-                DB::raw('COUNT(*) as jumlah_kegiatan'),
+                DB::raw('COUNT(DISTINCT CONCAT(bulan, "-", nama_kegiatan)) as jumlah_kegiatan'),
                 DB::raw('SUM(beban_banyak) as total_beban'),
                 DB::raw('SUM(honor_total) as total_honor'),
             ])
-            ->groupBy('nama_pcl');
+            ->groupBy('bulan', 'nama_pcl')
+            ->orderByRaw($orderBulan)
+            ->orderBy('nama_pcl', 'asc');
     }
 
     public static function table(Table $table): Table
@@ -82,11 +86,29 @@ class MonitoringHonorResource extends Resource
             ->columns([
 
                 TextColumn::make('no')
-                    ->label('No')
+                    ->label('No.')
                     ->rowIndex(),
+
+                TextColumn::make('bulan')
+                    ->label('Bulan')
+                    ->sortable()
+                    ->badge(),
 
                 TextColumn::make('nama_pcl')
                     ->label('Nama Mitra')
+                    ->url(function ($record) {
+                        return MonitoringSurveyResource::getUrl('index', [
+                            'activeTab' => strtolower($record->bulan),
+                            'tableFilters' => [
+                                'bulan' => [
+                                    'value' => $record->bulan,
+                                ],
+                                'nama_pcl' => [
+                                    'value' => $record->nama_pcl,
+                                ],
+                            ],
+                        ]);
+                    })
                     ->searchable()
                     ->sortable(),
 
@@ -102,7 +124,7 @@ class MonitoringHonorResource extends Resource
                     ->label('Total Honor')
                     ->money('IDR', locale: 'id')
                     ->sortable(),
-                
+
                 BadgeColumn::make('status')
                     ->label('Status')
                     ->getStateUsing(fn ($record) =>
@@ -116,41 +138,12 @@ class MonitoringHonorResource extends Resource
                     ]),
 
             ])
-
-            ->defaultSort('total_honor', 'desc')
-
             ->filters([
 
-                Tables\Filters\SelectFilter::make('bulan')
-                    ->label('Bulan')
-                    ->options([
-                        'Januari' => 'Januari',
-                        'Februari' => 'Februari',
-                        'Maret' => 'Maret',
-                        'April' => 'April',
-                        'Mei' => 'Mei',
-                        'Juni' => 'Juni',
-                        'Juli' => 'Juli',
-                        'Agustus' => 'Agustus',
-                        'September' => 'September',
-                        'Oktober' => 'Oktober',
-                        'November' => 'November',
-                        'Desember' => 'Desember',
-                    ]),
-                
-                Tables\Filters\SelectFilter::make('nama_kegiatan')
-                    ->label('Kegiatan')
-                    ->options(
-                        MonitoringSurvey::query()
-                            ->pluck('nama_kegiatan', 'nama_kegiatan')
-                            ->toArray()
-                    ),
             ])
-
             ->actions([
 
             ])
-
             ->bulkActions([
 
             ]);
