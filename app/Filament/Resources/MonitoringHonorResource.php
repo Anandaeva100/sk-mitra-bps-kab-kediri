@@ -11,11 +11,10 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BadgeColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 class MonitoringHonorResource extends Resource
 {
-    private const BATAS_HONOR = 3700000;
-
     protected static ?string $model = MonitoringSurvey::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-banknotes';
@@ -31,23 +30,30 @@ class MonitoringHonorResource extends Resource
     protected static ?int $navigationSort = 4;
 
     /**
-     * 1. Menampilkan badge angka di sidebar khusus mitra yang MELEBIHI BATAS HONOR
+     * Ambil Batas Honor dari Pengaturan
+     */
+    public static function getBatasHonor(): int
+    {
+        return (int) Cache::get('app_batas_honor', 3755000);
+    }
+
+    /**
+     * Badge jumlah mitra yang melebihi batas honor
      */
     public static function getNavigationBadge(): ?string
     {
+        $batasHonor = self::getBatasHonor();
+
         $count = DB::table('monitoring_surveys')
-            ->select('nama_pcl')
-            ->groupBy('nama_pcl')
-            ->havingRaw('SUM(honor_total) >= ?', [self::BATAS_HONOR])
+            ->select('nama_pcl', 'bulan')
+            ->groupBy('nama_pcl', 'bulan')
+            ->havingRaw('SUM(honor_total) >= ?', [$batasHonor])
             ->get()
             ->count();
 
         return $count > 0 ? (string) $count : null;
     }
 
-    /**
-     * 2. Memberikan warna MERAH pada badge sidebar
-     */
     public static function getNavigationBadgeColor(): ?string
     {
         return 'danger';
@@ -58,10 +64,6 @@ class MonitoringHonorResource extends Resource
         return $form->schema([]);
     }
 
-    /**
-     * Query Monitoring Honor
-     * Mengelompokkan berdasarkan Bulan & Nama PCL, serta mengurutkan Bulan & Nama A-Z
-     */
     public static function getEloquentQuery(): Builder
     {
         $orderBulan = "FIELD(bulan, 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember')";
@@ -82,6 +84,8 @@ class MonitoringHonorResource extends Resource
 
     public static function table(Table $table): Table
     {
+        $batasHonor = self::getBatasHonor();
+
         return $table
             ->columns([
 
@@ -128,7 +132,7 @@ class MonitoringHonorResource extends Resource
                 BadgeColumn::make('status')
                     ->label('Status')
                     ->getStateUsing(fn ($record) =>
-                        $record->total_honor >= self::BATAS_HONOR
+                        $record->total_honor >= $batasHonor
                             ? 'Melebihi Batas'
                             : 'Aman'
                     )
@@ -138,15 +142,9 @@ class MonitoringHonorResource extends Resource
                     ]),
 
             ])
-            ->filters([
-
-            ])
-            ->actions([
-
-            ])
-            ->bulkActions([
-
-            ]);
+            ->filters([])
+            ->actions([])
+            ->bulkActions([]);
     }
 
     public static function getRelations(): array
