@@ -21,7 +21,13 @@
         @include('filament.components.dashboard-cards')
 
         {{-- Chart --}}
-        @include('filament.components.dashboard-chart')
+        @php
+            $chartData = $this->getChartData();
+        @endphp
+        @include('filament.components.dashboard-chart', [
+            'labels' => $chartData['labels'],
+            'data'   => $chartData['values'],
+        ])
 
         {{-- Panel Bawah --}}
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">

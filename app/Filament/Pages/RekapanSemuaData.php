@@ -43,7 +43,8 @@ class RekapanSemuaData extends Page
             'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
         ];
 
-        $data = MonitoringSurvey::select(
+        // Ambil akumulasi total honor per bulan dari database
+        $rawData = MonitoringSurvey::select(
                 'bulan',
                 DB::raw('SUM(honor_total) as total')
             )
@@ -51,13 +52,22 @@ class RekapanSemuaData extends Page
             ->pluck('total', 'bulan')
             ->toArray();
 
-        $chart = [];
+        $labels = $months;
+        $values = [];
 
+        // Penanganan Case-Insensitive & Whitespace Trimming agar bulan seperti "Februari" selalu cocok
         foreach ($months as $month) {
-            $chart[$month] = $data[$month] ?? 0;
+            $matchedKey = collect($rawData)->keys()->first(function ($key) use ($month) {
+                return strtolower(trim($key)) === strtolower($month);
+            });
+
+            $values[] = $matchedKey ? (float) $rawData[$matchedKey] : 0;
         }
 
-        return $chart;
+        return [
+            'labels' => $labels,
+            'values' => $values,
+        ];
     }
 
     public function getLatestActivities()
@@ -67,9 +77,6 @@ class RekapanSemuaData extends Page
             ->get();
     }
 
-    /**
-     * Data Mitra yang Melebihi Batas Honor (Diperbaiki)
-     */
     public function getWarningData()
     {
         return MonitoringSurvey::select(
