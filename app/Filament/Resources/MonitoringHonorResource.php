@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\MonitoringHonorResource\Pages;
 use App\Models\MonitoringSurvey;
+use App\Models\Setting;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
@@ -30,11 +31,16 @@ class MonitoringHonorResource extends Resource
     protected static ?int $navigationSort = 4;
 
     /**
-     * Ambil Batas Honor dari Pengaturan
+     * Ambil Batas Honor secara Sinkron dari Cache atau Database Settings
      */
     public static function getBatasHonor(): int
     {
-        return (int) Cache::get('app_batas_honor', 3755000);
+        return Cache::rememberForever('app_batas_honor', function () {
+            $settingValue = Setting::get('batas_honor', '3700000');
+            // Bersihkan format titik/koma agar aman dihitung dalam query integer
+            $cleanNominal = preg_replace('/[^0-9]/', '', (string) $settingValue);
+            return (int) ($cleanNominal ?: 3700000);
+        });
     }
 
     /**

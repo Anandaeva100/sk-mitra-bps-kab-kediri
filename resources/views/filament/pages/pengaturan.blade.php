@@ -33,7 +33,7 @@
                         </div>
                     </div>
 
-                    {{-- Tombol Edit Profil Pojok Kanan Atas --}}
+                    {{-- Tombol Edit Profil --}}
                     <div>
                         <button type="button" 
                                 x-show="!isEditing" 
@@ -70,66 +70,114 @@
                         {{-- Form Inputs --}}
                         <div class="flex-1 w-full space-y-4">
                             
-                            {{-- Nama Lengkap --}}
-                            <div>
-                                <label class="block text-xs font-bold text-black dark:text-white mb-1.5">Nama Lengkap</label>
-                                <input type="text" wire:model="name" :disabled="!isEditing"
-                                       class="w-full text-sm font-medium rounded-xl border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-black dark:text-white focus:border-amber-500 focus:ring-amber-500 transition shadow-sm disabled:opacity-75 disabled:bg-gray-100/70 dark:disabled:bg-gray-800/50">
-                                @error('name') <span class="text-xs font-medium text-red-600 dark:text-red-400 mt-1 block">{{ $message }}</span> @enderror
-                            </div>
-
-                            {{-- Email Address --}}
-                            <div>
-                                <label class="block text-xs font-bold text-black dark:text-white mb-1.5">Email Address</label>
-                                <input type="email" wire:model="email" :disabled="!isEditing"
-                                       class="w-full text-sm font-medium rounded-xl border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-black dark:text-white focus:border-amber-500 focus:ring-amber-500 transition shadow-sm disabled:opacity-75 disabled:bg-gray-100/70 dark:disabled:bg-gray-800/50">
-                                @error('email') <span class="text-xs font-medium text-red-600 dark:text-red-400 mt-1 block">{{ $message }}</span> @enderror
-                            </div>
-
-                            {{-- Password Inputs --}}
-                            <div x-show="isEditing" x-transition.opacity.duration.200ms class="space-y-4 pt-2">
+                            {{-- TAMPILAN READ-ONLY --}}
+                            <div x-show="!isEditing" class="space-y-4">
                                 <div>
+                                    <label class="block text-xs font-bold text-black dark:text-white mb-1.5">Nama Lengkap</label>
+                                    <div class="w-full px-4 py-2.5 text-sm font-medium rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/50 text-black dark:text-white shadow-2xs">
+                                        {{ $name ?? '-' }}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-black dark:text-white mb-1.5">Email Address</label>
+                                    <div class="w-full px-4 py-2.5 text-sm font-medium rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/50 text-black dark:text-white shadow-2xs">
+                                        {{ $email ?? '-' }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- TAMPILAN FORM EDIT --}}
+                            <div x-show="isEditing" x-transition.opacity.duration.200ms class="space-y-4">
+                                
+                                <div>
+                                    <label class="block text-xs font-bold text-black dark:text-white mb-1.5">Nama Lengkap</label>
+                                    <input type="text" wire:model="name" placeholder="Masukkan nama lengkap"
+                                           class="w-full text-sm font-medium rounded-xl border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-black dark:text-white focus:border-amber-500 focus:ring-amber-500 transition shadow-sm">
+                                    @error('name') <span class="text-xs font-medium text-red-600 dark:text-red-400 mt-1 block">{{ $message }}</span> @enderror
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-black dark:text-white mb-1.5">Email Address</label>
+                                    <input type="email" wire:model="email" placeholder="Masukkan email address"
+                                           class="w-full text-sm font-medium rounded-xl border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-black dark:text-white focus:border-amber-500 focus:ring-amber-500 transition shadow-sm">
+                                    @error('email') <span class="text-xs font-medium text-red-600 dark:text-red-400 mt-1 block">{{ $message }}</span> @enderror
+                                </div>
+
+                                {{-- Password Saat Ini --}}
+                                <div x-data="{ show: false }">
                                     <label class="block text-xs font-bold text-black dark:text-white mb-1.5">Password Saat Ini</label>
-                                    <input type="password" wire:model="current_password" placeholder="Masukkan password saat ini untuk ubah kata sandi" 
-                                           class="w-full text-sm rounded-xl border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-black dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-amber-500 focus:ring-amber-500 shadow-sm">
+                                    <div style="position: relative !important; width: 100% !important; display: block !important;">
+                                        <input :type="show ? 'text' : 'password'" wire:model="current_password" placeholder="Masukkan password saat ini untuk konfirmasi perubahan" 
+                                               style="padding-right: 2.75rem !important;"
+                                               class="w-full pl-4 py-2.5 text-sm rounded-xl border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-black dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-amber-500 focus:ring-amber-500 shadow-sm">
+                                        
+                                        <button type="button" @click="show = !show" 
+                                                style="position: absolute !important; right: 12px !important; top: 50% !important; transform: translateY(-50%) !important; z-index: 30 !important; background: transparent !important; border: none !important;"
+                                                class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition focus:outline-none cursor-pointer p-1">
+                                            <x-heroicon-o-eye-slash x-show="!show" class="w-5 h-5 block" />
+                                            <x-heroicon-o-eye x-show="show" class="w-5 h-5 block" />
+                                        </button>
+                                    </div>
                                     @error('current_password') <span class="text-xs font-medium text-red-600 dark:text-red-400 mt-1 block">{{ $message }}</span> @enderror
                                 </div>
 
-                                <div>
+                                {{-- Password Baru --}}
+                                <div x-data="{ show: false }">
                                     <label class="block text-xs font-bold text-black dark:text-white mb-1.5">
                                         Password Baru <span class="text-gray-500 dark:text-gray-400 font-normal">(opsional)</span>
                                     </label>
-                                    <input type="password" wire:model="password" placeholder="Minimal 8 karakter" 
-                                           class="w-full text-sm rounded-xl border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-black dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-amber-500 focus:ring-amber-500 shadow-sm">
+                                    <div style="position: relative !important; width: 100% !important; display: block !important;">
+                                        <input :type="show ? 'text' : 'password'" wire:model="password" placeholder="Minimal 8 karakter" 
+                                               style="padding-right: 2.75rem !important;"
+                                               class="w-full pl-4 py-2.5 text-sm rounded-xl border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-black dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-amber-500 focus:ring-amber-500 shadow-sm">
+                                        
+                                        <button type="button" @click="show = !show" 
+                                                style="position: absolute !important; right: 12px !important; top: 50% !important; transform: translateY(-50%) !important; z-index: 30 !important; background: transparent !important; border: none !important;"
+                                                class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition focus:outline-none cursor-pointer p-1">
+                                            <x-heroicon-o-eye-slash x-show="!show" class="w-5 h-5 block" />
+                                            <x-heroicon-o-eye x-show="show" class="w-5 h-5 block" />
+                                        </button>
+                                    </div>
                                     @error('password') <span class="text-xs font-medium text-red-600 dark:text-red-400 mt-1 block">{{ $message }}</span> @enderror
                                 </div>
 
-                                <div>
+                                {{-- Konfirmasi Password Baru --}}
+                                <div x-data="{ show: false }">
                                     <label class="block text-xs font-bold text-black dark:text-white mb-1.5">Konfirmasi Password Baru</label>
-                                    <input type="password" wire:model="password_confirmation" placeholder="Ulangi password baru" 
-                                           class="w-full text-sm rounded-xl border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-black dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-amber-500 focus:ring-amber-500 shadow-sm">
+                                    <div style="position: relative !important; width: 100% !important; display: block !important;">
+                                        <input :type="show ? 'text' : 'password'" wire:model="password_confirmation" placeholder="Ulangi password baru" 
+                                               style="padding-right: 2.75rem !important;"
+                                               class="w-full pl-4 py-2.5 text-sm rounded-xl border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-black dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-amber-500 focus:ring-amber-500 shadow-sm">
+                                        
+                                        <button type="button" @click="show = !show" 
+                                                style="position: absolute !important; right: 12px !important; top: 50% !important; transform: translateY(-50%) !important; z-index: 30 !important; background: transparent !important; border: none !important;"
+                                                class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition focus:outline-none cursor-pointer p-1">
+                                            <x-heroicon-o-eye-slash x-show="!show" class="w-5 h-5 block" />
+                                            <x-heroicon-o-eye x-show="show" class="w-5 h-5 block" />
+                                        </button>
+                                    </div>
                                 </div>
+
                             </div>
 
                         </div>
                     </div>
 
-                    {{-- PERBAIKAN: Lengkungan (rounded-xl), Jarak dari Garis (mt-6 pt-5), serta Padding Dalam Tombol (px-6 py-3) --}}
+                    {{-- Tombol Batal & Simpan --}}
                     <div x-show="isEditing" x-transition.opacity 
                          class="flex items-center justify-end gap-3 mt-6 pt-5 border-t border-gray-200 dark:border-gray-800">
                         
-                        {{-- Tombol Batal --}}
                         <button type="button" @click="isEditing = false" 
                                 style="background-color: #e11d48 !important; color: #ffffff !important;"
-                                class="inline-flex items-center justify-center gap-2.5 px-6 py-3 !bg-rose-600 hover:!bg-rose-700 active:!bg-rose-800 !text-white font-bold rounded-xl text-xs transition-all duration-150 shadow-sm hover:shadow-rose-500/20 cursor-pointer shrink-0">
+                                class="inline-flex items-center justify-center gap-2.5 px-6 py-3 !bg-rose-600 hover:!bg-rose-700 active:!bg-rose-800 !text-white font-bold rounded-xl text-xs transition-all duration-150 shadow-sm cursor-pointer shrink-0">
                             <x-heroicon-o-x-mark class="w-4 h-4 !text-white stroke-[2.5] shrink-0" />
                             <span class="!text-white whitespace-nowrap">Batal</span>
                         </button>
 
-                        {{-- Tombol Simpan Perubahan Profil --}}
                         <button type="submit" wire:loading.attr="disabled" 
                                 style="background-color: #059669 !important; color: #ffffff !important;"
-                                class="inline-flex items-center justify-center gap-2.5 px-6 py-3 !bg-emerald-600 hover:!bg-emerald-700 active:!bg-emerald-800 !text-white font-bold rounded-xl text-xs shadow-sm hover:shadow-emerald-600/20 transition-all duration-150 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed shrink-0">
+                                class="inline-flex items-center justify-center gap-2.5 px-6 py-3 !bg-emerald-600 hover:!bg-emerald-700 active:!bg-emerald-800 !text-white font-bold rounded-xl text-xs shadow-sm transition-all duration-150 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed shrink-0">
                             <svg wire:loading wire:target="simpanProfil" class="animate-spin w-4 h-4 text-white shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
@@ -149,6 +197,7 @@
             {{-- Card Pengaturan Notifikasi --}}
             <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col justify-between overflow-hidden">
                 <div>
+                    {{-- Header Card --}}
                     <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-800 bg-gray-50/80 dark:bg-gray-800/50 flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <div class="p-2 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0">
@@ -161,106 +210,172 @@
                         </div>
                     </div>
 
-                    <div class="p-6 space-y-3">
+                    {{-- Body List Notifikasi --}}
+                    <div class="p-6 space-y-4">
+
+                        {{-- Item 1: Honor Mendekati Batas --}}
                         <label class="group flex items-center justify-between p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:bg-amber-50/40 dark:hover:bg-gray-800/60 hover:border-amber-300 dark:hover:border-amber-700/50 cursor-pointer transition-all duration-150 shadow-2xs">
-                            <div class="flex gap-3.5 items-center">
-                                <div class="p-2.5 rounded-xl bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400 shrink-0 transition-transform group-hover:scale-105">
-                                    <x-heroicon-o-exclamation-triangle class="w-5 h-5 stroke-[2]" />
+                            <div class="flex items-center gap-4 min-w-0 pr-2">
+                                <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 transition-transform group-hover:scale-105">
+                                    <x-heroicon-o-exclamation-triangle class="w-5 h-5 stroke-[2] shrink-0" />
                                 </div>
-                                <div>
-                                    <p class="text-xs font-bold text-gray-900 dark:text-white leading-snug">Honor mendekati batas</p>
-                                    <p class="text-[11px] font-medium text-gray-500 dark:text-gray-400 mt-0.5">Notifikasi ketika honor mendekati batas maksimal</p>
+                                <div class="flex flex-col justify-center min-w-0">
+                                    <span class="text-sm font-bold text-gray-900 dark:text-white leading-snug block">Honor mendekati batas</span>
+                                    <span class="text-xs font-normal text-gray-500 dark:text-gray-400 leading-normal mt-0.5 block truncate">Notifikasi ketika honor mendekati batas maksimal</span>
                                 </div>
                             </div>
-                            <input type="checkbox" wire:model.live="notif_mendekati" class="w-5 h-5 rounded-md border-2 border-gray-300 dark:border-gray-600 text-amber-500 focus:ring-2 focus:ring-amber-500/30 focus:ring-offset-0 dark:bg-gray-800 cursor-pointer transition">
+                            <input type="checkbox" wire:model.live="notif_mendekati" class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-amber-500 focus:ring-amber-500/20 focus:ring-2 focus:ring-offset-0 dark:bg-gray-800 cursor-pointer shrink-0">
                         </label>
 
+                        {{-- Item 2: Honor Melebihi Batas --}}
                         <label class="group flex items-center justify-between p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:bg-red-50/40 dark:hover:bg-gray-800/60 hover:border-red-300 dark:hover:border-red-700/50 cursor-pointer transition-all duration-150 shadow-2xs">
-                            <div class="flex gap-3.5 items-center">
-                                <div class="p-2.5 rounded-xl bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400 shrink-0 transition-transform group-hover:scale-105">
-                                    <x-heroicon-o-exclamation-circle class="w-5 h-5 stroke-[2]" />
+                            <div class="flex items-center gap-4 min-w-0 pr-2">
+                                <div class="w-10 h-10 rounded-xl bg-red-500/10 text-red-600 dark:text-red-400 flex items-center justify-center shrink-0 transition-transform group-hover:scale-105">
+                                    <x-heroicon-o-exclamation-circle class="w-5 h-5 stroke-[2] shrink-0" />
                                 </div>
-                                <div>
-                                    <p class="text-xs font-bold text-gray-900 dark:text-white leading-snug">Honor melebihi batas</p>
-                                    <p class="text-[11px] font-medium text-gray-500 dark:text-gray-400 mt-0.5">Notifikasi ketika honor sudah melebihi batas maksimal</p>
+                                <div class="flex flex-col justify-center min-w-0">
+                                    <span class="text-sm font-bold text-gray-900 dark:text-white leading-snug block">Honor melebihi batas</span>
+                                    <span class="text-xs font-normal text-gray-500 dark:text-gray-400 leading-normal mt-0.5 block truncate">Notifikasi ketika honor sudah melebihi batas maksimal</span>
                                 </div>
                             </div>
-                            <input type="checkbox" wire:model.live="notif_melebihi" class="w-5 h-5 rounded-md border-2 border-gray-300 dark:border-gray-600 text-amber-500 focus:ring-2 focus:ring-amber-500/30 focus:ring-offset-0 dark:bg-gray-800 cursor-pointer transition">
+                            <input type="checkbox" wire:model.live="notif_melebihi" class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-amber-500 focus:ring-amber-500/20 focus:ring-2 focus:ring-offset-0 dark:bg-gray-800 cursor-pointer shrink-0">
                         </label>
 
+                        {{-- Item 3: Data Survei Baru --}}
                         <label class="group flex items-center justify-between p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:bg-emerald-50/40 dark:hover:bg-gray-800/60 hover:border-emerald-300 dark:hover:border-emerald-700/50 cursor-pointer transition-all duration-150 shadow-2xs">
-                            <div class="flex gap-3.5 items-center">
-                                <div class="p-2.5 rounded-xl bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 shrink-0 transition-transform group-hover:scale-105">
-                                    <x-heroicon-o-document-plus class="w-5 h-5 stroke-[2]" />
+                            <div class="flex items-center gap-4 min-w-0 pr-2">
+                                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 transition-transform group-hover:scale-105">
+                                    <x-heroicon-o-document-plus class="w-5 h-5 stroke-[2] shrink-0" />
                                 </div>
-                                <div>
-                                    <p class="text-xs font-bold text-gray-900 dark:text-white leading-snug">Data survei baru</p>
-                                    <p class="text-[11px] font-medium text-gray-500 dark:text-gray-400 mt-0.5">Notifikasi ketika ada data survei yang ditambahkan</p>
+                                <div class="flex flex-col justify-center min-w-0">
+                                    <span class="text-sm font-bold text-gray-900 dark:text-white leading-snug block">Data survei baru</span>
+                                    <span class="text-xs font-normal text-gray-500 dark:text-gray-400 leading-normal mt-0.5 block truncate">Notifikasi ketika ada data survei yang ditambahkan</span>
                                 </div>
                             </div>
-                            <input type="checkbox" wire:model.live="notif_survei_baru" class="w-5 h-5 rounded-md border-2 border-gray-300 dark:border-gray-600 text-amber-500 focus:ring-2 focus:ring-amber-500/30 focus:ring-offset-0 dark:bg-gray-800 cursor-pointer transition">
+                            <input type="checkbox" wire:model.live="notif_survei_baru" class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-amber-500 focus:ring-amber-500/20 focus:ring-2 focus:ring-offset-0 dark:bg-gray-800 cursor-pointer shrink-0">
                         </label>
 
+                        {{-- Item 4: Email Notifikasi --}}
                         <label class="group flex items-center justify-between p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:bg-blue-50/40 dark:hover:bg-gray-800/60 hover:border-blue-300 dark:hover:border-blue-700/50 cursor-pointer transition-all duration-150 shadow-2xs">
-                            <div class="flex gap-3.5 items-center">
-                                <div class="p-2.5 rounded-xl bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400 shrink-0 transition-transform group-hover:scale-105">
-                                    <x-heroicon-o-envelope class="w-5 h-5 stroke-[2]" />
+                            <div class="flex items-center gap-4 min-w-0 pr-2">
+                                <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 transition-transform group-hover:scale-105">
+                                    <x-heroicon-o-envelope class="w-5 h-5 stroke-[2] shrink-0" />
                                 </div>
-                                <div>
-                                    <p class="text-xs font-bold text-gray-900 dark:text-white leading-snug">Email notifikasi</p>
-                                    <p class="text-[11px] font-medium text-gray-500 dark:text-gray-400 mt-0.5">Kirim pemberitahuan juga ke email saya</p>
+                                <div class="flex flex-col justify-center min-w-0">
+                                    <span class="text-sm font-bold text-gray-900 dark:text-white leading-snug block">Email notifikasi</span>
+                                    <span class="text-xs font-normal text-gray-500 dark:text-gray-400 leading-normal mt-0.5 block truncate">Kirim pemberitahuan juga ke email saya</span>
                                 </div>
                             </div>
-                            <input type="checkbox" wire:model.live="notif_email" class="w-5 h-5 rounded-md border-2 border-gray-300 dark:border-gray-600 text-amber-500 focus:ring-amber-500/30 focus:ring-2 focus:ring-offset-0 dark:bg-gray-800 cursor-pointer transition">
+                            <input type="checkbox" wire:model.live="notif_email" class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-amber-500 focus:ring-amber-500/20 focus:ring-2 focus:ring-offset-0 dark:bg-gray-800 cursor-pointer shrink-0">
                         </label>
+
                     </div>
                 </div>
             </div>
 
             {{-- Card Batas Honor Maksimal --}}
-            <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col justify-between overflow-hidden">
+            <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col justify-between overflow-hidden"
+                 x-data="{ isEditingHonor: false }">
                 <div>
                     {{-- Header Card --}}
-                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-800 bg-gray-50/80 dark:bg-gray-800/50 flex items-center gap-3">
-                        <div class="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
-                            <x-heroicon-o-currency-dollar class="w-5 h-5" />
+                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-800 bg-gray-50/80 dark:bg-gray-800/50 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
+                                <x-heroicon-o-currency-dollar class="w-5 h-5 stroke-[2]" />
+                            </div>
+                            <div>
+                                <h3 class="text-base font-bold text-gray-900 dark:text-white leading-tight">Batas Honor Maksimal</h3>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Atur ambang batas honor bulanan PCL</p>
+                            </div>
                         </div>
+
+                        {{-- Tombol Edit / Batal Batas Honor --}}
                         <div>
-                            <h3 class="text-base font-bold text-black dark:text-white leading-tight">Batas Honor Maksimal</h3>
-                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-0.5">Atur ambang batas honor bulanan PCL (Otomatis Tersimpan)</p>
+                            <button type="button" 
+                                    x-show="!isEditingHonor" 
+                                    @click="isEditingHonor = true"
+                                    style="background-color: #f59e0b !important; color: #ffffff !important;"
+                                    class="inline-flex items-center gap-2 px-3.5 py-1.5 !bg-amber-500 hover:!bg-amber-600 text-white font-bold rounded-xl text-xs shadow-sm transition-all duration-150 cursor-pointer">
+                                <x-heroicon-o-pencil-square class="w-4 h-4 text-white stroke-[2]" />
+                                <span>Edit Batas</span>
+                            </button>
+
+                            <button type="button" 
+                                    x-show="isEditingHonor" 
+                                    @click="isEditingHonor = false"
+                                    style="background-color: #e11d48 !important; color: #ffffff !important;"
+                                    class="inline-flex items-center gap-2 px-3.5 py-1.5 !bg-rose-600 hover:!bg-rose-700 text-white font-bold rounded-xl text-xs shadow-sm transition-all duration-150 cursor-pointer">
+                                <x-heroicon-o-x-mark class="w-4 h-4 text-white stroke-[2.5]" />
+                                <span>Batal</span>
+                            </button>
                         </div>
                     </div>
 
                     {{-- Body Card --}}
-                    <div class="p-6 space-y-6">
+                    <div class="p-6 space-y-4">
                         
                         {{-- Info Alert Box --}}
-                        <div class="flex items-start gap-3 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-black dark:text-white text-xs font-medium leading-relaxed">
-                            <x-heroicon-o-information-circle class="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
-                            <span>Atur batas maksimal honor. Sistem akan menandai data yang melebihi batas ini pada Monitoring Honor.</span>
+                        <div class="flex items-center gap-4 p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-2xs">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                                <x-heroicon-o-information-circle class="w-5 h-5 stroke-[2] shrink-0" />
+                            </div>
+                            <div class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                                Atur batas maksimal honor. Sistem akan menandai data yang melebihi batas ini pada <span class="font-bold text-gray-900 dark:text-white">Monitoring Honor</span>.
+                            </div>
                         </div>
 
-                        {{-- Input Batas Honor --}}
-                        <div class="space-y-2">
-                            <label class="block text-xs font-bold text-black dark:text-white">Batas Honor Maksimal (Rp)</label>
-                            <div class="relative flex items-center">
-                                <span class="absolute left-3.5 text-xs font-bold text-black dark:text-white select-none">Rp</span>
-                                <input type="text" 
-                                       wire:model.blur="batas_honor" 
-                                       class="w-full pl-10 pr-4 py-2.5 text-sm font-bold rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-black dark:text-white focus:border-amber-500 focus:ring-amber-500 shadow-sm transition">
+                        {{-- Input Field & Mode Display --}}
+                        <div class="space-y-1.5">
+                            <label class="block text-xs font-bold text-gray-900 dark:text-white">Batas Honor Maksimal (Rp)</label>
+                            
+                            {{-- TAMPILAN READ-ONLY --}}
+                            <div x-show="!isEditingHonor" class="relative flex items-center">
+                                <div class="w-full px-5 py-3.5 text-lg font-bold rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/50 text-gray-900 dark:text-white shadow-2xs">
+                                    Rp {{ number_format((float) str_replace('.', '', $batas_honor ?? 0), 0, ',', '.') }}
+                                </div>
                             </div>
-                            @error('batas_honor') 
-                                <span class="text-xs font-medium text-red-600 dark:text-red-400 block mt-1">{{ $message }}</span> 
-                            @enderror
+
+                            {{-- TAMPILAN FORM EDITING --}}
+                            <div x-show="isEditingHonor" x-transition.opacity class="space-y-3">
+                                <div style="position: relative !important; width: 100% !important; display: block !important;">
+                                    <span style="position: absolute !important; left: 16px !important; top: 50% !important; transform: translateY(-50%) !important; z-index: 10 !important;" 
+                                          class="font-bold text-base text-gray-800 dark:text-gray-200 select-none">
+                                        Rp
+                                    </span>
+                                    <input type="text" 
+                                           wire:model="batas_honor" 
+                                           placeholder="5.000.000"
+                                           style="padding-left: 3.75rem !important; padding-right: 1.25rem !important;"
+                                           class="w-full py-3.5 text-lg font-bold rounded-xl border border-amber-400 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-2xs transition">
+                                </div>
+                                @error('batas_honor') 
+                                    <span class="text-xs font-medium text-red-600 dark:text-red-400 block">{{ $message }}</span> 
+                                @enderror
+
+                                {{-- Tombol Simpan Batas Honor --}}
+                                <div class="flex justify-end pt-1">
+                                    <button type="button" 
+                                            wire:click="simpanBatasHonor"
+                                            @click="isEditingHonor = false"
+                                            style="background-color: #059669 !important; color: #ffffff !important;"
+                                            class="inline-flex items-center justify-center gap-2 px-5 py-2.5 !bg-emerald-600 hover:!bg-emerald-700 !text-white font-bold rounded-xl text-xs shadow-sm transition-all duration-150 cursor-pointer">
+                                        <x-heroicon-o-check class="w-4 h-4 !text-white stroke-[2.5]" />
+                                        <span>Simpan Batas Honor</span>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
                         {{-- Keterangan Rule Box --}}
-                        <div class="space-y-2">
-                            <label class="block text-xs font-bold text-black dark:text-white">Keterangan Rule</label>
-                            <div class="p-4 rounded-xl bg-gray-50/80 dark:bg-gray-800/40 border border-gray-200/80 dark:border-gray-800">
-                                <p class="text-xs text-black dark:text-white leading-relaxed">
-                                    Jika total honor PCL dalam 1 bulan mencapai atau melebihi batas ini, maka akan secara otomatis ditandai sebagai <strong class="font-bold underline decoration-amber-500 decoration-2">"Melebihi Batas Honor"</strong> pada halaman Monitoring Honor.
-                                </p>
+                        <div class="space-y-1.5 pt-1">
+                            <label class="block text-xs font-bold text-gray-900 dark:text-white">Keterangan Rule</label>
+                            <div class="flex items-start gap-4 p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-2xs">
+                                <div class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 flex items-center justify-center shrink-0 mt-0.5">
+                                    <x-heroicon-o-document-text class="w-5 h-5 stroke-[2] shrink-0" />
+                                </div>
+                                <div class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                                    Jika total honor PCL dalam 1 bulan mencapai atau melebihi batas ini, maka akan secara otomatis ditandai sebagai <strong class="font-bold text-gray-900 dark:text-white underline decoration-amber-500 decoration-2">"Melebihi Batas Honor"</strong> pada halaman Monitoring Honor.
+                                </div>
                             </div>
                         </div>
 

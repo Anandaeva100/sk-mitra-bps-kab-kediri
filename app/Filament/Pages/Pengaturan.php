@@ -7,6 +7,7 @@ use App\Models\User;
 use Filament\Pages\Page;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
@@ -18,7 +19,7 @@ class Pengaturan extends Page
 
     protected static ?string $title = 'Pengaturan';
 
-    // Set null agar berada di grup utama navigasi (tidak masuk folder terpisah)
+    // Set null agar berada di grup utama navigasi
     protected static ?string $navigationGroup = null;
 
     // Menentukan urutan tepat di bawah Monitoring Honor
@@ -51,7 +52,7 @@ class Pengaturan extends Page
             $this->email = $user->email;
         }
 
-        // Load pengaturan dari tabel 'settings' (jika belum ada, gunakan nilai default)
+        // Load pengaturan dari tabel 'settings'
         $this->notif_mendekati   = Setting::get('notif_mendekati', '0') === '1';
         $this->notif_melebihi    = Setting::get('notif_melebihi', '0') === '1';
         $this->notif_survei_baru = Setting::get('notif_survei_baru', '0') === '1';
@@ -72,7 +73,6 @@ class Pengaturan extends Page
             'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $user->id],
         ];
 
-        // Jalankan validasi password jika diisi
         if (!empty($this->current_password) || !empty($this->password)) {
             $rules['current_password'] = ['required', 'current_password'];
             $rules['password'] = ['required', 'confirmed', Password::defaults()];
@@ -89,10 +89,8 @@ class Pengaturan extends Page
 
         $user->save();
 
-        // Reset field password setelah disimpan
         $this->reset(['current_password', 'password', 'password_confirmation']);
 
-        // Flash message & Notifikasi Filament
         session()->flash('message', 'Informasi profil berhasil diperbarui.');
 
         Notification::make()
@@ -102,7 +100,7 @@ class Pengaturan extends Page
     }
 
     /**
-     * Helper tombol Batal
+     * Helper tombol Batal Edit Profil
      */
     public function toggleEditProfil(): void
     {
@@ -117,8 +115,34 @@ class Pengaturan extends Page
         $this->reset(['current_password', 'password', 'password_confirmation']);
     }
 
+    /**
+     * Fungsi utama menyimpan Batas Honor dari Tombol Simpan Blade
+     */
+    public function simpanBatasHonor(): void
+    {
+        // Bersihkan string nominal dari titik/koma/spasi
+        $rawNominal = preg_replace('/[^0-9]/', '', (string) $this->batas_honor);
+        $nominalInt = (int) ($rawNominal ?: 0);
+
+        // Format kembali agar tersimpan rapi
+        $formattedNominal = number_format($nominalInt, 0, ',', '.');
+        $this->batas_honor = $formattedNominal;
+
+        // 1. Simpan ke Database
+        Setting::set('batas_honor', $formattedNominal);
+
+        // 2. Simpan / Perbarui Cache untuk MonitoringHonorResource
+        Cache::forever('app_batas_honor', $nominalInt);
+
+        Notification::make()
+            ->title('Batas Honor Berhasil Disimpan')
+            ->body("Batas honor maksimal diperbarui menjadi Rp {$formattedNominal}")
+            ->success()
+            ->send();
+    }
+
     // =========================================================================
-    // UPDATED HOOKS (Otomatis Menyimpan Perubahan ke Tabel Settings)
+    // UPDATED HOOKS (Otomatis Menyimpan Perubahan Switch Notifikasi)
     // =========================================================================
 
     public function updatedNotifMendekati(bool $value): void
@@ -167,12 +191,10 @@ class Pengaturan extends Page
 
     public function updatedBatasHonor(mixed $value): void
     {
-        Setting::set('batas_honor', $value);
+        $rawNominal = preg_replace('/[^0-9]/', '', (string) $value);
+        $nominalInt = (int) ($rawNominal ?: 0);
 
-        Notification::make()
-            ->title('Batas Honor Diperbarui')
-            ->body("Batas honor maksimal berhasil diubah menjadi Rp {$value}")
-            ->success()
-            ->send();
+        Setting::set('batas_honor', $value);
+        Cache::forever('app_batas_honor', $nominalInt);
     }
 }
