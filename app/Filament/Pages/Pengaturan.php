@@ -16,7 +16,7 @@ class Pengaturan extends Page
 
     protected static string $view = 'filament.pages.pengaturan';
 
-    protected static ?string $title = 'Pengaturan Sistem';
+    protected static ?string $title = 'Pengaturan';
 
     // Set null agar berada di grup utama navigasi (tidak masuk folder terpisah)
     protected static ?string $navigationGroup = null;
