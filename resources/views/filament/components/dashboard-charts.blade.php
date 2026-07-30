@@ -1,170 +1,476 @@
-{{-- Pembungkus Grid Utama --}}
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch w-full">
+<style>
+    .dashboard-chart-card{
+        background:#ffffff;
+        border:1px solid #e5e7eb;
+        border-radius:18px;
+        padding:24px;
+        transition:.25s;
+        height:100%;
+    }
 
-    {{-- 1. Grafik Honor Bulanan (Mengambil 2 Kolom) --}}
-    <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col justify-between">
-        <div>
-            <h3 class="text-base font-bold text-gray-900 dark:text-white">Grafik Honor Bulanan</h3>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">Total Honor Mitra Tahun {{ date('Y') }}</p>
-            
-            <div class="relative w-full h-72">
-                @php
-                    $chartData = $this->getChartData();
-                @endphp
-                <canvas id="honorChart" 
-                        data-labels="{{ json_encode($chartData['labels'] ?? ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']) }}"
-                        data-values="{{ json_encode($chartData['values'] ?? [0,0,0,0,0,0,0,0,0,0,0,0]) }}">
-                </canvas>
-            </div>
+    .dashboard-chart-card:hover{
+        box-shadow:0 10px 30px rgba(0,0,0,.05);
+    }
+
+    .dark .dashboard-chart-card{
+        background:#2b2b2f;
+        border:1px solid #3f3f46;
+    }
+
+    .chart-title{
+        font-size:1.05rem;
+        font-weight:700;
+        color:#111827;
+        line-height:1.2;
+    }
+
+    .dark .chart-title{
+        color:#ffffff;
+    }
+
+    .chart-desc{
+        margin-top:4px;
+        font-size:.82rem;
+        color:#6b7280;
+    }
+
+    .dark .chart-desc{
+        color:#9ca3af;
+    }
+
+    .chart-year{
+        min-width: 90px;
+        height: 38px;
+
+        padding: 0 12px;
+
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+
+        background: #fff;
+
+        font-size: .85rem;
+        font-weight: 600;
+        color: #374151;
+
+        appearance: auto;
+        -webkit-appearance: auto;
+        -moz-appearance: auto;
+    }
+
+    .chart-year:hover{
+        border-color:#cbd5e1;
+    }
+
+    .dark .chart-year{
+        background:#34343a;
+        border:1px solid #4b5563;
+        color:#d1d5db;
+    }
+
+    .status-item{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:12px;
+        padding:10px 0;
+    }
+
+    .status-left{
+        display:flex;
+        align-items:center;
+        gap:10px;
+    }
+
+    .status-dot{
+        width:12px;
+        height:12px;
+        border-radius:999px;
+        flex-shrink:0;
+    }
+
+    .status-label{
+        font-size:.83rem;
+        font-weight:600;
+        color:#374151;
+    }
+
+    .dark .status-label{
+        color:#e5e7eb;
+    }
+
+    .status-value{
+        font-size:.83rem;
+        font-weight:700;
+        color:#111827;
+    }
+
+    .dark .status-value{
+        color:#ffffff;
+    }
+
+    .status-percent{
+        color:#6b7280;
+        font-weight:500;
+    }
+
+    .dark .status-percent{
+        color:#9ca3af;
+    }
+</style>
+
+{{-- Pembungkus Grid Utama --}}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+
+    {{-- Grafik Honor Bulanan --}}
+    <div class="lg:col-span-2 dashboard-chart-card">
+
+        <div class="mb-5">
+
+            <h3 class="chart-title">
+                Grafik Honor Bulanan
+            </h3>
+
+            <p class="chart-desc">
+                Akumulasi honor mitra berdasarkan bulan.
+            </p>
+
         </div>
+
+        @php
+            $chartData = $this->getChartData();
+        @endphp
+
+        <div class="relative h-72">
+
+            <canvas
+                id="honorChart"
+                data-labels="{{ json_encode($chartData['labels'] ?? ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des']) }}"
+                data-values="{{ json_encode($chartData['values'] ?? [0,0,0,0,0,0,0,0,0,0,0,0]) }}">
+            </canvas>
+
+        </div>
+
     </div>
 
-    {{-- 2. Status Honor Mitra / Donut (Mengambil 1 Kolom) --}}
-    <div class="lg:col-span-1 bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col justify-between">
+    {{-- Status Honor Mitra --}}
+    <div class="lg:col-span-1 dashboard-chart-card">
+
         @php
             $statusData = $this->getStatusMitraData();
         @endphp
-        
-        <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">Status Honor Mitra</h3>
 
-        <div class="flex flex-col items-center justify-center my-auto py-2">
-            {{-- Canvas Donut dengan ukuran fixed w-44 h-44 agar tidak merusak layout --}}
-            <div class="relative w-44 h-44 my-2 flex items-center justify-center shrink-0">
-                <canvas id="statusDonutChart"
-                        data-aman="{{ $statusData['aman'] ?? 0 }}"
-                        data-mendekati="{{ $statusData['mendekati'] ?? 0 }}"
-                        data-melebihi="{{ $statusData['melebihi'] ?? 0 }}">
-                </canvas>
-                <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                    <span class="text-[10px] text-gray-400 uppercase tracking-wider">Total</span>
-                    <span class="text-xl font-bold text-gray-900 dark:text-white leading-tight">{{ $statusData['total'] ?? 0 }}</span>
-                    <span class="text-[10px] text-gray-400">Mitra</span>
-                </div>
-            </div>
+        <div>
 
-            {{-- Legenda Donut --}}
-            <div class="space-y-2.5 w-full text-xs mt-4">
-                <div class="flex items-center justify-between pb-1.5 border-b border-gray-100 dark:border-gray-700/50">
-                    <div class="flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></span>
-                        <span class="text-gray-600 dark:text-gray-300">Aman</span>
-                    </div>
-                    <span class="font-bold text-gray-900 dark:text-white">{{ $statusData['aman'] ?? 0 }} <span class="text-gray-400 font-normal">({{ $statusData['aman_pct'] ?? 0 }}%)</span></span>
-                </div>
+            <h3 class="chart-title">
+                Status Honor Mitra
+            </h3>
 
-                <div class="flex items-center justify-between pb-1.5 border-b border-gray-100 dark:border-gray-700/50">
-                    <div class="flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-orange-500 shrink-0"></span>
-                        <span class="text-gray-600 dark:text-gray-300">Mendekati Batas</span>
-                    </div>
-                    <span class="font-bold text-gray-900 dark:text-white">{{ $statusData['mendekati'] ?? 0 }} <span class="text-gray-400 font-normal">({{ $statusData['mendekati_pct'] ?? 0 }}%)</span></span>
-                </div>
+            <p class="chart-desc">
+                Distribusi status honor seluruh mitra.
+            </p>
 
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-rose-500 shrink-0"></span>
-                        <span class="text-gray-600 dark:text-gray-300">Melebihi Batas</span>
-                    </div>
-                    <span class="font-bold text-gray-900 dark:text-white">{{ $statusData['melebihi'] ?? 0 }} <span class="text-gray-400 font-normal">({{ $statusData['melebihi_pct'] ?? 0 }}%)</span></span>
-                </div>
-            </div>
         </div>
+
+        {{-- Donut --}}
+        <div class="flex justify-center mt-6">
+
+            <div class="relative w-40 h-40">
+
+                <canvas
+                    id="statusDonutChart"
+                    data-aman="{{ $statusData['aman'] ?? 0 }}"
+                    data-mendekati="{{ $statusData['mendekati'] ?? 0 }}"
+                    data-melebihi="{{ $statusData['melebihi'] ?? 0 }}">
+                </canvas>
+
+                {{-- Text Tengah --}}
+                <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
+
+                    <span class="text-xs font-medium text-gray-500 dark:text-gray-400">
+                        Total
+                    </span>
+
+                    <span class="text-3xl font-bold leading-none text-gray-900 dark:text-white">
+                        {{ $statusData['total'] ?? 0 }}
+                    </span>
+
+                    <span class="text-xs font-medium text-gray-500 dark:text-gray-400">
+                        Mitra
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {{-- Legend --}}
+        <div class="mt-7 space-y-4">
+
+            {{-- Aman --}}
+            <div class="status-item">
+
+                <div class="status-left">
+
+                    <span
+                        class="status-dot"
+                        style="background:#10b981;">
+                    </span>
+
+                    <span class="status-label">
+                        Aman
+                    </span>
+
+                </div>
+
+                <div class="status-value">
+
+                    {{ $statusData['aman'] ?? 0 }}
+
+                    <span class="status-percent">
+                        ({{ $statusData['aman_pct'] ?? 0 }}%)
+                    </span>
+
+                </div>
+
+            </div>
+
+            {{-- Mendekati --}}
+            <div class="status-item">
+
+                <div class="status-left">
+
+                    <span
+                        class="status-dot"
+                        style="background:#f59e0b;">
+                    </span>
+
+                    <span class="status-label">
+                        Mendekati Batas
+                    </span>
+
+                </div>
+
+                <div class="status-value">
+
+                    {{ $statusData['mendekati'] ?? 0 }}
+
+                    <span class="status-percent">
+                        ({{ $statusData['mendekati_pct'] ?? 0 }}%)
+                    </span>
+
+                </div>
+
+            </div>
+
+            {{-- Melebihi --}}
+            <div class="status-item">
+
+                <div class="status-left">
+
+                    <span
+                        class="status-dot"
+                        style="background:#ef4444;">
+                    </span>
+
+                    <span class="status-label">
+                        Melebihi Batas
+                    </span>
+
+                </div>
+
+                <div class="status-value">
+
+                    {{ $statusData['melebihi'] ?? 0 }}
+
+                    <span class="status-percent">
+                        ({{ $statusData['melebihi_pct'] ?? 0 }}%)
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
     </div>
 
 </div>
 
-{{-- Script JS Gabungan --}}
+{{-- Script Chart.js --}}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
-    function renderCombinedCharts() {
-        // 1. Render Bar Chart
-        const barCanvas = document.getElementById('honorChart');
-        if (barCanvas) {
-            const existingBar = Chart.getChart(barCanvas);
-            if (existingBar) existingBar.destroy();
+function renderCombinedCharts() {
+    const isDark = document.documentElement.classList.contains('dark');
+    const gridColor = isDark ? 'rgba(255,255,255,.06)' : 'rgba(229,231,235,.8)';
+    const textColor = isDark ? '#9ca3af' : '#6b7280';
 
-            const labels = JSON.parse(barCanvas.dataset.labels || '[]');
-            const values = JSON.parse(barCanvas.dataset.values || '[]');
+    // =======================
+    // Bar Chart Honor Bulanan
+    // =======================
+    const barCanvas = document.getElementById('honorChart');
 
-            new Chart(barCanvas, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Total Honor (Rp)',
-                        data: values,
-                        backgroundColor: '#3b82f6',
-                        borderRadius: 6,
-                        barThickness: 20,
-                    }]
+    if (barCanvas) {
+        Chart.getChart(barCanvas)?.destroy();
+
+        const labels = JSON.parse(barCanvas.dataset.labels || '[]');
+        const values = JSON.parse(barCanvas.dataset.values || '[]');
+
+        new Chart(barCanvas, {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: '#3b82f6',
+                    hoverBackgroundColor: '#2563eb',
+
+                    borderRadius: {
+                        topLeft: 10,
+                        topRight: 10,
+                        bottomLeft: 0,
+                        bottomRight: 0,
+                    },
+
+                    borderSkipped: 'bottom',
+
+                    maxBarThickness: 34,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: {
+                    duration: 800,
+                    easing: 'easeOutQuart'
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: (ctx) => ' Rp ' + (ctx.raw || 0).toLocaleString('id-ID')
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: '#111827',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        padding: 12,
+                        cornerRadius: 10,
+                        displayColors: false,
+                        callbacks: {
+                            label: (ctx) =>
+                                'Rp ' + Number(ctx.raw).toLocaleString('id-ID')
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        border: {
+                            display: false
+                        },
+                        ticks: {
+                            color: textColor,
+                            font: {
+                                size: 12,
+                                weight: '600'
                             }
                         }
                     },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: 'rgba(229, 231, 235, 0.5)' },
-                            ticks: {
-                                font: { size: 10 },
-                                callback: (v) => 'Rp ' + (v / 1000).toLocaleString('id-ID') + 'k'
-                            }
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: gridColor,
+                            drawBorder: false
                         },
-                        x: {
-                            grid: { display: false },
-                            ticks: { font: { size: 10 } }
+                        border: {
+                            display: false
+                        },
+                        ticks: {
+                            color: textColor,
+                            font: {
+                                size: 11
+                            },
+                            callback(value) {
+                                if (value >= 1000000000)
+                                    return 'Rp ' + (value / 1000000000) + ' M';
+
+                                if (value >= 1000000)
+                                    return 'Rp ' + (value / 1000000) + ' Jt';
+
+                                return 'Rp ' + value.toLocaleString('id-ID');
+                            }
                         }
                     }
                 }
-            });
-        }
+            }
+        });
+    }
 
-        // 2. Render Donut Chart
-        const donutCanvas = document.getElementById('statusDonutChart');
-        if (donutCanvas) {
-            const existingDonut = Chart.getChart(donutCanvas);
-            if (existingDonut) existingDonut.destroy();
+    // =======================
+    // Donut Chart Status Honor
+    // =======================
+    const donutCanvas = document.getElementById('statusDonutChart');
 
-            const aman = parseInt(donutCanvas.dataset.aman || 0);
-            const mendekati = parseInt(donutCanvas.dataset.mendekati || 0);
-            const melebihi = parseInt(donutCanvas.dataset.melebihi || 0);
+    if (donutCanvas) {
+        Chart.getChart(donutCanvas)?.destroy();
 
-            new Chart(donutCanvas, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Aman', 'Mendekati Batas', 'Melebihi Batas'],
-                    datasets: [{
-                        data: [aman, mendekati, melebihi],
-                        backgroundColor: ['#10b981', '#f97316', '#f43f5e'],
-                        borderWidth: 0,
-                        cutout: '75%'
-                    }]
+        const aman = Number(donutCanvas.dataset.aman || 0);
+        const mendekati = Number(donutCanvas.dataset.mendekati || 0);
+        const melebihi = Number(donutCanvas.dataset.melebihi || 0);
+        const total = aman + mendekati + melebihi;
+
+        new Chart(donutCanvas, {
+            type: 'doughnut',
+            data: {
+                labels: ['Aman', 'Mendekati', 'Melebihi'],
+                datasets: [{
+                    data: [aman, mendekati, melebihi],
+                    backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                    hoverBackgroundColor: ['#059669', '#d97706', '#dc2626'],
+                    borderWidth: 0,
+                    spacing: 4,
+                    cutout: '74%',
+                    hoverOffset: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: {
+                    animateRotate: true,
+                    duration: 900
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: { enabled: true }
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: '#111827',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        padding: 12,
+                        cornerRadius: 10,
+                        callbacks: {
+                            label(context) {
+                                const value = context.raw;
+                                const percent = total
+                                    ? ((value / total) * 100).toFixed(1)
+                                    : 0;
+
+                                return `${context.label}: ${value} Mitra (${percent}%)`;
+                            }
+                        }
                     }
                 }
-            });
-        }
+            }
+        });
     }
+}
 
-    // Jalankan saat DOM dimuat & mendukung Livewire navigasi
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', renderCombinedCharts);
-    } else {
-        renderCombinedCharts();
-    }
-    document.addEventListener('livewire:navigated', renderCombinedCharts);
+document.addEventListener('DOMContentLoaded', renderCombinedCharts);
+document.addEventListener('livewire:navigated', renderCombinedCharts);
+window.addEventListener('resize', renderCombinedCharts);
 </script>
