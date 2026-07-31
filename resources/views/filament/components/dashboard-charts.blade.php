@@ -38,36 +38,6 @@
         color:#9ca3af;
     }
 
-    .chart-year{
-        min-width: 90px;
-        height: 38px;
-
-        padding: 0 12px;
-
-        border: 1px solid #e5e7eb;
-        border-radius: 10px;
-
-        background: #fff;
-
-        font-size: .85rem;
-        font-weight: 600;
-        color: #374151;
-
-        appearance: auto;
-        -webkit-appearance: auto;
-        -moz-appearance: auto;
-    }
-
-    .chart-year:hover{
-        border-color:#cbd5e1;
-    }
-
-    .dark .chart-year{
-        background:#34343a;
-        border:1px solid #4b5563;
-        color:#d1d5db;
-    }
-
     .status-item{
         display:flex;
         align-items:center;
@@ -117,6 +87,25 @@
     .dark .status-percent{
         color:#9ca3af;
     }
+
+    /* Header Link Lihat Semua */
+    .lihat-semua{
+        color:#2563eb;
+        transition:.2s;
+        text-decoration:none;
+    }
+
+    .lihat-semua:hover{
+        color:#1d4ed8;
+    }
+
+    .dark .lihat-semua{
+        color:#60a5fa;
+    }
+
+    .dark .lihat-semua:hover{
+        color:#93c5fd;
+    }
 </style>
 
 {{-- Pembungkus Grid Utama --}}
@@ -160,15 +149,30 @@
             $statusData = $this->getStatusMitraData();
         @endphp
 
-        <div>
+        <div class="flex items-start justify-between">
 
-            <h3 class="chart-title">
-                Status Honor Mitra
-            </h3>
+            <div>
 
-            <p class="chart-desc">
-                Distribusi status honor seluruh mitra.
-            </p>
+                <h3 class="chart-title">
+                    Status Honor Mitra
+                </h3>
+
+                <p class="chart-desc">
+                    Distribusi status honor seluruh mitra.
+                </p>
+
+            </div>
+
+            {{-- Tombol Lihat Semua menuju Menu Monitoring Honor --}}
+            <a
+                href="{{ route('filament.admin.resources.monitoring-honors.index') }}"
+                class="lihat-semua inline-flex items-center gap-1 text-xs font-semibold shrink-0">
+
+                Lihat Semua
+
+                <x-heroicon-m-chevron-right class="w-4 h-4"/>
+
+            </a>
 
         </div>
 
@@ -180,7 +184,6 @@
                 <canvas
                     id="statusDonutChart"
                     data-aman="{{ $statusData['aman'] ?? 0 }}"
-                    data-mendekati="{{ $statusData['mendekati'] ?? 0 }}"
                     data-melebihi="{{ $statusData['melebihi'] ?? 0 }}">
                 </canvas>
 
@@ -230,34 +233,6 @@
 
                     <span class="status-percent">
                         ({{ $statusData['aman_pct'] ?? 0 }}%)
-                    </span>
-
-                </div>
-
-            </div>
-
-            {{-- Mendekati --}}
-            <div class="status-item">
-
-                <div class="status-left">
-
-                    <span
-                        class="status-dot"
-                        style="background:#f59e0b;">
-                    </span>
-
-                    <span class="status-label">
-                        Mendekati Batas
-                    </span>
-
-                </div>
-
-                <div class="status-value">
-
-                    {{ $statusData['mendekati'] ?? 0 }}
-
-                    <span class="status-percent">
-                        ({{ $statusData['mendekati_pct'] ?? 0 }}%)
                     </span>
 
                 </div>
@@ -418,20 +393,19 @@ function renderCombinedCharts() {
         Chart.getChart(donutCanvas)?.destroy();
 
         const aman = Number(donutCanvas.dataset.aman || 0);
-        const mendekati = Number(donutCanvas.dataset.mendekati || 0);
         const melebihi = Number(donutCanvas.dataset.melebihi || 0);
-        const total = aman + mendekati + melebihi;
+        const total = aman + melebihi;
 
         new Chart(donutCanvas, {
             type: 'doughnut',
             data: {
-                labels: ['Aman', 'Mendekati', 'Melebihi'],
+                labels: ['Aman', 'Melebihi'],
                 datasets: [{
-                    data: [aman, mendekati, melebihi],
-                    backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
-                    hoverBackgroundColor: ['#059669', '#d97706', '#dc2626'],
+                    data: [aman, melebihi],
+                    backgroundColor: ['#10b981', '#ef4444'],
+                    hoverBackgroundColor: ['#059669', '#dc2626'],
                     borderWidth: 0,
-                    spacing: 4,
+                    spacing: 0,
                     cutout: '74%',
                     hoverOffset: 6
                 }]

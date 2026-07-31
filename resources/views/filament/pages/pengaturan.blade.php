@@ -336,7 +336,14 @@
                             </div>
 
                             {{-- TAMPILAN FORM EDITING --}}
-                            <div x-show="isEditingHonor" x-transition.opacity class="space-y-3">
+                            <div x-show="isEditingHonor" x-transition.opacity class="space-y-3"
+                                 x-data="{
+                                     formatNumber(val) {
+                                         if (!val) return '';
+                                         let clean = val.toString().replace(/[^0-9]/g, '');
+                                         return clean.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                                     }
+                                 }">
                                 <div style="position: relative !important; width: 100% !important; display: block !important;">
                                     <span style="position: absolute !important; left: 16px !important; top: 50% !important; transform: translateY(-50%) !important; z-index: 10 !important;" 
                                           class="font-bold text-base text-gray-800 dark:text-gray-200 select-none">
@@ -344,6 +351,8 @@
                                     </span>
                                     <input type="text" 
                                            wire:model="batas_honor" 
+                                           @input="$el.value = formatNumber($el.value); $wire.set('batas_honor', $el.value)"
+                                           @keydown.enter.prevent="$wire.simpanBatasHonor(); isEditingHonor = false"
                                            placeholder="5.000.000"
                                            style="padding-left: 3.75rem !important; padding-right: 1.25rem !important;"
                                            class="w-full py-3.5 text-lg font-bold rounded-xl border border-amber-400 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-2xs transition">
@@ -352,29 +361,29 @@
                                     <span class="text-xs font-medium text-red-600 dark:text-red-400 block">{{ $message }}</span> 
                                 @enderror
 
-                                {{-- Tombol Simpan Batas Honor --}}
-                                <div class="flex justify-end pt-1">
+                                {{-- Tombol Simpan Batas Honor (Padding Diperlebar px-6 & py-3) --}}
+                                <div class="flex justify-end mt-4 mb-2">
                                     <button type="button" 
                                             wire:click="simpanBatasHonor"
                                             @click="isEditingHonor = false"
                                             style="background-color: #059669 !important; color: #ffffff !important;"
-                                            class="inline-flex items-center justify-center gap-2 px-5 py-2.5 !bg-emerald-600 hover:!bg-emerald-700 !text-white font-bold rounded-xl text-xs shadow-sm transition-all duration-150 cursor-pointer">
-                                        <x-heroicon-o-check class="w-4 h-4 !text-white stroke-[2.5]" />
-                                        <span>Simpan Batas Honor</span>
+                                            class="inline-flex items-center justify-center gap-2.5 px-6 py-3 !bg-emerald-600 hover:!bg-emerald-700 !text-white font-bold rounded-xl text-xs shadow-sm transition-all duration-150 cursor-pointer w-full sm:w-auto shrink-0">
+                                        <x-heroicon-o-check class="w-4 h-4 !text-white stroke-[2.5] shrink-0" />
+                                        <span class="!text-white whitespace-nowrap">Simpan Batas Honor</span>
                                     </button>
                                 </div>
                             </div>
                         </div>
 
                         {{-- Keterangan Rule Box --}}
-                        <div class="space-y-1.5 pt-1">
+                        <div class="space-y-1.5 pt-3">
                             <label class="block text-xs font-bold text-gray-900 dark:text-white">Keterangan Rule</label>
                             <div class="flex items-start gap-4 p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-2xs">
                                 <div class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 flex items-center justify-center shrink-0 mt-0.5">
                                     <x-heroicon-o-document-text class="w-5 h-5 stroke-[2] shrink-0" />
                                 </div>
                                 <div class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
-                                    Jika total honor PCL dalam 1 bulan mencapai atau melebihi batas ini, maka akan secara otomatis ditandai sebagai <strong class="font-bold text-gray-900 dark:text-white underline decoration-amber-500 decoration-2">"Melebihi Batas Honor"</strong> pada halaman Monitoring Honor.
+                                    Jika total honor PCL dalam 1 bulan mencapai atau melebihi batas ini, maka akan secara otomatis ditandai sebagai <span class="font-bold text-gray-900 dark:text-white">"Melebihi Batas Honor"</span> pada halaman Monitoring Honor.
                                 </div>
                             </div>
                         </div>
