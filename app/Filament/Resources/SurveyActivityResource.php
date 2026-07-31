@@ -14,6 +14,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BadgeColumn;
+use Illuminate\Database\Eloquent\Builder;
 
 class SurveyActivityResource extends Resource
 {
@@ -21,11 +22,11 @@ class SurveyActivityResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
 
-    protected static ?string $navigationLabel = 'Kegiatan Survei';
+    protected static ?string $navigationLabel = 'Daftar Kegiatan / Survei';
 
-    protected static ?string $modelLabel = 'Kegiatan Survei';
+    protected static ?string $modelLabel = 'Daftar Kegiatan / Survei';
 
-    protected static ?string $pluralModelLabel = 'Kegiatan Survei';
+    protected static ?string $pluralModelLabel = 'Daftar Kegiatan / Survei';
 
     protected static ?string $navigationGroup = null;
 
@@ -36,7 +37,7 @@ class SurveyActivityResource extends Resource
         return $form
             ->schema([
 
-                Section::make('Informasi Kegiatan Survei')
+                Section::make('Informasi Kegiatan / Survei')
                     ->schema([
 
                         TextInput::make('nama_kegiatan')
@@ -66,6 +67,12 @@ class SurveyActivityResource extends Resource
             ]);
     }
 
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->orderBy('nama_kegiatan', 'asc');
+    }
+
     public static function table(Table $table): Table
     {
         return $table
@@ -73,10 +80,11 @@ class SurveyActivityResource extends Resource
 
                 Tables\Columns\TextColumn::make('no')
                     ->label('No.')
+                    ->alignCenter()
                     ->rowIndex(),
 
                 TextColumn::make('nama_kegiatan')
-                    ->label('Nama Kegiatan')
+                    ->label('Nama Kegiatan / Survei')
                     ->searchable()
                     ->sortable(),
 
@@ -101,6 +109,8 @@ class SurveyActivityResource extends Resource
                 Tables\Actions\DeleteAction::make(),
 
             ])
+            ->actionsColumnLabel('Aksi')
+            
             ->bulkActions([
 
                 Tables\Actions\BulkActionGroup::make([
