@@ -15,6 +15,8 @@ use Filament\Tables\Enums\FiltersLayout;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 class MonitoringSurveyResource extends Resource
 {
@@ -130,16 +132,45 @@ class MonitoringSurveyResource extends Resource
             ]);
     }
 
+    public static function getEloquentQuery(): Builder
+    {
+        $orderBulan = "
+            FIELD(
+                bulan,
+                'Januari',
+                'Februari',
+                'Maret',
+                'April',
+                'Mei',
+                'Juni',
+                'Juli',
+                'Agustus',
+                'September',
+                'Oktober',
+                'November',
+                'Desember'
+            )
+        ";
+
+        return parent::getEloquentQuery()
+            ->orderByRaw($orderBulan)
+            ->orderBy('nama_pcl', 'asc')
+            ->orderBy('nama_kegiatan', 'asc');
+    }
+
     public static function table(Table $table): Table
     {
         return $table
             ->filtersLayout(Tables\Enums\FiltersLayout::AboveContent)
             ->deferFilters(false)
+
+            ->searchPlaceholder('Cari kegiatan, PML, atau PCL...')
             
             ->columns([
 
                 Tables\Columns\TextColumn::make('no')
                     ->label('No.')
+                    ->alignCenter()
                     ->rowIndex(),
 
                 TextColumn::make('nama_kegiatan')
@@ -148,7 +179,36 @@ class MonitoringSurveyResource extends Resource
                     ->sortable(),
 
                 TextColumn::make('bulan')
-                    ->label('Bulan'),
+                    ->label('Bulan')
+                    ->badge()
+                    ->color(function (string $state): string {
+
+                        return match ($state) {
+
+                            'Januari',
+                            'Februari',
+                            'Maret'
+                                => 'warning',
+
+                            'April',
+                            'Mei',
+                            'Juni'
+                                => 'success',
+
+                            'Juli',
+                            'Agustus',
+                            'September'
+                                => 'info',
+
+                            'Oktober',
+                            'November',
+                            'Desember'
+                                => 'danger',
+
+                            default => 'gray',
+                        };
+
+                    }),
 
                 TextColumn::make('nama_pml')
                     ->label('Nama PML')
@@ -160,7 +220,33 @@ class MonitoringSurveyResource extends Resource
 
                 TextColumn::make('beban_banyak')
                     ->label('Beban')
-                    ->alignCenter(),
+                    ->badge()
+                    ->alignCenter()
+                    ->color(function ($state) {
+
+                        if ($state <= 5) {
+                            return 'success';
+                        }
+
+                        if ($state <= 10) {
+                            return 'warning';
+                        }
+
+                        return 'danger';
+                    })
+                    ->tooltip(function ($state){
+
+                        if($state<=5){
+                            return 'Beban Ringan';
+                        }
+
+                        if($state<=10){
+                            return 'Beban Sedang';
+                        }
+
+                        return 'Beban Tinggi';
+
+                    }),
 
                 TextColumn::make('rate_honor')
                     ->label('Rate Honor')
@@ -168,9 +254,12 @@ class MonitoringSurveyResource extends Resource
 
                 TextColumn::make('honor_total')
                     ->label('Honor Total')
-                    ->money('IDR', locale: 'id'),
+                    ->money('IDR', locale: 'id')
+                    ->weight('bold')
+                    ->color('success'),
 
             ])
+            
             ->filters([
 
                 SelectFilter::make('bulan')
@@ -230,6 +319,8 @@ class MonitoringSurveyResource extends Resource
                 Tables\Actions\DeleteAction::make(),
 
             ])
+            ->actionsColumnLabel('Aksi')
+            
             ->bulkActions([
 
                 Tables\Actions\BulkActionGroup::make([

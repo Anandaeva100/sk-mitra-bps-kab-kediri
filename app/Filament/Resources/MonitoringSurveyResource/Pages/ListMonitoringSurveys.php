@@ -12,6 +12,21 @@ class ListMonitoringSurveys extends ListRecords
 {
     protected static string $resource = MonitoringSurveyResource::class;
 
+    protected array $months = [
+        'Januari',
+        'Februari',
+        'Maret',
+        'April',
+        'Mei',
+        'Juni',
+        'Juli',
+        'Agustus',
+        'September',
+        'Oktober',
+        'November',
+        'Desember',
+    ];
+
     protected function getHeaderActions(): array
     {
         return [
@@ -22,32 +37,17 @@ class ListMonitoringSurveys extends ListRecords
 
     public function getTabs(): array
     {
-        return [
+        $tabs = [
             'semua' => Tab::make('Semua Data'),
-            'januari' => Tab::make('Januari')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('bulan', 'Januari')),
-            'februari' => Tab::make('Februari')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('bulan', 'Februari')),
-            'maret' => Tab::make('Maret')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('bulan', 'Maret')),
-            'april' => Tab::make('April')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('bulan', 'April')),
-            'mei' => Tab::make('Mei')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('bulan', 'Mei')),
-            'juni' => Tab::make('Juni')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('bulan', 'Juni')),
-            'juli' => Tab::make('Juli')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('bulan', 'Juli')),
-            'agustus' => Tab::make('Agustus')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('bulan', 'Agustus')),
-            'september' => Tab::make('September')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('bulan', 'September')),
-            'oktober' => Tab::make('Oktober')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('bulan', 'Oktober')),
-            'november' => Tab::make('November')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('bulan', 'November')),
-            'desember' => Tab::make('Desember')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('bulan', 'Desember')),
         ];
+
+        foreach ($this->months as $month) {
+            $tabs[strtolower($month)] = Tab::make($month)
+                ->modifyQueryUsing(
+                    fn (Builder $query) => $query->where('bulan', $month)
+                );
+        }
+
+        return $tabs;
     }
 }
