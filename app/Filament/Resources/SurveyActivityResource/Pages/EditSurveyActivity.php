@@ -10,6 +10,11 @@ class EditSurveyActivity extends EditRecord
 {
     protected static string $resource = SurveyActivityResource::class;
 
+    public function getTitle(): string
+    {
+        return 'Edit Data Kegiatan / Survei';
+    }
+
     protected function getHeaderActions(): array
     {
         return [

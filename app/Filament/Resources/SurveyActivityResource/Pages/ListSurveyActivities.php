@@ -13,7 +13,11 @@ class ListSurveyActivities extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+                ->label('Tambah Kegiatan / Survei')
+                ->icon('heroicon-o-document-plus')
+                ->color('primary')
+                ->button(),
         ];
     }
 }
