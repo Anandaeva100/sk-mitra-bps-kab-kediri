@@ -84,7 +84,7 @@ class MonitoringSurveyResource extends Resource
                     ])
                     ->columns(2),
 
-                Section::make('Informasi Mitra & Honor')
+                Section::make('Informasi Mitra')
                     ->schema([
 
                         TextInput::make('nama_pml')
@@ -102,7 +102,7 @@ class MonitoringSurveyResource extends Resource
                             ->live(),
 
                         TextInput::make('rate_honor')
-                            ->label('Rate Honor (Rp)')
+                            ->label('Rate Honor yang Diterima (Rp)')
                             ->numeric()
                             ->prefix('Rp')
                             ->required()
@@ -219,7 +219,7 @@ class MonitoringSurveyResource extends Resource
                     ->searchable(),
 
                 TextColumn::make('beban_banyak')
-                    ->label('Beban')
+                    ->label('Beban / Banyak')
                     ->badge()
                     ->alignCenter()
                     ->color(function ($state) {

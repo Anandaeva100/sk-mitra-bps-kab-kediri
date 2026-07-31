@@ -31,7 +31,18 @@ class ListMonitoringSurveys extends ListRecords
     {
         return [
             Actions\CreateAction::make()
-                ->label('Tambah Data Survei'),
+                ->label('Tambah Data Survei')
+                ->icon('heroicon-o-document-plus')
+                ->url(function () {
+
+                    return static::getResource()::getUrl(
+                        'create',
+                        [
+                            'activeTab' => $this->activeTab,
+                        ]
+                    );
+
+                }),
         ];
     }
 
@@ -49,5 +60,20 @@ class ListMonitoringSurveys extends ListRecords
         }
 
         return $tabs;
+    }
+
+    public function mount(): void
+    {
+        parent::mount();
+
+        if (
+            session()->has('activeTab')
+            && empty($this->activeTab)
+        ) {
+
+            $this->activeTab = session('activeTab');
+
+            session()->forget('activeTab');
+        }
     }
 }
