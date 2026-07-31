@@ -4,6 +4,11 @@ namespace App\Filament\Resources\MonitoringHonorResource\Pages;
 
 use App\Filament\Resources\MonitoringHonorResource;
 use App\Filament\Resources\MonitoringHonorResource\Widgets\MonitoringHonorStats;
+
+use App\Exports\MonitoringHonorExport;
+use Filament\Actions\Action;
+use Maatwebsite\Excel\Facades\Excel;
+
 use Filament\Resources\Components\Tab;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
@@ -19,7 +24,28 @@ class ListMonitoringHonors extends ListRecords
 
     protected function getHeaderActions(): array
     {
-        return [];
+        return [
+
+            Action::make('export')
+                ->label('Unduh Rekapan')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('success')
+                ->action(function () {
+
+                    $tab = $this->activeTab ?? 'semua';
+
+                    $namaFile = $tab === 'semua'
+                        ? 'Rekapan Monitoring Honor Semua Data.xlsx'
+                        : 'Rekapan Monitoring Honor ' . ucfirst($tab) . '.xlsx';
+
+                    return Excel::download(
+                        new MonitoringHonorExport($tab),
+                        $namaFile
+                    );
+
+                }),
+
+        ];
     }
 
     // Trigger update ke widget saat tab diubah oleh user
