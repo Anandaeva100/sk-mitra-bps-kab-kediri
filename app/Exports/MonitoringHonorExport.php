@@ -21,12 +21,16 @@ class MonitoringHonorExport implements FromCollection, WithHeadings, WithColumnW
     protected string $jenisRekapan;
     protected ?string $bulan;
     protected ?string $namaKegiatan;
+    protected float $batasHonor;
 
     public function __construct(string $jenisRekapan = 'semua', ?string $bulan = null, ?string $namaKegiatan = null)
     {
         $this->jenisRekapan = $jenisRekapan;
         $this->bulan = $bulan;
         $this->namaKegiatan = $namaKegiatan;
+
+        // Ambil nilai batas honor dari cache/setting (atau gunakan nilai default misal 3.000.000 jika null)
+        $this->batasHonor = (float) cache('app_batas_honor', 3000000);
     }
 
     public function collection(): Collection
@@ -151,9 +155,6 @@ class MonitoringHonorExport implements FromCollection, WithHeadings, WithColumnW
         return $exportData;
     }
 
-    /**
-     * Header Kolom Excel
-     */
     public function headings(): array
     {
         return [
@@ -166,9 +167,6 @@ class MonitoringHonorExport implements FromCollection, WithHeadings, WithColumnW
         ];
     }
 
-    /**
-     * Ukuran Lebar Kolom
-     */
     public function columnWidths(): array
     {
         return [
@@ -181,13 +179,9 @@ class MonitoringHonorExport implements FromCollection, WithHeadings, WithColumnW
         ];
     }
 
-    /**
-     * Style Dasar Header dan Alignments
-     */
     public function styles(Worksheet $sheet): array
     {
         return [
-            // Style Header (Baris 1)
             1 => [
                 'font' => [
                     'bold' => true,
@@ -196,7 +190,7 @@ class MonitoringHonorExport implements FromCollection, WithHeadings, WithColumnW
                 ],
                 'fill' => [
                     'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['argb' => '1E3A8A'], // Navy Blue BPS
+                    'startColor' => ['argb' => '1E3A8A'], // Navy Blue
                 ],
                 'alignment' => [
                     'horizontal' => Alignment::HORIZONTAL_CENTER,
@@ -206,9 +200,6 @@ class MonitoringHonorExport implements FromCollection, WithHeadings, WithColumnW
         ];
     }
 
-    /**
-     * Event Styling Lanjutan (Format Angka, Subtotal Highlight, Border)
-     */
     public function registerEvents(): array
     {
         return [
@@ -219,7 +210,7 @@ class MonitoringHonorExport implements FromCollection, WithHeadings, WithColumnW
                 // Tinggi Baris Header
                 $sheet->getRowDimension(1)->setRowHeight(28);
 
-                // Format Angka Rupiah untuk Kolom F & Beban untuk Kolom E
+                // Format Angka Rupiah (F) & Beban (E)
                 $sheet->getStyle("E2:E{$highestRow}")
                     ->getNumberFormat()
                     ->setFormatCode('#,##0');
@@ -228,7 +219,7 @@ class MonitoringHonorExport implements FromCollection, WithHeadings, WithColumnW
                     ->getNumberFormat()
                     ->setFormatCode('"Rp "#,##0');
 
-                // Alignment Kolom
+                // Alignment
                 $sheet->getStyle("A2:B{$highestRow}")
                     ->getAlignment()
                     ->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -237,12 +228,13 @@ class MonitoringHonorExport implements FromCollection, WithHeadings, WithColumnW
                     ->getAlignment()
                     ->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
-                // Styling Baris Subtotal dan Grand Total
+                // Formatting Baris & Pengecekan Batas Honor
                 for ($row = 2; $row <= $highestRow; $row++) {
-                    $pclCell = $sheet->getCell("C{$row}")->getValue();
+                    $pclCell = (string) $sheet->getCell("C{$row}")->getValue();
+                    $honorValue = (float) $sheet->getCell("F{$row}")->getValue();
 
-                    // Baris Subtotal PCL
-                    if (str_starts_with((string) $pclCell, 'TOTAL ')) {
+                    // 1. Jika Baris Subtotal PCL
+                    if (str_starts_with($pclCell, 'TOTAL ')) {
                         $sheet->getStyle("A{$row}:F{$row}")->applyFromArray([
                             'font' => ['bold' => true, 'color' => ['argb' => '1E293B']],
                             'fill' => [
@@ -250,10 +242,24 @@ class MonitoringHonorExport implements FromCollection, WithHeadings, WithColumnW
                                 'startColor' => ['argb' => 'E2E8F0'], // Soft Gray
                             ],
                         ]);
+
+                        // --- CEK MEMELESAT/MELEBIHI BATAS HONOR ---
+                        if ($honorValue > $this->batasHonor) {
+                            $sheet->getStyle("F{$row}")->applyFromArray([
+                                'font' => [
+                                    'bold' => true,
+                                    'color' => ['argb' => 'FFFFFF'], // Teks Putih
+                                ],
+                                'fill' => [
+                                    'fillType' => Fill::FILL_SOLID,
+                                    'startColor' => ['argb' => 'DC2626'], // Merah Mencolok
+                                ],
+                            ]);
+                        }
                     }
 
-                    // Baris Grand Total Keseluruhan
-                    if (str_contains((string) $pclCell, 'GRAND TOTAL')) {
+                    // 2. Jika Baris Grand Total Keseluruhan
+                    if (str_contains($pclCell, 'GRAND TOTAL')) {
                         $sheet->getStyle("A{$row}:F{$row}")->applyFromArray([
                             'font' => ['bold' => true, 'color' => ['argb' => 'FFFFFF']],
                             'fill' => [
@@ -265,7 +271,7 @@ class MonitoringHonorExport implements FromCollection, WithHeadings, WithColumnW
                     }
                 }
 
-                // Gridline / Border untuk seluruh sel
+                // Gridline / Border
                 $sheet->getStyle("A1:F{$highestRow}")->applyFromArray([
                     'borders' => [
                         'allBorders' => [
