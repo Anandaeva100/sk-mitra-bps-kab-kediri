@@ -83,6 +83,28 @@
             border-bottom:1px solid #e5e7eb;
         }
 
+        .setting-header,
+        .notification-header{
+            position: relative;
+            overflow: hidden;
+        }
+
+        .setting-header::before,
+        .notification-header::before{
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 18px;
+            bottom: 18px;
+            width: 4px;
+            border-radius: 0 8px 8px 0;
+            background: linear-gradient(
+                to bottom,
+                #3b82f6,
+                #2563eb
+            );
+        }
+
         .dark .notification-header{
             border-bottom-color:#3f3f46;
         }
@@ -164,6 +186,46 @@
         .dark input[wire\:model="batas_honor"]::placeholder{
             color:#9ca3af !important;
         }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 46px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            display: none;
+        }
+
+        .slider {
+            position: absolute;
+            inset: 0;
+            background: #d1d5db;
+            border-radius: 9999px;
+            transition: .3s;
+            cursor: pointer;
+        }
+
+        .slider::before {
+            content: "";
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            left: 3px;
+            top: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: .3s;
+        }
+
+        .toggle-switch input:checked + .slider {
+            background: #2563eb;
+        }
+
+        .toggle-switch input:checked + .slider::before {
+            transform: translateX(22px);
+        }
     </style>
 
     {{-- Wrapper Utama --}}
@@ -189,7 +251,7 @@
             <form wire:submit="simpanProfil">
                 
                 {{-- Header Card dengan Tombol Edit --}}
-                <div class="setting-header">
+                <div class="setting-header profile-header">
                     <div class="flex items-center gap-3">
                         <div class="p-2 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
                             <x-heroicon-o-user-circle class="w-5 h-5" />
@@ -240,14 +302,14 @@
                             {{-- TAMPILAN READ-ONLY --}}
                             <div x-show="!isEditing" class="space-y-6">
                                 <div>
-                                    <label class="block text-sm font-semibold text-black dark:text-white mb-2 pt-4">Nama Lengkap</label>
+                                    <label class="block text-sm font-semibold text-black dark:text-white mb-2">Nama Lengkap</label>
                                     <div class="w-full px-4 py-2.5 text-sm font-medium rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/50 text-black dark:text-white shadow-2xs">
                                         {{ $name ?? '-' }}
                                     </div>
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-semibold text-black dark:text-white mb-2 pt-4">Email Address</label>
+                                    <label class="block text-sm font-semibold text-black dark:text-white mb-2">Email Address</label>
                                     <div class="w-full px-4 py-2.5 text-sm font-medium rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/50 text-black dark:text-white shadow-2xs">
                                         {{ $email ?? '-' }}
                                     </div>
@@ -258,14 +320,14 @@
                             <div x-show="isEditing" x-transition.opacity.duration.200ms class="space-y-6">
                                 
                                 <div>
-                                    <label class="block text-sm font-semibold text-black dark:text-white mb-2 pt-4">Nama Lengkap</label>
+                                    <label class="block text-sm font-semibold text-black dark:text-white mb-2">Nama Lengkap</label>
                                     <input type="text" wire:model="name" placeholder="Masukkan nama lengkap"
                                            class="w-full text-sm font-medium rounded-xl border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-black dark:text-white focus:border-amber-500 focus:ring-amber-500 transition shadow-sm">
                                     @error('name') <span class="text-xs font-medium text-red-600 dark:text-red-400 mt-1 block">{{ $message }}</span> @enderror
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-semibold text-black dark:text-white mb-2 pt-4">Email Address</label>
+                                    <label class="block text-sm font-semibold text-black dark:text-white mb-2">Email Address</label>
                                     <input type="email" wire:model="email" placeholder="Masukkan email address"
                                            class="w-full text-sm font-medium rounded-xl border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-black dark:text-white focus:border-amber-500 focus:ring-amber-500 transition shadow-sm">
                                     @error('email') <span class="text-xs font-medium text-red-600 dark:text-red-400 mt-1 block">{{ $message }}</span> @enderror
@@ -273,7 +335,7 @@
 
                                 {{-- Password Saat Ini --}}
                                 <div x-data="{ show: false }">
-                                    <label class="block text-sm font-semibold text-black dark:text-white mb-2 pt-4">Password Saat Ini</label>
+                                    <label class="block text-sm font-semibold text-black dark:text-white mb-2">Password Saat Ini</label>
                                     <div style="position: relative !important; width: 100% !important; display: block !important;">
                                         <input :type="show ? 'text' : 'password'" wire:model="current_password" placeholder="Masukkan password saat ini untuk konfirmasi perubahan" 
                                                style="padding-right: 2.75rem !important;"
@@ -291,7 +353,7 @@
 
                                 {{-- Password Baru --}}
                                 <div x-data="{ show: false }">
-                                    <label class="block text-sm font-semibold text-black dark:text-white mb-2 pt-4">
+                                    <label class="block text-sm font-semibold text-black dark:text-white mb-2">
                                         Password Baru <span class="text-gray-500 dark:text-gray-400 font-normal">(opsional)</span>
                                     </label>
                                     <div style="position: relative !important; width: 100% !important; display: block !important;">
@@ -311,7 +373,7 @@
 
                                 {{-- Konfirmasi Password Baru --}}
                                 <div x-data="{ show: false }">
-                                    <label class="block text-sm font-semibold text-black dark:text-white mb-2 pt-4">Konfirmasi Password Baru</label>
+                                    <label class="block text-sm font-semibold text-black dark:text-white mb-2">Konfirmasi Password Baru</label>
                                     <div style="position: relative !important; width: 100% !important; display: block !important;">
                                         <input :type="show ? 'text' : 'password'" wire:model="password_confirmation" placeholder="Ulangi password baru" 
                                                style="padding-right: 2.75rem !important;"
@@ -335,7 +397,7 @@
                     <div
                         x-show="isEditing"
                         x-transition.opacity
-                        class="flex items-center justify-end gap-3 mt-12 pt-4">
+                        class="flex items-center justify-end gap-3 mt-12 pt-6">
 
                         <button type="submit" wire:loading.attr="disabled" 
                                 style="background-color: #059669 !important; color: #ffffff !important;"
@@ -360,7 +422,7 @@
             <div class="notification-card">
                 <div>
                     {{-- Header Card --}}
-                    <div class="notification-header">
+                    <div class="notification-header notification-header-blue">
                         <div class="flex items-center gap-3">
                             <div class="p-2 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0">
                                 <x-heroicon-o-bell class="w-5 h-5 stroke-[2]" />
@@ -390,8 +452,13 @@
                                 </div>
                             </div>
 
-                            <input type="checkbox" wire:model.live="notif_mendekati"
-                                class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-blue-600 focus:ring-blue-500 focus:ring-2 focus:ring-offset-0 cursor-pointer shrink-0">
+                            <label class="toggle-switch">
+                                <input
+                                    type="checkbox"
+                                    wire:model.live="notif_mendekati">
+
+                                <span class="slider"></span>
+                            </label>
                         </label>
 
                         {{-- Honor Melebihi Batas --}}
@@ -409,8 +476,13 @@
                                 </div>
                             </div>
 
-                            <input type="checkbox" wire:model.live="notif_melebihi"
-                                class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-blue-600 focus:ring-blue-500 focus:ring-2 focus:ring-offset-0 cursor-pointer shrink-0">
+                            <label class="toggle-switch">
+                                <input
+                                    type="checkbox"
+                                    wire:model.live="notif_melebihi">
+
+                                <span class="slider"></span>
+                            </label>
                         </label>
 
                         {{-- Data Survei Baru --}}
@@ -428,8 +500,13 @@
                                 </div>
                             </div>
 
-                            <input type="checkbox" wire:model.live="notif_survei_baru"
-                                class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-blue-600 focus:ring-blue-500 focus:ring-2 focus:ring-offset-0 cursor-pointer shrink-0">
+                            <label class="toggle-switch">
+                                <input
+                                    type="checkbox"
+                                    wire:model.live="notif_survei_baru">
+
+                                <span class="slider"></span>
+                            </label>
                         </label>
 
                         {{-- Email Notifikasi --}}
@@ -447,8 +524,13 @@
                                 </div>
                             </div>
 
-                            <input type="checkbox" wire:model.live="notif_email"
-                                class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-blue-600 focus:ring-2 focus:ring-blue-500/20 focus:ring-offset-0 cursor-pointer shrink-0">
+                            <label class="toggle-switch">
+                                <input
+                                    type="checkbox"
+                                    wire:model.live="notif_email">
+
+                                <span class="slider"></span>
+                            </label>
                         </label>
 
                     </div>
@@ -460,7 +542,7 @@
                 <div>
 
                     {{-- Header Card --}}
-                    <div class="setting-header">
+                    <div class="setting-header honor-header">
 
                         <div class="flex items-center gap-3">
                             <div class="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
