@@ -437,30 +437,6 @@
                     {{-- Body List Notifikasi --}}
                     <div class="notification-body space-y-4">
 
-                        {{-- Honor Mendekati Batas --}}
-                        <label class="flex items-center justify-between p-4 rounded-xl border border-gray-200 dark:border-zinc-700 cursor-pointer">
-                            <div class="flex items-center gap-4 min-w-0 pr-2">
-                                <div class="w-10 h-10 flex items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0">
-                                    <x-heroicon-o-exclamation-triangle class="w-5 h-5 stroke-[2]" />
-                                </div>
-
-                                <div class="min-w-0">
-                                    <p class="text-sm font-bold text-gray-900 dark:text-white">Honor mendekati batas</p>
-                                    <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 truncate">
-                                        Notifikasi ketika honor mendekati batas maksimal.
-                                    </p>
-                                </div>
-                            </div>
-
-                            <label class="toggle-switch">
-                                <input
-                                    type="checkbox"
-                                    wire:model.live="notif_mendekati">
-
-                                <span class="slider"></span>
-                            </label>
-                        </label>
-
                         {{-- Honor Melebihi Batas --}}
                         <label class="flex items-center justify-between p-4 rounded-xl border border-gray-200 dark:border-zinc-700 cursor-pointer">
                             <div class="flex items-center gap-4 min-w-0 pr-2">
