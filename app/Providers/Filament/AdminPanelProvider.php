@@ -34,13 +34,13 @@ class AdminPanelProvider extends PanelProvider
             // -----------------------------------------------------------------
             // Brand
             // -----------------------------------------------------------------
-            ->brandName('BPS Kabupaten Kediri')
+            ->brandName('SI-Mantra')
 
             ->brandLogo(fn () => new HtmlString('
                 <div class="flex items-center gap-x-3">
                     <img src="' . asset('images/logobps.png') . '" class="h-8 w-auto" alt="Logo BPS">
                     <span class="text-base font-bold text-gray-900 dark:text-white tracking-wide">
-                        BPS Kabupaten Kediri
+                        SI-Mantra
                     </span>
                 </div>
             '))
