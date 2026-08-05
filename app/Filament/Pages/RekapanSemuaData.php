@@ -89,31 +89,62 @@ class RekapanSemuaData extends Page
     {
         $honorLimit = $this->getHonorLimit();
 
-        $mitraTotals = MonitoringSurvey::select('nama_pcl', DB::raw('SUM(honor_total) as total'))
+        $selectedMonth = request('bulan');
+
+        $months = [
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juni',
+            7 => 'Juli',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember',
+        ];
+
+        $query = MonitoringSurvey::select(
+            'nama_pcl',
+            DB::raw('SUM(honor_total) as total')
+        );
+
+        if ($selectedMonth) {
+            $query->where('bulan', $months[$selectedMonth]);
+        }
+
+        $mitraTotals = $query
             ->groupBy('nama_pcl')
             ->pluck('total');
 
         $totalMitra = $mitraTotals->count();
+
         if ($totalMitra === 0) {
             return [
-                'aman'         => 0, 
-                'aman_pct'     => 0,
-                'melebihi'     => 0, 
+                'aman' => 0,
+                'aman_pct' => 0,
+                'melebihi' => 0,
                 'melebihi_pct' => 0,
-                'total'        => 0,
+                'total' => 0,
             ];
         }
 
-        // Kategori hanya 2: Aman (< batas) & Melebihi (>= batas)
-        $aman     = $mitraTotals->filter(fn($val) => $val < $honorLimit)->count();
-        $melebihi = $mitraTotals->filter(fn($val) => $val >= $honorLimit)->count();
+        $aman = $mitraTotals
+            ->filter(fn ($total) => $total < $honorLimit)
+            ->count();
+
+        $melebihi = $mitraTotals
+            ->filter(fn ($total) => $total >= $honorLimit)
+            ->count();
 
         return [
-            'aman'          => $aman,
-            'aman_pct'      => round(($aman / $totalMitra) * 100),
-            'melebihi'      => $melebihi,
-            'melebihi_pct'  => round(($melebihi / $totalMitra) * 100),
-            'total'         => $totalMitra,
+            'aman' => $aman,
+            'aman_pct' => round(($aman / $totalMitra) * 100),
+            'melebihi' => $melebihi,
+            'melebihi_pct' => round(($melebihi / $totalMitra) * 100),
+            'total' => $totalMitra,
         ];
     }
 

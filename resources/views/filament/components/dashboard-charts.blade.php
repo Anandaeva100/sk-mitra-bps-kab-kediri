@@ -146,33 +146,77 @@
     <div class="lg:col-span-1 dashboard-chart-card">
 
         @php
-            $statusData = $this->getStatusMitraData();
+            $months = [
+                1 => 'Januari',
+                2 => 'Februari',
+                3 => 'Maret',
+                4 => 'April',
+                5 => 'Mei',
+                6 => 'Juni',
+                7 => 'Juli',
+                8 => 'Agustus',
+                9 => 'September',
+                10 => 'Oktober',
+                11 => 'November',
+                12 => 'Desember',
+            ];
+
+            $selectedMonth = request('bulan');
+
+            $statusData = $this->getStatusMitraData($selectedMonth);
         @endphp
 
-        <div class="flex items-start justify-between">
+        <div class="flex items-start justify-between mb-6">
 
             <div>
-
-                <h3 class="chart-title">
+                <h3 class="text-xl font-bold text-gray-900">
                     Status Honor Mitra
                 </h3>
 
-                <p class="chart-desc">
-                    Distribusi status honor seluruh mitra.
+                <p class="text-gray-500 text-sm">
+                    Distribusi status honor berdasarkan bulan.
                 </p>
-
             </div>
 
-            {{-- Tombol Lihat Semua menuju Menu Monitoring Honor --}}
-            <a
-                href="{{ route('filament.admin.resources.monitoring-honors.index') }}"
-                class="lihat-semua inline-flex items-center gap-1 text-xs font-semibold shrink-0">
+            <div class="flex items-center gap-3">
 
-                Lihat Semua
+                {{-- Filter Bulan --}}
+                <form method="GET">
+                    <select
+                        name="bulan"
+                        onchange="this.form.submit()"
+                        style="
+                            background-image: url(&quot;data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e&quot;) !important;
+                            background-position: right 0.6rem center !important;
+                            background-repeat: no-repeat !important;
+                            background-size: 1.25em 1.25em !important;
+                        "
+                        class="h-10 min-w-[160px] rounded-lg border border-gray-300 bg-white pl-4 pr-9 text-sm font-semibold text-gray-800 shadow-sm transition hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 cursor-pointer appearance-none"
+                    >
+                        <option value="">Semua Bulan</option>
 
-                <x-heroicon-m-chevron-right class="w-4 h-4"/>
+                        @foreach ($months as $number => $month)
+                            <option value="{{ $number }}" {{ request('bulan') == $number ? 'selected' : '' }}>
+                                {{ $month }}
+                            </option>
+                        @endforeach
+                    </select>
+                </form>
 
-            </a>
+                {{-- Tombol Lihat Semua --}}
+                <a
+                    href="{{ \App\Filament\Resources\MonitoringHonorResource::getUrl() }}"
+                    style="background: #2563eb; color: #ffffff !important; border: 1px solid #2563eb;"
+                    class="inline-flex items-center gap-2 h-10 rounded-lg px-4 text-sm font-semibold no-underline shadow-sm transition hover:opacity-90"
+                >
+                    <span style="color: #ffffff;">Lihat Semua</span>
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="color: #ffffff;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+
+            </div>
 
         </div>
 
