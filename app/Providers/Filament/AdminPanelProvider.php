@@ -55,11 +55,12 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::Amber,
             ])
 
-            // Custom CSS: Menghilangkan tombol dropdown & merapatkan sidebar
+            // Custom CSS: Menghilangkan tombol dropdown & merapikan sidebar
             ->renderHook(
                 PanelsRenderHook::STYLES_AFTER,
                 fn (): string => new HtmlString('
                     <style>
+
                         /* =====================================================
                         SIDEBAR - CUSTOM SPACING
                         ===================================================== */
@@ -83,22 +84,22 @@ class AdminPanelProvider extends PanelProvider
                             gap: 0 !important;
                         }
 
+
                         /* =====================================================
                         ITEM MENU
                         ===================================================== */
 
-                        /* Hilangkan jarak antar item */
                         .fi-sidebar-item {
                             margin-top: 0 !important;
                             margin-bottom: 0 !important;
                         }
 
-                        /* Tinggi dan padding item menu */
                         .fi-sidebar-item-button {
                             min-height: 2.25rem !important;
                             padding-top: 0.25rem !important;
                             padding-bottom: 0.25rem !important;
                         }
+
 
                         /* =====================================================
                         LABEL GROUP
@@ -111,11 +112,11 @@ class AdminPanelProvider extends PanelProvider
                             padding-bottom: 0 !important;
                         }
 
-                        /* Group pertama tidak perlu jarak atas terlalu besar */
                         .fi-sidebar-group:first-child {
                             padding-top: 0 !important;
                             margin-top: 0 !important;
                         }
+
 
                         /* =====================================================
                         JARAK ANTAR GROUP
@@ -128,10 +129,10 @@ class AdminPanelProvider extends PanelProvider
                             padding-bottom: 0 !important;
                         }
 
-                        /* Mengurangi gap bawaan antar navigation group */
                         .fi-sidebar-nav-groups {
                             gap: 0.25rem !important;
                         }
+
 
                         /* =====================================================
                         SIDEBAR NAVIGATION
@@ -141,6 +142,77 @@ class AdminPanelProvider extends PanelProvider
                             padding-top: 1.25rem !important;
                             padding-bottom: 0.5rem !important;
                         }
+
+
+                        /* =====================================================
+                        SIDEBAR COLLAPSED
+                        ===================================================== */
+
+                        /* Header tetap memiliki ruang untuk logo */
+                        .fi-sidebar.fi-sidebar-collapsed .fi-sidebar-header {
+                            display: flex !important;
+                            align-items: center !important;
+                            justify-content: center !important;
+                        }
+
+                        /* Link/logo tetap ditampilkan */
+                        .fi-sidebar.fi-sidebar-collapsed .fi-sidebar-header a {
+                            display: flex !important;
+                            align-items: center !important;
+                            justify-content: center !important;
+                        }
+
+                        /* Logo BPS tetap terlihat */
+                        .fi-sidebar.fi-sidebar-collapsed .fi-sidebar-header img {
+                            display: block !important;
+                            width: auto !important;
+                            height: 2rem !important;
+                        }
+
+                        /* Sembunyikan tulisan SI-Mantra ketika collapsed */
+                        .fi-sidebar.fi-sidebar-collapsed .fi-sidebar-header span {
+                            display: none !important;
+                        }
+
+
+                        /* =====================================================
+                        TOMBOL COLLAPSE
+                        ===================================================== */
+
+                        /* Tombol collapse */
+                        .fi-sidebar-collapse-button {
+                            display: flex !important;
+                            align-items: center !important;
+                            justify-content: center !important;
+                        }
+
+                        /* Hilangkan icon panah bawaan */
+                        .fi-sidebar-collapse-button svg {
+                            display: none !important;
+                        }
+
+                        /* Icon hamburger */
+                        .fi-sidebar-collapse-button::before {
+                            content: "☰" !important;
+                            font-size: 1.35rem !important;
+                            line-height: 1 !important;
+                            display: block !important;
+                            font-family: Arial, sans-serif !important;
+                        }
+
+
+                        /* =====================================================
+                        LOGOUT
+                        ===================================================== */
+
+                        .fi-sidebar-nav + div form button {
+                            background-color: rgb(245 245 245) !important;
+                        }
+
+                        .fi-sidebar-nav + div form button:hover {
+                            background-color: rgb(229 229 229) !important;
+                        }
+
                     </style>
                 ')
             )

@@ -21,7 +21,7 @@ class Pengaturan extends Page
 
     protected static ?string $navigationGroup = 'SISTEM';
 
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 10;
 
     // Property Profil
     public ?string $name = '';
