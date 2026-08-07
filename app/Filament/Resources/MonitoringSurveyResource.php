@@ -25,7 +25,7 @@ class MonitoringSurveyResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-document-duplicate';
 
     // Kelompokkan ke DATA
-    protected static ?string $navigationGroup = 'DATA';
+    protected static ?string $navigationGroup = 'INPUT DATA';
 
     protected static ?int $navigationSort = 2;
 
