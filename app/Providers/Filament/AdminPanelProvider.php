@@ -10,6 +10,7 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
 use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -52,6 +53,61 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
+
+            // Custom CSS: Menghilangkan Tombol Dropdown & Rapat Langsung di Bawah Label
+            ->renderHook(
+                PanelsRenderHook::STYLES_AFTER,
+                fn (): string => new HtmlString('
+                    <style>
+                        /* Sembunyikan tombol icon toggle collapse/dropdown pada header grup */
+                        .fi-sidebar-group-button svg,
+                        .fi-sidebar-group-button .fi-icon-btn {
+                            display: none !important;
+                        }
+
+                        /* Menonaktifkan efek kursor klik/pointer pada header grup agar seperti teks biasa */
+                        .fi-sidebar-group-button {
+                            pointer-events: none !important;
+                            cursor: default !important;
+                        }
+
+                        /* Memastikan item grup selalu terlihat (tidak bisa tersembunyi) */
+                        .fi-sidebar-group-items {
+                            display: flex !important;
+                            flex-direction: column !important;
+                            gap: 0px !important;
+                        }
+
+                        /* Kerapatan item menu navigasi */
+                        .fi-sidebar-item {
+                            margin-top: 0px !important;
+                            margin-bottom: 0px !important;
+                        }
+
+                        /* Memperkecil padding atas-bawah tombol menu */
+                        .fi-sidebar-item-button {
+                            padding-top: 0.15rem !important;
+                            padding-bottom: 0.15rem !important;
+                            min-height: 2rem !important;
+                        }
+
+                        /* Mengatur jarak judul grup (INPUT DATA, DATA, MONITORING, SISTEM) */
+                        .fi-sidebar-group-label {
+                            margin-top: 0.25rem !important;
+                            margin-bottom: 0rem !important;
+                            padding-top: 0.1rem !important;
+                            padding-bottom: 0.1rem !important;
+                        }
+
+                        /* Mengatur jarak antar grup */
+                        .fi-sidebar-group {
+                            margin-bottom: 0.15rem !important;
+                            padding-top: 0px !important;
+                            padding-bottom: 0px !important;
+                        }
+                    </style>
+                ')
+            )
 
             // Resources
             ->discoverResources(
