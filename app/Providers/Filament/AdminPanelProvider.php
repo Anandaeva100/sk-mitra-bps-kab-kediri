@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Resources\MonitoringSurveyResource;
+use App\Filament\Pages\RekapanSemuaData;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -54,56 +55,91 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::Amber,
             ])
 
-            // Custom CSS: Menghilangkan Tombol Dropdown & Rapat Langsung di Bawah Label
+            // Custom CSS: Menghilangkan tombol dropdown & merapatkan sidebar
             ->renderHook(
                 PanelsRenderHook::STYLES_AFTER,
                 fn (): string => new HtmlString('
                     <style>
-                        /* Sembunyikan tombol icon toggle collapse/dropdown pada header grup */
+                        /* =====================================================
+                        SIDEBAR - CUSTOM SPACING
+                        ===================================================== */
+
+                        /* Sembunyikan tombol icon toggle collapse/dropdown */
                         .fi-sidebar-group-button svg,
                         .fi-sidebar-group-button .fi-icon-btn {
                             display: none !important;
                         }
 
-                        /* Menonaktifkan efek kursor klik/pointer pada header grup agar seperti teks biasa */
+                        /* Header group tidak bisa diklik */
                         .fi-sidebar-group-button {
                             pointer-events: none !important;
                             cursor: default !important;
                         }
 
-                        /* Memastikan item grup selalu terlihat (tidak bisa tersembunyi) */
+                        /* Semua item dalam group selalu ditampilkan */
                         .fi-sidebar-group-items {
                             display: flex !important;
                             flex-direction: column !important;
-                            gap: 0px !important;
+                            gap: 0 !important;
                         }
 
-                        /* Kerapatan item menu navigasi */
+                        /* =====================================================
+                        ITEM MENU
+                        ===================================================== */
+
+                        /* Hilangkan jarak antar item */
                         .fi-sidebar-item {
-                            margin-top: 0px !important;
-                            margin-bottom: 0px !important;
+                            margin-top: 0 !important;
+                            margin-bottom: 0 !important;
                         }
 
-                        /* Memperkecil padding atas-bawah tombol menu */
+                        /* Tinggi dan padding item menu */
                         .fi-sidebar-item-button {
-                            padding-top: 0.15rem !important;
-                            padding-bottom: 0.15rem !important;
-                            min-height: 2rem !important;
+                            min-height: 2.25rem !important;
+                            padding-top: 0.25rem !important;
+                            padding-bottom: 0.25rem !important;
                         }
 
-                        /* Mengatur jarak judul grup (INPUT DATA, DATA, MONITORING, SISTEM) */
+                        /* =====================================================
+                        LABEL GROUP
+                        ===================================================== */
+
                         .fi-sidebar-group-label {
-                            margin-top: 0.25rem !important;
-                            margin-bottom: 0rem !important;
-                            padding-top: 0.1rem !important;
-                            padding-bottom: 0.1rem !important;
+                            margin-top: 0.5rem !important;
+                            margin-bottom: 0.2rem !important;
+                            padding-top: 0 !important;
+                            padding-bottom: 0 !important;
                         }
 
-                        /* Mengatur jarak antar grup */
+                        /* Group pertama tidak perlu jarak atas terlalu besar */
+                        .fi-sidebar-group:first-child {
+                            padding-top: 0 !important;
+                            margin-top: 0 !important;
+                        }
+
+                        /* =====================================================
+                        JARAK ANTAR GROUP
+                        ===================================================== */
+
                         .fi-sidebar-group {
-                            margin-bottom: 0.15rem !important;
-                            padding-top: 0px !important;
-                            padding-bottom: 0px !important;
+                            margin-top: 0 !important;
+                            margin-bottom: 0.5rem !important;
+                            padding-top: 0 !important;
+                            padding-bottom: 0 !important;
+                        }
+
+                        /* Mengurangi gap bawaan antar navigation group */
+                        .fi-sidebar-nav-groups {
+                            gap: 0.25rem !important;
+                        }
+
+                        /* =====================================================
+                        SIDEBAR NAVIGATION
+                        ===================================================== */
+
+                        .fi-sidebar-nav {
+                            padding-top: 1.25rem !important;
+                            padding-bottom: 0.5rem !important;
                         }
                     </style>
                 ')
@@ -121,7 +157,7 @@ class AdminPanelProvider extends PanelProvider
             )
 
             ->pages([
-                Pages\Dashboard::class,
+                RekapanSemuaData::class,
             ])
 
             ->resources([
