@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Resources\MonitoringSurveyResource;
+use App\Filament\Pages\RekapanSemuaData;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -54,57 +55,164 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::Amber,
             ])
 
-            // Custom CSS: Menghilangkan Tombol Dropdown & Rapat Langsung di Bawah Label
+            // Custom CSS: Menghilangkan tombol dropdown & merapikan sidebar
             ->renderHook(
                 PanelsRenderHook::STYLES_AFTER,
                 fn (): string => new HtmlString('
                     <style>
-                        /* Sembunyikan tombol icon toggle collapse/dropdown pada header grup */
+
+                        /* =====================================================
+                        SIDEBAR - CUSTOM SPACING
+                        ===================================================== */
+
+                        /* Sembunyikan tombol icon toggle collapse/dropdown */
                         .fi-sidebar-group-button svg,
                         .fi-sidebar-group-button .fi-icon-btn {
                             display: none !important;
                         }
 
-                        /* Menonaktifkan efek kursor klik/pointer pada header grup agar seperti teks biasa */
+                        /* Header group tidak bisa diklik */
                         .fi-sidebar-group-button {
                             pointer-events: none !important;
                             cursor: default !important;
                         }
 
-                        /* Memastikan item grup selalu terlihat (tidak bisa tersembunyi) */
+                        /* Semua item dalam group selalu ditampilkan */
                         .fi-sidebar-group-items {
                             display: flex !important;
                             flex-direction: column !important;
-                            gap: 0px !important;
+                            gap: 0 !important;
                         }
 
-                        /* Kerapatan item menu navigasi */
+
+                        /* =====================================================
+                        ITEM MENU
+                        ===================================================== */
+
                         .fi-sidebar-item {
-                            margin-top: 0px !important;
-                            margin-bottom: 0px !important;
+                            margin-top: 0 !important;
+                            margin-bottom: 0 !important;
                         }
 
-                        /* Memperkecil padding atas-bawah tombol menu */
                         .fi-sidebar-item-button {
-                            padding-top: 0.15rem !important;
-                            padding-bottom: 0.15rem !important;
-                            min-height: 2rem !important;
+                            min-height: 2.25rem !important;
+                            padding-top: 0.25rem !important;
+                            padding-bottom: 0.25rem !important;
                         }
 
-                        /* Mengatur jarak judul grup (INPUT DATA, DATA, MONITORING, SISTEM) */
+
+                        /* =====================================================
+                        LABEL GROUP
+                        ===================================================== */
+
                         .fi-sidebar-group-label {
-                            margin-top: 0.25rem !important;
-                            margin-bottom: 0rem !important;
-                            padding-top: 0.1rem !important;
-                            padding-bottom: 0.1rem !important;
+                            margin-top: 0.5rem !important;
+                            margin-bottom: 0.2rem !important;
+                            padding-top: 0 !important;
+                            padding-bottom: 0 !important;
                         }
 
-                        /* Mengatur jarak antar grup */
-                        .fi-sidebar-group {
-                            margin-bottom: 0.15rem !important;
-                            padding-top: 0px !important;
-                            padding-bottom: 0px !important;
+                        .fi-sidebar-group:first-child {
+                            padding-top: 0 !important;
+                            margin-top: 0 !important;
                         }
+
+
+                        /* =====================================================
+                        JARAK ANTAR GROUP
+                        ===================================================== */
+
+                        .fi-sidebar-group {
+                            margin-top: 0 !important;
+                            margin-bottom: 0.5rem !important;
+                            padding-top: 0 !important;
+                            padding-bottom: 0 !important;
+                        }
+
+                        .fi-sidebar-nav-groups {
+                            gap: 0.25rem !important;
+                        }
+
+
+                        /* =====================================================
+                        SIDEBAR NAVIGATION
+                        ===================================================== */
+
+                        .fi-sidebar-nav {
+                            padding-top: 1.25rem !important;
+                            padding-bottom: 0.5rem !important;
+                        }
+
+
+                        /* =====================================================
+                        SIDEBAR COLLAPSED
+                        ===================================================== */
+
+                        /* Header tetap memiliki ruang untuk logo */
+                        .fi-sidebar.fi-sidebar-collapsed .fi-sidebar-header {
+                            display: flex !important;
+                            align-items: center !important;
+                            justify-content: center !important;
+                        }
+
+                        /* Link/logo tetap ditampilkan */
+                        .fi-sidebar.fi-sidebar-collapsed .fi-sidebar-header a {
+                            display: flex !important;
+                            align-items: center !important;
+                            justify-content: center !important;
+                        }
+
+                        /* Logo BPS tetap terlihat */
+                        .fi-sidebar.fi-sidebar-collapsed .fi-sidebar-header img {
+                            display: block !important;
+                            width: auto !important;
+                            height: 2rem !important;
+                        }
+
+                        /* Sembunyikan tulisan SI-Mantra ketika collapsed */
+                        .fi-sidebar.fi-sidebar-collapsed .fi-sidebar-header span {
+                            display: none !important;
+                        }
+
+
+                        /* =====================================================
+                        TOMBOL COLLAPSE
+                        ===================================================== */
+
+                        /* Tombol collapse */
+                        .fi-sidebar-collapse-button {
+                            display: flex !important;
+                            align-items: center !important;
+                            justify-content: center !important;
+                        }
+
+                        /* Hilangkan icon panah bawaan */
+                        .fi-sidebar-collapse-button svg {
+                            display: none !important;
+                        }
+
+                        /* Icon hamburger */
+                        .fi-sidebar-collapse-button::before {
+                            content: "☰" !important;
+                            font-size: 1.35rem !important;
+                            line-height: 1 !important;
+                            display: block !important;
+                            font-family: Arial, sans-serif !important;
+                        }
+
+
+                        /* =====================================================
+                        LOGOUT
+                        ===================================================== */
+
+                        .fi-sidebar-nav + div form button {
+                            background-color: rgb(245 245 245) !important;
+                        }
+
+                        .fi-sidebar-nav + div form button:hover {
+                            background-color: rgb(229 229 229) !important;
+                        }
+
                     </style>
                 ')
             )
@@ -121,7 +229,7 @@ class AdminPanelProvider extends PanelProvider
             )
 
             ->pages([
-                Pages\Dashboard::class,
+                RekapanSemuaData::class,
             ])
 
             ->resources([

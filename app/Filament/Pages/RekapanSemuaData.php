@@ -4,11 +4,11 @@ namespace App\Filament\Pages;
 
 use App\Models\MonitoringSurvey;
 use App\Models\Setting;
-use Filament\Pages\Page;
+use Filament\Pages\Dashboard;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
-class RekapanSemuaData extends Page
+class RekapanSemuaData extends Dashboard
 {
     protected static string $view = 'filament.pages.rekapan-semua-data';
 
