@@ -19,11 +19,9 @@ class Pengaturan extends Page
 
     protected static ?string $title = 'Pengaturan';
 
-    // Set null agar berada di grup utama navigasi
-    protected static ?string $navigationGroup = null;
+    protected static ?string $navigationGroup = 'SISTEM';
 
-    // Menentukan urutan tepat di bawah Monitoring Honor
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 4;
 
     // Property Profil
     public ?string $name = '';

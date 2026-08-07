@@ -22,9 +22,10 @@ class MonitoringSurveyResource extends Resource
 {
     protected static ?string $model = MonitoringSurvey::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
+    protected static ?string $navigationIcon = 'heroicon-o-document-duplicate';
 
-    protected static ?string $navigationGroup = null;
+    // Kelompokkan ke DATA
+    protected static ?string $navigationGroup = 'DATA';
 
     protected static ?int $navigationSort = 2;
 
@@ -36,9 +37,6 @@ class MonitoringSurveyResource extends Resource
 
     protected static bool $shouldRegisterNavigation = true;
 
-    /**
-     * Mengembalikan null agar badge angka (12) di menu Data Survei hilang
-     */
     public static function getNavigationBadge(): ?string
     {
         return null;
@@ -95,11 +93,19 @@ class MonitoringSurveyResource extends Resource
                             ->label('Nama PCL')
                             ->required(),
 
+                        TextInput::make('satuan')
+                            ->label('Satuan')
+                            ->nullable(),
+
                         TextInput::make('beban_banyak')
                             ->label('Beban / Banyak')
                             ->numeric()
                             ->required()
                             ->live(),
+
+                        TextInput::make('wilayah_tugas')
+                            ->label('Wilayah Tugas')
+                            ->nullable(),
 
                         TextInput::make('rate_honor')
                             ->label('Rate Honor yang Diterima (Rp)')
@@ -218,6 +224,11 @@ class MonitoringSurveyResource extends Resource
                     ->label('Nama PCL')
                     ->searchable(),
 
+                TextColumn::make('satuan')
+                    ->label('Satuan')
+                    ->searchable()
+                    ->toggleable(),
+
                 TextColumn::make('beban_banyak')
                     ->label('Beban / Banyak')
                     ->badge()
@@ -247,6 +258,11 @@ class MonitoringSurveyResource extends Resource
                         return 'Beban Tinggi';
 
                     }),
+
+                TextColumn::make('wilayah_tugas')
+                    ->label('Wilayah Tugas')
+                    ->searchable()
+                    ->toggleable(),
 
                 TextColumn::make('rate_honor')
                     ->label('Rate Honor')
