@@ -26,9 +26,9 @@ class MonitoringHonorResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Monitoring Honor';
 
-    protected static ?string $navigationGroup = null;
+    protected static ?string $navigationGroup = 'MONITORING';
 
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 3;
 
     /**
      * Ambil Batas Honor secara Sinkron dari Cache atau Database Settings
