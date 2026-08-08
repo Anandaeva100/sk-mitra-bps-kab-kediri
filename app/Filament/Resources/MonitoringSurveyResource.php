@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\MonitoringSurveyResource\Pages;
 use App\Models\MonitoringSurvey;
 use App\Models\SurveyActivity;
+use App\Models\Pml;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -85,8 +86,16 @@ class MonitoringSurveyResource extends Resource
                 Section::make('Informasi Mitra')
                     ->schema([
 
-                        TextInput::make('nama_pml')
+                        Select::make('nama_pml')
                             ->label('Nama PML')
+                            ->options(function () {
+                                return Pml::query()
+                                    ->orderBy('nama_pml')
+                                    ->pluck('nama_pml', 'nama_pml')
+                                    ->toArray();
+                            })
+                            ->searchable()
+                            ->preload()
                             ->required(),
 
                         TextInput::make('nama_pcl')
