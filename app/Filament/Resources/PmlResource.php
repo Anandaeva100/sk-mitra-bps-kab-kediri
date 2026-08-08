@@ -43,6 +43,12 @@ class PmlResource extends Resource
             ]);
     }
 
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()
+            ->orderBy('nama_pml', 'asc');
+    }
+
     public static function table(Table $table): Table
     {
         return $table
