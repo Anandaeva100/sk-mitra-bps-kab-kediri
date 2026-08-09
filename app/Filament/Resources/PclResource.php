@@ -60,6 +60,7 @@ class PclResource extends Resource
 
                 TextColumn::make('id_pcl')
                     ->label('ID PCL')
+                    ->color('gray')
                     ->searchable()
                     ->sortable(),
 

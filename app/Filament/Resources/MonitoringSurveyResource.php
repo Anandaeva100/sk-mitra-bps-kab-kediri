@@ -6,7 +6,7 @@ use App\Filament\Resources\MonitoringSurveyResource\Pages;
 use App\Models\MonitoringSurvey;
 use App\Models\SurveyActivity;
 use App\Models\Pml;
-use App\Models\Pcl;
+use App\Models\Pcl; // Import Model Pcl
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -99,8 +99,19 @@ class MonitoringSurveyResource extends Resource
                             ->preload()
                             ->required(),
 
-                        TextInput::make('nama_pcl')
+                        // Dropdown PCL dengan styling HTML
+                        Select::make('nama_pcl')
                             ->label('Nama PCL')
+                            ->options(function () {
+                                return Pcl::all()->mapWithKeys(function ($pcl) {
+                                    return [
+                                        $pcl->nama_pcl => '<span class="text-gray-400 font-normal">' . $pcl->id_pcl . '</span> <span class="text-gray-400 font-normal">-</span> <span class="font-medium text-gray-900 dark:text-white">' . $pcl->nama_pcl . '</span>'
+                                    ];
+                                });
+                            })
+                            ->allowHtml()
+                            ->searchable()
+                            ->preload()
                             ->required(),
 
                         TextInput::make('satuan')
