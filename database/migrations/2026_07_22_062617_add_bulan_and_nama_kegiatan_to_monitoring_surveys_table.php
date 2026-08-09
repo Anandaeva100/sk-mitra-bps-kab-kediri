@@ -9,16 +9,24 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('monitoring_surveys', function (Blueprint $table) {
-            // Menyisipkan kolom bulan dan nama_kegiatan tepat di bawah kolom user_id awal Anda
-            $table->string('bulan')->after('user_id')->nullable();
-            $table->string('nama_kegiatan')->after('bulan')->nullable();
+            if (!Schema::hasColumn('monitoring_surveys', 'bulan')) {
+                $table->string('bulan')->nullable();
+            }
+            if (!Schema::hasColumn('monitoring_surveys', 'nama_kegiatan')) {
+                $table->string('nama_kegiatan')->nullable();
+            }
         });
     }
 
     public function down(): void
     {
         Schema::table('monitoring_surveys', function (Blueprint $table) {
-            $table->dropColumn(['bulan', 'nama_kegiatan']);
+            if (Schema::hasColumn('monitoring_surveys', 'bulan')) {
+                $table->dropColumn('bulan');
+            }
+            if (Schema::hasColumn('monitoring_surveys', 'nama_kegiatan')) {
+                $table->dropColumn('nama_kegiatan');
+            }
         });
     }
 };
