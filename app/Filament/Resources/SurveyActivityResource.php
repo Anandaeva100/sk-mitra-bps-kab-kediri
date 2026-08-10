@@ -14,6 +14,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BadgeColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 
 class SurveyActivityResource extends Resource
@@ -100,9 +101,15 @@ class SurveyActivityResource extends Resource
                     ]),
 
             ])
+            
             ->filters([
 
+                SelectFilter::make('tahun')
+                    ->label('Tahun')
+                    ->options(fn () => SurveyActivity::distinct()->orderBy('tahun', 'desc')->pluck('tahun', 'tahun')->toArray()),
+
             ])
+
             ->actions([
 
                 Tables\Actions\EditAction::make(),
