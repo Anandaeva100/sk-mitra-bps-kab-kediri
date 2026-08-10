@@ -24,6 +24,6 @@ class CreateSurveyActivity extends CreateRecord
     {
         return Notification::make()
             ->success()
-            ->title('Data kegiatan / survei berhasil ditambahkan');
+            ->title('Data Kegiatan / Survei berhasil ditambahkan');
     }
 }
