@@ -61,8 +61,12 @@ class PclResource extends Resource
                 TextColumn::make('id_pcl')
                     ->label('ID PCL')
                     ->color('gray')
+                    ->icon('heroicon-m-square-2-stack')
+                    ->iconPosition('after')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->copyable()
+                    ->copyMessage('ID PCL berhasil disalin'),
 
                 TextColumn::make('nama_pcl')
                     ->label('Nama PCL')
