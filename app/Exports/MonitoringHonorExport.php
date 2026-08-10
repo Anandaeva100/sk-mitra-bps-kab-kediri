@@ -21,13 +21,15 @@ class MonitoringHonorExport implements FromCollection, WithHeadings, WithColumnW
     protected string $jenisRekapan;
     protected ?string $bulan;
     protected ?string $namaKegiatan;
+    protected ?string $tahun;
     protected float $batasHonor;
 
-    public function __construct(string $jenisRekapan = 'semua', ?string $bulan = null, ?string $namaKegiatan = null)
+    public function __construct(string $jenisRekapan = 'semua', ?string $bulan = null, ?string $namaKegiatan = null, ?string $tahun = null)
     {
         $this->jenisRekapan = $jenisRekapan;
         $this->bulan = $bulan;
         $this->namaKegiatan = $namaKegiatan;
+        $this->tahun = $tahun ?? date('Y');
 
         // Ambil nilai batas honor dari cache/setting (atau gunakan nilai default misal 3.000.000 jika null)
         $this->batasHonor = (float) cache('app_batas_honor', 3000000);
@@ -36,6 +38,13 @@ class MonitoringHonorExport implements FromCollection, WithHeadings, WithColumnW
     public function collection(): Collection
     {
         $query = MonitoringSurvey::query();
+
+        // FILTER TAHUN
+        if ($this->tahun) {
+            $query->whereYear('created_at', $this->tahun); 
+            // Catatan: Jika di tabel database Anda ada kolom khusus bernama 'tahun' (misal: integer/string),
+            // ganti menjadi: $query->where('tahun', $this->tahun);
+        }
 
         // Filter berdasarkan jenis rekapan
         if ($this->jenisRekapan === 'satu_bulan' && $this->bulan) {
