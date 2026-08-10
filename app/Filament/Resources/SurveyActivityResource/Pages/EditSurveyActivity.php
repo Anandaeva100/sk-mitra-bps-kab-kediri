@@ -26,4 +26,9 @@ class EditSurveyActivity extends EditRecord
     {
         return $this->getResource()::getUrl('index');
     }
+
+    protected function getSavedNotificationTitle(): ?string
+    {
+        return 'Data Kegiatan / Survei berhasil diperbarui';
+    }
 }
