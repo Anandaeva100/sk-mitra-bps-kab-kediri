@@ -37,6 +37,23 @@ class ListMonitoringHonors extends ListRecords
                 ->modalDescription('Pilih filter data yang ingin Anda unduh ke dalam format Excel.')
                 ->modalSubmitActionLabel('Unduh Excel')
                 ->form([
+                    // Dropdown Pilihan Tahun (Selalu muncul agar rekapan terfilter per tahun)
+                    Select::make('tahun')
+                        ->label('Pilih Tahun')
+                        ->options(function () {
+                            $years = MonitoringSurvey::query()
+                                ->selectRaw('YEAR(created_at) as tahun')
+                                ->distinct()
+                                ->whereNotNull('created_at')
+                                ->orderBy('tahun', 'desc')
+                                ->pluck('tahun', 'tahun')
+                                ->toArray();
+
+                            return !empty($years) ? $years : [date('Y') => date('Y')];
+                        })
+                        ->default(date('Y'))
+                        ->required(),
+
                     // Menggunakan Radio (pilihan bulatan)
                     Radio::make('jenis_rekapan')
                         ->label('Jenis Rekapan')
@@ -67,6 +84,7 @@ class ListMonitoringHonors extends ListRecords
                             }
                             return $query->distinct()
                                 ->whereNotNull('nama_kegiatan')
+                                ->orderBy('nama_kegiatan', 'asc') // <-- Perbaikan: Mengurutkan abjad A-Z
                                 ->pluck('nama_kegiatan', 'nama_kegiatan')
                                 ->toArray();
                         })
@@ -79,6 +97,7 @@ class ListMonitoringHonors extends ListRecords
                     $jenis = $data['jenis_rekapan'];
                     $bulan = $data['bulan'] ?? null;
                     $kegiatan = $data['nama_kegiatan'] ?? null;
+                    $tahun = $data['tahun'] ?? date('Y');
 
                     // Penentuan Nama File Excel
                     if ($jenis === 'semua') {
@@ -90,7 +109,7 @@ class ListMonitoringHonors extends ListRecords
                     }
 
                     return Excel::download(
-                        new MonitoringHonorExport($jenis, $bulan, $kegiatan),
+                        new MonitoringHonorExport($jenis, $bulan, $kegiatan, $tahun),
                         $namaFile,
                         \Maatwebsite\Excel\Excel::XLSX
                     );

@@ -213,6 +213,21 @@ class AdminPanelProvider extends PanelProvider
                             background-color: rgb(229 229 229) !important;
                         }
 
+                        /* =====================================================
+                        MONITORING HONOR - HOVER NAMA MITRA
+                        ===================================================== */
+
+                        .monitoring-honor-mitra-cell a {
+                            transition: color 150ms ease-in-out !important;
+                        }
+
+                        .monitoring-honor-mitra-cell a:hover,
+                        .monitoring-honor-mitra-cell a:hover span,
+                        .monitoring-honor-mitra-cell a:hover * {
+                            color: #2563eb !important; /* Warna biru (Tailwind blue-600) */
+                            text-decoration: none !important;
+                        }
+                            
                     </style>
                 ')
             )

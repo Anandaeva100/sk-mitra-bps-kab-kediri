@@ -10,6 +10,7 @@ use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BadgeColumn;
+use Filament\Support\Enums\FontWeight;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
@@ -102,7 +103,32 @@ class MonitoringHonorResource extends Resource
                 TextColumn::make('bulan')
                     ->label('Bulan')
                     ->sortable()
-                    ->badge(),
+                    ->badge()
+                    ->color(function (string $state): string {
+                        return match ($state) {
+                            'Januari',
+                            'Februari',
+                            'Maret'
+                                => 'warning',
+
+                            'April',
+                            'Mei',
+                            'Juni'
+                                => 'success',
+
+                            'Juli',
+                            'Agustus',
+                            'September'
+                                => 'info', // Membuat warna Juli, Agustus, September menjadi Biru (Info)
+
+                            'Oktober',
+                            'November',
+                            'Desember'
+                                => 'danger',
+
+                            default => 'gray',
+                        };
+                    }),
 
                 TextColumn::make('nama_pcl')
                     ->label('Nama Mitra')
@@ -119,20 +145,35 @@ class MonitoringHonorResource extends Resource
                             ],
                         ]);
                     })
+                    ->tooltip('Lihat Detail Data')
+                    ->weight('medium')
+                    ->extraCellAttributes([
+                        'class' => 'monitoring-honor-mitra-cell',
+                    ])
                     ->searchable()
                     ->sortable(),
 
                 TextColumn::make('jumlah_kegiatan')
-                    ->label('Jumlah Kegiatan')
+                    ->label('Jumlah Kegiatan / Survei')
                     ->alignCenter(),
 
                 TextColumn::make('total_beban')
                     ->label('Total Beban')
-                    ->alignCenter(),
+                    ->badge()
+                    ->alignCenter()
+                    ->color(function ($record) use ($batasHonor) {
+                        return $record->total_honor >= $batasHonor ? 'danger' : 'success';
+                    }),
 
                 TextColumn::make('total_honor')
                     ->label('Total Honor')
                     ->money('IDR', locale: 'id')
+                    ->color(function ($record) use ($batasHonor) {
+                        return $record->total_honor >= $batasHonor ? 'danger' : null;
+                    })
+                    ->weight(function ($record) use ($batasHonor) {
+                        return $record->total_honor >= $batasHonor ? FontWeight::Bold : null;
+                    })
                     ->sortable(),
 
                 BadgeColumn::make('status')
