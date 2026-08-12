@@ -88,23 +88,11 @@
         color:#9ca3af;
     }
 
-    /* Header Link Lihat Semua */
-    .lihat-semua{
-        color:#2563eb;
-        transition:.2s;
-        text-decoration:none;
-    }
-
-    .lihat-semua:hover{
-        color:#1d4ed8;
-    }
-
-    .dark .lihat-semua{
-        color:#60a5fa;
-    }
-
-    .dark .lihat-semua:hover{
-        color:#93c5fd;
+    .select-custom {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e") !important;
+        background-position: right 0.6rem center !important;
+        background-repeat: no-repeat !important;
+        background-size: 1.25em 1.25em !important;
     }
 </style>
 
@@ -115,15 +103,12 @@
     <div class="lg:col-span-2 dashboard-chart-card">
 
         <div class="mb-5">
-
             <h3 class="chart-title">
                 Grafik Honor Bulanan
             </h3>
-
             <p class="chart-desc">
                 Akumulasi honor mitra berdasarkan bulan.
             </p>
-
         </div>
 
         @php
@@ -131,86 +116,83 @@
         @endphp
 
         <div class="relative h-72">
-
             <canvas
                 id="honorChart"
                 data-labels="{{ json_encode($chartData['labels'] ?? ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des']) }}"
                 data-values="{{ json_encode($chartData['values'] ?? [0,0,0,0,0,0,0,0,0,0,0,0]) }}">
             </canvas>
-
         </div>
 
     </div>
 
-    {{-- Status Honor Mitra --}}
-    <div class="lg:col-span-1 dashboard-chart-card">
+    {{-- Status Honor Mitra dengan Listener Auto-Scroll --}}
+    <div 
+        id="card-status-honor-mitra"
+        x-data 
+        x-on:scroll-to-status-honor.window="document.getElementById('card-status-honor-mitra')?.scrollIntoView({ behavior: 'smooth' })"
+        class="lg:col-span-1 dashboard-chart-card"
+    >
 
         @php
             $months = [
-                1 => 'Januari',
-                2 => 'Februari',
-                3 => 'Maret',
-                4 => 'April',
-                5 => 'Mei',
-                6 => 'Juni',
-                7 => 'Juli',
-                8 => 'Agustus',
-                9 => 'September',
-                10 => 'Oktober',
-                11 => 'November',
-                12 => 'Desember',
+                'januari' => 'Januari',
+                'februari' => 'Februari',
+                'maret' => 'Maret',
+                'april' => 'April',
+                'mei' => 'Mei',
+                'juni' => 'Juni',
+                'juli' => 'Juli',
+                'agustus' => 'Agustus',
+                'september' => 'September',
+                'oktober' => 'Oktober',
+                'november' => 'November',
+                'desember' => 'Desember',
             ];
 
-            $selectedMonth = request('bulan');
-
-            $statusData = $this->getStatusMitraData($selectedMonth);
+            $statusData = $this->getStatusMitraData();
         @endphp
 
-        <div class="flex items-start justify-between mb-6">
+        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
 
             <div>
-                <h3 class="text-xl font-bold text-gray-900">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white">
                     Status Honor Mitra
                 </h3>
-
-                <p class="text-gray-500 text-sm">
-                    Distribusi status honor berdasarkan bulan.
+                <p class="text-gray-500 dark:text-gray-400 text-sm">
+                    Distribusi status honor berdasarkan bulan dan tahun.
                 </p>
             </div>
 
-            <div class="flex items-center gap-3">
+            <div class="flex flex-wrap items-center gap-2">
 
-                {{-- Filter Bulan --}}
-                <form method="GET">
-                    <select
-                        name="bulan"
-                        onchange="this.form.submit()"
-                        style="
-                            background-image: url(&quot;data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e&quot;) !important;
-                            background-position: right 0.6rem center !important;
-                            background-repeat: no-repeat !important;
-                            background-size: 1.25em 1.25em !important;
-                        "
-                        class="h-10 min-w-[160px] rounded-lg border border-gray-300 bg-white pl-4 pr-9 text-sm font-semibold text-gray-800 shadow-sm transition hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 cursor-pointer appearance-none"
-                    >
-                        <option value="">Semua Bulan</option>
+                {{-- 1. Dropdown Filter Bulan (Livewire) --}}
+                <select
+                    wire:model.live="selectedMonth"
+                    class="select-custom h-10 min-w-[130px] rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 pl-3 pr-8 text-sm font-semibold text-gray-800 dark:text-gray-200 shadow-sm transition hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 cursor-pointer appearance-none"
+                >
+                    <option value="semua">Semua Bulan</option>
+                    @foreach ($months as $key => $month)
+                        <option value="{{ $key }}">{{ $month }}</option>
+                    @endforeach
+                </select>
 
-                        @foreach ($months as $number => $month)
-                            <option value="{{ $number }}" {{ request('bulan') == $number ? 'selected' : '' }}>
-                                {{ $month }}
-                            </option>
-                        @endforeach
-                    </select>
-                </form>
+                {{-- 2. Dropdown Filter Tahun (Diletakkan Sebelah Filter Bulan) --}}
+                <select
+                    wire:model.live="selectedYear"
+                    class="select-custom h-10 min-w-[100px] rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 pl-3 pr-8 text-sm font-semibold text-gray-800 dark:text-gray-200 shadow-sm transition hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 cursor-pointer appearance-none"
+                >
+                    @foreach ($this->getYearOptions() as $year)
+                        <option value="{{ $year }}">{{ $year }}</option>
+                    @endforeach
+                </select>
 
-                {{-- Tombol Lihat Semua --}}
+                {{-- 3. Tombol Lihat Semua --}}
                 <a
                     href="{{ \App\Filament\Resources\MonitoringHonorResource::getUrl() }}"
                     style="background: #2563eb; color: #ffffff !important; border: 1px solid #2563eb;"
-                    class="inline-flex items-center gap-2 h-10 rounded-lg px-4 text-sm font-semibold no-underline shadow-sm transition hover:opacity-90"
+                    class="inline-flex items-center gap-2 h-10 rounded-lg px-3 text-sm font-semibold no-underline shadow-sm transition hover:opacity-90 shrink-0"
                 >
                     <span style="color: #ffffff;">Lihat Semua</span>
-
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="color: #ffffff;">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
@@ -220,7 +202,7 @@
 
         </div>
 
-        {{-- Donut --}}
+        {{-- Donut Chart --}}
         <div class="flex justify-center mt-6">
 
             <div class="relative w-40 h-40">
@@ -233,19 +215,15 @@
 
                 {{-- Text Tengah --}}
                 <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
-
                     <span class="text-xs font-medium text-gray-500 dark:text-gray-400">
                         Total
                     </span>
-
                     <span class="text-3xl font-bold leading-none text-gray-900 dark:text-white">
                         {{ $statusData['total'] ?? 0 }}
                     </span>
-
                     <span class="text-xs font-medium text-gray-500 dark:text-gray-400">
                         Mitra
                     </span>
-
                 </div>
 
             </div>
@@ -257,58 +235,30 @@
 
             {{-- Aman --}}
             <div class="status-item">
-
                 <div class="status-left">
-
-                    <span
-                        class="status-dot"
-                        style="background:#10b981;">
-                    </span>
-
-                    <span class="status-label">
-                        Aman
-                    </span>
-
+                    <span class="status-dot" style="background:#10b981;"></span>
+                    <span class="status-label">Aman</span>
                 </div>
-
                 <div class="status-value">
-
                     {{ $statusData['aman'] ?? 0 }}
-
                     <span class="status-percent">
                         ({{ $statusData['aman_pct'] ?? 0 }}%)
                     </span>
-
                 </div>
-
             </div>
 
             {{-- Melebihi --}}
             <div class="status-item">
-
                 <div class="status-left">
-
-                    <span
-                        class="status-dot"
-                        style="background:#ef4444;">
-                    </span>
-
-                    <span class="status-label">
-                        Melebihi Batas
-                    </span>
-
+                    <span class="status-dot" style="background:#ef4444;"></span>
+                    <span class="status-label">Melebihi Batas</span>
                 </div>
-
                 <div class="status-value">
-
                     {{ $statusData['melebihi'] ?? 0 }}
-
                     <span class="status-percent">
                         ({{ $statusData['melebihi_pct'] ?? 0 }}%)
                     </span>
-
                 </div>
-
             </div>
 
         </div>
@@ -345,16 +295,13 @@ function renderCombinedCharts() {
                     data: values,
                     backgroundColor: '#3b82f6',
                     hoverBackgroundColor: '#2563eb',
-
                     borderRadius: {
                         topLeft: 10,
                         topRight: 10,
                         bottomLeft: 0,
                         bottomRight: 0,
                     },
-
                     borderSkipped: 'bottom',
-
                     maxBarThickness: 34,
                 }]
             },
@@ -366,9 +313,7 @@ function renderCombinedCharts() {
                     easing: 'easeOutQuart'
                 },
                 plugins: {
-                    legend: {
-                        display: false
-                    },
+                    legend: { display: false },
                     tooltip: {
                         backgroundColor: '#111827',
                         titleColor: '#fff',
@@ -377,48 +322,29 @@ function renderCombinedCharts() {
                         cornerRadius: 10,
                         displayColors: false,
                         callbacks: {
-                            label: (ctx) =>
-                                'Rp ' + Number(ctx.raw).toLocaleString('id-ID')
+                            label: (ctx) => 'Rp ' + Number(ctx.raw).toLocaleString('id-ID')
                         }
                     }
                 },
                 scales: {
                     x: {
-                        grid: {
-                            display: false
-                        },
-                        border: {
-                            display: false
-                        },
+                        grid: { display: false },
+                        border: { display: false },
                         ticks: {
                             color: textColor,
-                            font: {
-                                size: 12,
-                                weight: '600'
-                            }
+                            font: { size: 12, weight: '600' }
                         }
                     },
                     y: {
                         beginAtZero: true,
-                        grid: {
-                            color: gridColor,
-                            drawBorder: false
-                        },
-                        border: {
-                            display: false
-                        },
+                        grid: { color: gridColor, drawBorder: false },
+                        border: { display: false },
                         ticks: {
                             color: textColor,
-                            font: {
-                                size: 11
-                            },
+                            font: { size: 11 },
                             callback(value) {
-                                if (value >= 1000000000)
-                                    return 'Rp ' + (value / 1000000000) + ' M';
-
-                                if (value >= 1000000)
-                                    return 'Rp ' + (value / 1000000) + ' Jt';
-
+                                if (value >= 1000000000) return 'Rp ' + (value / 1000000000) + ' M';
+                                if (value >= 1000000) return 'Rp ' + (value / 1000000) + ' Jt';
                                 return 'Rp ' + value.toLocaleString('id-ID');
                             }
                         }
@@ -462,9 +388,7 @@ function renderCombinedCharts() {
                     duration: 900
                 },
                 plugins: {
-                    legend: {
-                        display: false
-                    },
+                    legend: { display: false },
                     tooltip: {
                         backgroundColor: '#111827',
                         titleColor: '#fff',
@@ -474,10 +398,7 @@ function renderCombinedCharts() {
                         callbacks: {
                             label(context) {
                                 const value = context.raw;
-                                const percent = total
-                                    ? ((value / total) * 100).toFixed(1)
-                                    : 0;
-
+                                const percent = total ? ((value / total) * 100).toFixed(1) : 0;
                                 return `${context.label}: ${value} Mitra (${percent}%)`;
                             }
                         }
@@ -490,5 +411,13 @@ function renderCombinedCharts() {
 
 document.addEventListener('DOMContentLoaded', renderCombinedCharts);
 document.addEventListener('livewire:navigated', renderCombinedCharts);
+// Menjalankan ulang render chart setiap kali Livewire memperbarui komponen
+document.addEventListener('livewire:initialized', () => {
+    Livewire.hook('commit', ({ respond }) => {
+        respond(() => {
+            setTimeout(renderCombinedCharts, 50);
+        });
+    });
+});
 window.addEventListener('resize', renderCombinedCharts);
 </script>

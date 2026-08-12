@@ -7,6 +7,7 @@ use App\Models\Setting;
 use Filament\Pages\Dashboard;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Url;
 
 class RekapanSemuaData extends Dashboard
 {
@@ -20,9 +21,38 @@ class RekapanSemuaData extends Dashboard
 
     protected static ?int $navigationSort = 1;
 
+    // Filter Livewire dengan Reaktivitas URL
+    #[Url]
+    public ?string $selectedMonth = 'semua';
+
+    #[Url]
+    public ?string $selectedYear = null;
+
+    public function mount(): void
+    {
+        if (! $this->selectedYear) {
+            $this->selectedYear = (string) date('Y');
+        }
+    }
+
+    /**
+     * Dipanggil otomatis saat dropdown bulan diubah
+     */
+    public function updatedSelectedMonth(): void
+    {
+        $this->dispatch('scroll-to-status-honor');
+    }
+
+    /**
+     * Dipanggil otomatis saat dropdown tahun diubah
+     */
+    public function updatedSelectedYear(): void
+    {
+        $this->dispatch('scroll-to-status-honor');
+    }
+
     /**
      * Mengambil nilai Batas Honor Maksimal secara dinamis.
-     * Mengutamakan Cache 'app_batas_honor', atau membaca dari Model Setting.
      */
     private function getHonorLimit(): float
     {
@@ -34,22 +64,86 @@ class RekapanSemuaData extends Dashboard
         });
     }
 
+    /**
+     * Helper untuk memformat angka nominal menjadi ringkas (Juta/Miliar)
+     */
+    private function formatRupiahRingkas(float $nominal): string
+    {
+        if ($nominal >= 1_000_000_000) {
+            $formatted = number_format($nominal / 1_000_000_000, 2, ',', '.');
+            $formatted = rtrim(rtrim($formatted, '0'), ',');
+            return 'Rp ' . $formatted . ' Miliar';
+        }
+
+        if ($nominal >= 1_000_000) {
+            $formatted = number_format($nominal / 1_000_000, 2, ',', '.');
+            $formatted = rtrim(rtrim($formatted, '0'), ',');
+            return 'Rp ' . $formatted . ' Juta';
+        }
+
+        return 'Rp ' . number_format($nominal, 0, ',', '.');
+    }
+
+    /**
+     * Mengambil daftar opsi tahun dari database untuk dropdown filter
+     */
+    public function getYearOptions(): array
+    {
+        $years = MonitoringSurvey::select(DB::raw('YEAR(created_at) as year'))
+            ->whereNotNull('created_at')
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year', 'year')
+            ->toArray();
+
+        return ! empty($years) ? $years : [date('Y') => date('Y')];
+    }
+
     public function getStats(): array
     {
         $honorLimit = $this->getHonorLimit();
 
-        $warningCount = MonitoringSurvey::select('nama_pcl')
+        // 1. Buat Base Query yang menerapkan filter Bulan dan Tahun
+        $query = MonitoringSurvey::query();
+
+        if ($this->selectedMonth && $this->selectedMonth !== 'semua') {
+            $query->where('bulan', ucfirst($this->selectedMonth));
+        }
+
+        if ($this->selectedYear) {
+            $query->whereYear('created_at', $this->selectedYear);
+        }
+
+        // 2. Hitung statistik berdasarkan Query yang sudah difilter
+        $totalKegiatan = (clone $query)->distinct('nama_kegiatan')->count('nama_kegiatan');
+        $totalMitra    = (clone $query)->distinct('nama_pcl')->count('nama_pcl');
+        $totalHonorRaw = (float) ((clone $query)->sum('honor_total'));
+
+        // 3. Hitung mitra yang melebihi batas (Warning) berdasarkan filter
+        $warningCount = (clone $query)
+            ->select('nama_pcl', DB::raw('SUM(honor_total) as total_honor'))
             ->groupBy('nama_pcl')
-            ->havingRaw('SUM(honor_total) >= ?', [$honorLimit])
+            ->having('total_honor', '>=', $honorLimit)
             ->get()
             ->count();
 
+        // 4. Format Teks Deskripsi
+        $bulanText = ($this->selectedMonth && $this->selectedMonth !== 'semua') 
+            ? ucfirst($this->selectedMonth) 
+            : null;
+
+        $descriptionText = $bulanText ? 'Honor bulan ' . $bulanText : 'Akumulasi seluruh honor';
+        $totalHonorFullFormat = 'Rp ' . number_format($totalHonorRaw, 0, ',', '.');
+        $descriptionComplete = $descriptionText . ' (' . $totalHonorFullFormat . ')';
+
         return [
-            'total_kegiatan' => MonitoringSurvey::distinct('nama_kegiatan')->count('nama_kegiatan'),
-            'total_mitra'    => MonitoringSurvey::distinct('nama_pcl')->count('nama_pcl'),
-            'total_honor'    => MonitoringSurvey::sum('honor_total'),
-            'warning'        => $warningCount,
-            'batas_honor'    => $honorLimit,
+            'total_kegiatan'     => $totalKegiatan,
+            'total_mitra'        => $totalMitra,
+            'total_honor'        => $this->formatRupiahRingkas($totalHonorRaw),
+            'total_honor_full'   => $totalHonorFullFormat,
+            'total_honor_desc'   => $descriptionComplete,
+            'warning'            => $warningCount,
+            'batas_honor'        => $honorLimit,
         ];
     }
 
@@ -85,34 +179,26 @@ class RekapanSemuaData extends Dashboard
         ];
     }
 
+    /**
+     * Mengambil data status honor mitra berdasarkan filter bulan dan tahun
+     */
     public function getStatusMitraData(): array
     {
         $honorLimit = $this->getHonorLimit();
-
-        $selectedMonth = request('bulan');
-
-        $months = [
-            1 => 'Januari',
-            2 => 'Februari',
-            3 => 'Maret',
-            4 => 'April',
-            5 => 'Mei',
-            6 => 'Juni',
-            7 => 'Juli',
-            8 => 'Agustus',
-            9 => 'September',
-            10 => 'Oktober',
-            11 => 'November',
-            12 => 'Desember',
-        ];
 
         $query = MonitoringSurvey::select(
             'nama_pcl',
             DB::raw('SUM(honor_total) as total')
         );
 
-        if ($selectedMonth) {
-            $query->where('bulan', $months[$selectedMonth]);
+        // Filter Bulan
+        if ($this->selectedMonth && $this->selectedMonth !== 'semua') {
+            $query->where('bulan', ucfirst($this->selectedMonth));
+        }
+
+        // Filter Tahun
+        if ($this->selectedYear) {
+            $query->whereYear('created_at', $this->selectedYear);
         }
 
         $mitraTotals = $query

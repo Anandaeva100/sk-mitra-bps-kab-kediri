@@ -4,6 +4,7 @@ namespace App\Filament\Resources\SurveyActivityResource\Pages;
 
 use App\Filament\Resources\SurveyActivityResource;
 use Filament\Actions;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 
 class EditSurveyActivity extends EditRecord
@@ -18,7 +19,12 @@ class EditSurveyActivity extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            Actions\DeleteAction::make()
+                ->successNotification(
+                    Notification::make()
+                        ->success()
+                        ->title('Data berhasil dihapus')
+                ),
         ];
     }
 

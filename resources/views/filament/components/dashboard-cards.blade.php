@@ -85,7 +85,7 @@
             </p>
 
             <h2 class="stat-value">
-                {{ $stats['total_kegiatan'] }}
+                {{ number_format($stats['total_kegiatan'] ?? 0, 0, ',', '.') }}
             </h2>
         </div>
 
@@ -113,7 +113,7 @@
             </p>
 
             <h2 class="stat-value">
-                {{ $stats['total_mitra'] }}
+                {{ number_format($stats['total_mitra'] ?? 0, 0, ',', '.') }}
             </h2>
         </div>
 
@@ -132,16 +132,17 @@
     </div>
 
 
-    {{-- Total Honor --}}
-    <div class="dashboard-stat-card">
+    {{-- Total Honor (Sesuai Tampilan Monitoring Honor) --}}
+    <div class="dashboard-stat-card" title="{{ $stats['total_honor_full'] ?? '' }}">
 
         <div>
             <p class="stat-title">
                 Total Honor
             </p>
 
+            {{-- Menampilkan angka ringkas (Contoh: Rp 4,48 Juta / Rp 4,48 Miliar) --}}
             <h2 class="stat-value-money">
-                Rp&nbsp;{{ number_format($stats['total_honor'],0,',','.') }}
+                {{ $stats['total_honor'] ?? 'Rp 0' }}
             </h2>
         </div>
 
@@ -149,10 +150,11 @@
             class="stat-footer"
             style="color:#10b981;">
 
-            <span>Akumulasi seluruh honor</span>
+            {{-- Menampilkan deskripsi dinamis (Contoh: Akumulasi seluruh honor (Rp 4.480.000)) --}}
+            <span>{{ $stats['total_honor_desc'] ?? 'Akumulasi seluruh honor' }}</span>
 
             <x-heroicon-m-banknotes
-                class="w-6 h-6"
+                class="w-6 h-6 shrink-0"
                 style="color:#10b981;" />
 
         </div>
@@ -169,7 +171,7 @@
             </p>
 
             <h2 class="stat-value">
-                {{ $stats['warning'] }}
+                {{ number_format($stats['warning'] ?? 0, 0, ',', '.') }}
             </h2>
         </div>
 

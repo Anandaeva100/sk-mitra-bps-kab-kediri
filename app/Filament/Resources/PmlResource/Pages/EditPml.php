@@ -18,17 +18,16 @@ class EditPml extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            Actions\DeleteAction::make()
+                ->successNotificationTitle('Data berhasil dihapus'),
         ];
     }
 
-    // Mengarahkan kembali ke halaman tabel setelah data berhasil disimpan
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('index');
     }
 
-    // Mengubah judul notifikasi saat berhasil disimpan
     protected function getSavedNotificationTitle(): ?string
     {
         return 'Data PML berhasil diperbarui';

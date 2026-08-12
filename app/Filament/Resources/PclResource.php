@@ -38,7 +38,8 @@ class PclResource extends Resource
                         TextInput::make('id_pcl')
                             ->label('ID PCL')
                             ->required()
-                            ->maxLength(9)
+                            ->numeric()
+                            ->maxLength(30)
                             ->unique(ignoreRecord: true),
 
                         TextInput::make('nama_pcl')

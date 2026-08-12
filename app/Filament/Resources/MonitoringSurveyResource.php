@@ -26,7 +26,6 @@ class MonitoringSurveyResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-document-duplicate';
 
-    // Kelompokkan ke DATA
     protected static ?string $navigationGroup = 'INPUT DATA';
 
     protected static ?int $navigationSort = 2;
@@ -99,7 +98,6 @@ class MonitoringSurveyResource extends Resource
                             ->preload()
                             ->required(),
 
-                        // Dropdown PCL dengan styling HTML
                         Select::make('nama_pcl')
                             ->label('Nama PCL')
                             ->options(function () {

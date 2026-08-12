@@ -189,7 +189,7 @@
 
         </div>
 
-        {{-- Card --}}
+        {{-- Card Component --}}
         @include('filament.components.dashboard-cards')
 
         {{-- Chart --}}

@@ -29,7 +29,6 @@ class SurveyActivityResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Daftar Kegiatan / Survei';
 
-    // Kelompokkan ke INPUT DATA
     protected static ?string $navigationGroup = 'MASTER DATA';
 
     protected static ?int $navigationSort = 1;
