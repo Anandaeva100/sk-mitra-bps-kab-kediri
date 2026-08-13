@@ -37,10 +37,10 @@ class MonitoringHonorResource extends Resource
     public static function getBatasHonor(): int
     {
         return Cache::rememberForever('app_batas_honor', function () {
-            $settingValue = Setting::get('batas_honor', '3700000');
+            $settingValue = Setting::get('batas_honor', '3078000');
             // Bersihkan format titik/koma agar aman dihitung dalam query integer
             $cleanNominal = preg_replace('/[^0-9]/', '', (string) $settingValue);
-            return (int) ($cleanNominal ?: 3700000);
+            return (int) ($cleanNominal ?: 3078000);
         });
     }
 
