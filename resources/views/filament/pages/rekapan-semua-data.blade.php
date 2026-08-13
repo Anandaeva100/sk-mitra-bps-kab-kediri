@@ -92,7 +92,7 @@
         }
 
         /* =====================================================
-        DROPDOWN BULAN - LIGHT MODE
+        DROPDOWN - LIGHT MODE
         ===================================================== */
 
         select {
@@ -107,7 +107,7 @@
         }
 
         /* =====================================================
-        DROPDOWN BULAN - DARK MODE
+        DROPDOWN - DARK MODE
         ===================================================== */
 
         .dark select {
@@ -121,17 +121,12 @@
             color: #f4f4f5 !important;
         }
 
-        /* Saat dropdown sedang aktif */
         .dark select:focus {
             background-color: #27272a !important;
             border-color: #71717a !important;
             color: #ffffff !important;
             outline: none;
         }
-
-        /* =====================================================
-        DROPDOWN FILAMENT
-        ===================================================== */
 
         .dark .fi-select-input {
             background-color: #27272a !important;
@@ -143,10 +138,6 @@
             background-color: #27272a !important;
             color: #f4f4f5 !important;
         }
-
-        /* =====================================================
-        PLACEHOLDER / TEKS DROPDOWN
-        ===================================================== */
 
         .dark select::placeholder,
         .dark .fi-select-input::placeholder {
