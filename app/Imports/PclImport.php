@@ -14,37 +14,83 @@ class PclImport implements ToCollection, WithHeadingRow
 
     public function collection(Collection $rows)
     {
-        foreach ($rows as $index => $row) {
-            $rowNum = $index + 2;
-            $idPcl  = trim($row['id_pcl'] ?? $row['id'] ?? '');
-            $nama   = trim($row['nama_pcl'] ?? $row['nama'] ?? '');
+        // Daftar teks terlarang (placeholder / contoh input template)
+        $dummyKeywords = [
+            'namapcl', 
+            'idpcl', 
+            'contoh', 
+            'sample', 
+            'dummy', 
+            'nama', 
+            'namapetugas',
+            'id'
+        ];
 
-            if (empty($idPcl) || empty($nama)) {
+        foreach ($rows as $index => $row) {
+            $rowNum = $index + 2; // Baris Excel (Header = Baris 1)
+
+            // AMBIL DATA BERDASARKAN BERBAGAI KEMUNGKINAN HEADER EXCEL
+            // Ambil ID jika ada di excel (optional)
+            $excelId = trim($row['id'] ?? $row['id_pcl'] ?? '');
+            
+            // Ambil Nama PCL dari kolom 'nama_pcl' ATAU 'nama' ATAU 'nama_petugas'
+            $namaPcl = trim($row['nama_pcl'] ?? $row['nama'] ?? $row['nama_petugas'] ?? '');
+
+            // Normalisasi Teks: Hapus SEMUA simbol/spasi/underscore & ubah ke huruf kecil
+            $cleanNama = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $namaPcl));
+            $cleanId   = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $excelId));
+
+            // =========================================================================
+            // 1. FILTER DUMMY: Cek apakah data ini adalah CONTOH INPUT / HEADER TEMPLATE
+            // =========================================================================
+            if (
+                in_array($cleanNama, $dummyKeywords) || 
+                in_array($cleanId, $dummyKeywords) || 
+                str_contains($cleanNama, 'namapcl') || 
+                str_contains($cleanNama, 'contoh')
+            ) {
                 $this->failedLogs[] = [
-                    'baris' => $rowNum,
-                    'data'  => "ID: {$idPcl} | Nama: {$nama}",
-                    'alasan' => 'ID PCL atau Nama PCL wajib diisi',
+                    'baris'  => $rowNum,
+                    'data'   => "Nama: {$namaPcl}",
+                    'alasan' => 'Baris contoh / placeholder template diabaikan',
+                ];
+                continue; // SYARAT UTAMA: LEWATI / JANGAN SIMPAN
+            }
+
+            // =========================================================================
+            // 2. FILTER KOSONG: Cek apakah nama PCL kosong
+            // =========================================================================
+            if (empty($namaPcl)) {
+                $this->failedLogs[] = [
+                    'baris'  => $rowNum,
+                    'data'   => '- Kosong -',
+                    'alasan' => 'Nama PCL wajib diisi',
                 ];
                 continue;
             }
 
-            $existing = Pcl::where('id_pcl', $idPcl)->first();
+            // =========================================================================
+            // 3. FILTER DUPLIKAT: Cek ke database berdasarkan kolom 'nama_pcl'
+            // =========================================================================
+            $existing = Pcl::where('nama_pcl', $namaPcl)->first();
 
             if ($existing) {
                 $this->failedLogs[] = [
-                    'baris' => $rowNum,
-                    'data'  => "{$idPcl} - {$nama}",
-                    'alasan' => 'ID PCL sudah ada di database (Duplikat)',
+                    'baris'  => $rowNum,
+                    'data'   => $namaPcl,
+                    'alasan' => 'Nama PCL sudah ada di database (Duplikat)',
                 ];
             } else {
+                // =========================================================================
+                // 4. SIMPAN DATA VALID (Primary key 'id' terisi otomatis/auto-increment)
+                // =========================================================================
                 $created = Pcl::create([
-                    'id_pcl'   => $idPcl,
-                    'nama_pcl' => $nama,
+                    'nama_pcl' => $namaPcl,
                 ]);
 
                 $this->successLogs[] = [
-                    'baris' => $rowNum,
-                    'data'  => "{$created->id_pcl} - {$created->nama_pcl}",
+                    'baris'  => $rowNum,
+                    'data'   => "ID: {$created->id} - {$created->nama_pcl}",
                 ];
             }
         }

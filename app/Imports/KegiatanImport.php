@@ -14,12 +14,27 @@ class KegiatanImport implements ToCollection, WithHeadingRow
 
     public function collection(Collection $rows)
     {
+        // Daftar kata kunci terlarang (placeholder / contoh input template)
+        $dummyKeywords = [
+            'namakegiatan', 
+            'namasurvei', 
+            'contohkegiatan', 
+            'contoh', 
+            'sample', 
+            'dummy', 
+            'nama'
+        ];
+
         foreach ($rows as $index => $row) {
             $rowNum = $index + 2; // Hitung baris Excel (header = 1)
-            $nama = trim($row['nama_kegiatan'] ?? $row['nama'] ?? '');
-            $tahun = trim($row['tahun'] ?? date('Y'));
+            $nama   = trim($row['nama_kegiatan'] ?? $row['nama'] ?? '');
+            $tahun  = trim($row['tahun'] ?? date('Y'));
             $status = trim($row['status'] ?? 'Aktif');
 
+            // Normalisasi Teks: Hapus simbol/spasi/underscore & ubah ke huruf kecil
+            $cleanNama = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $nama));
+
+            // 1. FILTER: Cek Kosong
             if (empty($nama)) {
                 $this->failedLogs[] = [
                     'baris' => $rowNum,
@@ -29,7 +44,21 @@ class KegiatanImport implements ToCollection, WithHeadingRow
                 continue;
             }
 
-            // Cek Duplikat
+            // 2. FILTER: Abaikan Data Contoh / Placeholder Template
+            if (
+                in_array($cleanNama, $dummyKeywords) || 
+                str_contains($cleanNama, 'namakegiatan') || 
+                str_contains($cleanNama, 'contoh')
+            ) {
+                $this->failedLogs[] = [
+                    'baris'  => $rowNum,
+                    'data'   => $nama,
+                    'alasan' => 'Baris contoh / placeholder template diabaikan',
+                ];
+                continue; // Skip baris contoh
+            }
+
+            // 3. Cek Duplikat di Database
             $existing = SurveyActivity::where('nama_kegiatan', $nama)
                 ->where('tahun', $tahun)
                 ->first();
@@ -41,6 +70,7 @@ class KegiatanImport implements ToCollection, WithHeadingRow
                     'alasan' => 'Data sudah ada di database (Duplikat)',
                 ];
             } else {
+                // 4. Simpan Hanya Data Valid
                 $created = SurveyActivity::create([
                     'nama_kegiatan' => $nama,
                     'tahun'         => $tahun,

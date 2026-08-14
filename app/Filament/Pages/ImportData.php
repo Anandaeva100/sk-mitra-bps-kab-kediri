@@ -82,16 +82,20 @@ class ImportData extends Page
             // Mengambil seluruh data sheet dari file Excel
             $sheets = Excel::toArray([], $path);
 
+            // Kata kunci terlarang (dummy / placeholder header)
+            $dummyKeywords = [
+                'namapcl', 'idpcl', 'namapml', 'idpml', 
+                'contoh', 'sample', 'dummy', 'nama', 
+                'namapetugas', 'petunjuk', 'template', 'keterangan'
+            ];
+
             // ==========================================
             // --- 1. SHEET KEGIATAN / SURVEI (Index 0) ---
             // ==========================================
             if (isset($sheets[0])) {
                 foreach ($sheets[0] as $index => $row) {
-                    // Skip Baris 1 ($index 0): Catatan Keterangan Merah
-                    // Skip Baris 2 ($index 1): Header Tabel
-                    // Skip Baris 3 ($index 2): Baris Sampel Contoh Abu-Abu
                     if ($index <= 2) {
-                        continue;
+                        continue; // Lewati header template
                     }
 
                     $namaKegiatan = trim((string)($row[0] ?? ''));
@@ -100,7 +104,7 @@ class ImportData extends Page
 
                     $namaLower = strtolower($namaKegiatan);
 
-                    // Filter ketat baris kosong, header terikut, atau teks petunjuk
+                    // LEWATI TANPA MENAMBAH $totalSkipped JIKA BARIS KOSONG ATAU DUMMY/HEADER
                     if (
                         empty($namaKegiatan) || 
                         $namaLower === 'nama kegiatan' || 
@@ -113,21 +117,18 @@ class ImportData extends Page
                         continue;
                     }
 
-                    // Bersihkan Status dari Formula Excel (=IF...)
                     if (str_starts_with($statusRaw, '=') || empty($statusRaw) || (!in_array($statusRaw, ['Aktif', 'Non-Aktif', 'Selesai']))) {
                         $status = 'Aktif';
                     } else {
                         $status = $statusRaw;
                     }
 
-                    // Bersihkan Tahun dari Formula Excel (=IF...) atau Non-Numeric
                     if (str_starts_with($tahunRaw, '=') || strtolower($tahunRaw) === 'tahun' || !is_numeric($tahunRaw) || empty($tahunRaw)) {
                         $tahun = (int) date('Y');
                     } else {
                         $tahun = (int) $tahunRaw;
                     }
 
-                    // Cek Duplikasi di Database
                     $exists = SurveyActivity::where('nama_kegiatan', $namaKegiatan)
                         ->where('tahun', $tahun)
                         ->exists();
@@ -140,6 +141,7 @@ class ImportData extends Page
                         ]);
                         $this->totalKegiatanSuccess++;
                     } else {
+                        // HANYA TAMBAH SKIPPED JIKA KANSER/DATA TERBUTI DUPLIKAT DI DATABASE
                         $this->totalSkipped++;
                     }
                 }
@@ -150,36 +152,27 @@ class ImportData extends Page
             // ==========================================
             if (isset($sheets[1])) {
                 foreach ($sheets[1] as $index => $row) {
-                    // Hanya skip baris pertama jika itu Judul/Catatan utama
-                    if ($index === 0) {
-                        // Jika baris pertama adalah header, lanjut ke iterasi berikutnya
-                        // Tapi kita tidak pakai $index <= 2 agar data baris 3 ke atas tidak hilang
+                    $namaPml = trim((string)($row[0] ?? ''));
+                    $cleanNamaPml = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $namaPml));
+
+                    // LEWATI TANPA MENAMBAH $totalSkipped JIKA BARIS KOSONG ATAU DUMMY
+                    if (
+                        empty($namaPml) || 
+                        in_array($cleanNamaPml, $dummyKeywords) || 
+                        str_contains($cleanNamaPml, 'namapml')
+                    ) {
+                        continue;
                     }
 
-                    $namaPml = trim((string)($row[0] ?? ''));
-                    $namaLower = strtolower($namaPml);
+                    $exists = Pml::where('nama_pml', $namaPml)->exists();
 
-                    // Penjagaan ketat lewat string filter
-                    if (
-                        !empty($namaPml) && 
-                        $namaLower !== 'nama pml' && 
-                        $namaLower !== 'nama' &&
-                        !str_contains($namaLower, 'contoh') &&
-                        !str_contains($namaLower, 'petunjuk') &&
-                        !str_contains($namaLower, 'template') &&
-                        !str_contains($namaLower, 'keterangan')
-                    ) {
-                        // Cek Duplikasi Nama PML di Database
-                        $exists = Pml::where('nama_pml', $namaPml)->exists();
-
-                        if (!$exists) {
-                            Pml::create([
-                                'nama_pml' => $namaPml,
-                            ]);
-                            $this->totalPmlSuccess++;
-                        } else {
-                            $this->totalSkipped++;
-                        }
+                    if (!$exists) {
+                        Pml::create([
+                            'nama_pml' => $namaPml,
+                        ]);
+                        $this->totalPmlSuccess++;
+                    } else {
+                        $this->totalSkipped++;
                     }
                 }
             }
@@ -192,33 +185,31 @@ class ImportData extends Page
                     $idPcl   = trim((string)($row[0] ?? ''));
                     $namaPcl = trim((string)($row[1] ?? ''));
 
-                    $idLower   = strtolower($idPcl);
-                    $namaLower = strtolower($namaPcl);
+                    // Normalisasi teks
+                    $cleanIdPcl   = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $idPcl));
+                    $cleanNamaPcl = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $namaPcl));
 
+                    // LEWATI TANPA MENAMBAH $totalSkipped JIKA BARIS KOSONG ATAU DUMMY/HEADER
                     if (
-                        !empty($idPcl) && !empty($namaPcl) &&
-                        $idLower !== 'id pcl' && 
-                        $idLower !== 'id' &&
-                        $namaLower !== 'nama pcl' &&
-                        $idLower !== '1234567890123456' &&
-                        !str_contains($idLower, 'contoh') &&
-                        !str_contains($namaLower, 'contoh') &&
-                        !str_contains($idLower, 'petunjuk') &&
-                        !str_contains($namaLower, 'petunjuk') &&
-                        !str_contains($idLower, 'keterangan')
+                        empty($namaPcl) ||
+                        in_array($cleanNamaPcl, $dummyKeywords) ||
+                        in_array($cleanIdPcl, $dummyKeywords) ||
+                        str_contains($cleanNamaPcl, 'namapcl') ||
+                        str_contains($cleanIdPcl, 'idpcl') ||
+                        $cleanIdPcl === '1234567890123456'
                     ) {
-                        // Cek Duplikasi berdasarkan ID PCL
-                        $exists = Pcl::where('id_pcl', $idPcl)->exists();
+                        continue;
+                    }
 
-                        if (!$exists) {
-                            Pcl::create([
-                                'id_pcl'   => $idPcl,
-                                'nama_pcl' => $namaPcl,
-                            ]);
-                            $this->totalPclSuccess++;
-                        } else {
-                            $this->totalSkipped++;
-                        }
+                    $exists = Pcl::where('nama_pcl', $namaPcl)->exists();
+
+                    if (!$exists) {
+                        Pcl::create([
+                            'nama_pcl' => $namaPcl,
+                        ]);
+                        $this->totalPclSuccess++;
+                    } else {
+                        $this->totalSkipped++;
                     }
                 }
             }
@@ -233,7 +224,7 @@ class ImportData extends Page
 
             Notification::make()
                 ->title('Import Data Berhasil!')
-                ->body("Berhasil menyimpan {$totalBerhasil} data baru ke database. ({$this->totalSkipped} duplikat/contoh dilewati)")
+                ->body("Berhasil menyimpan {$totalBerhasil} data baru ke database. ({$this->totalSkipped} duplikat dilewati)")
                 ->success()
                 ->duration(6000)
                 ->send();

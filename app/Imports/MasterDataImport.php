@@ -24,6 +24,12 @@ class MasterDataImport implements WithMultipleSheets, SkipsUnknownSheets
     public function sheets(): array
     {
         return [
+            // 1. Pemetaan berdasarkan NAMA SHEET di Excel (Sangat disarankan)
+            'Kegiatan' => $this->kegiatanSheet,
+            'PML'      => $this->pmlSheet,
+            'PCL'      => $this->pclSheet,
+
+            // 2. Fallback Pemetaan berdasarkan INDEX SHEET (Jika nama sheet di Excel fleksibel)
             0 => $this->kegiatanSheet,
             1 => $this->pmlSheet,
             2 => $this->pclSheet,
@@ -31,10 +37,29 @@ class MasterDataImport implements WithMultipleSheets, SkipsUnknownSheets
     }
 
     /**
-     * Mengabaikan index sheet yang tidak ditemukan di file Excel tanpa melemparkan Exception.
+     * Mengabaikan nama/index sheet yang tidak ditemukan tanpa melemparkan Exception.
      */
     public function onUnknownSheet($sheetName)
     {
-        // Abaikan sheet yang tidak ditemukan/kurang
+        // Silakan dikosongkan untuk mengabaikan sheet ekstra
+    }
+
+    /**
+     * Helper Method untuk Mengambil Log Gabungan dari Semua Sheet (Opsional)
+     */
+    public function getCombinedLogs(): array
+    {
+        return [
+            'success' => array_merge(
+                $this->kegiatanSheet->successLogs ?? [],
+                $this->pmlSheet->successLogs ?? [],
+                $this->pclSheet->successLogs ?? []
+            ),
+            'failed' => array_merge(
+                $this->kegiatanSheet->failedLogs ?? [],
+                $this->pmlSheet->failedLogs ?? [],
+                $this->pclSheet->failedLogs ?? []
+            ),
+        ];
     }
 }
