@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('pcls', function (Blueprint $table) {
             $table->id();
-            $table->string('id_pcl', 9)->unique();
+            $table->string('id_pcl')->unique();
             $table->string('nama_pcl');
             $table->timestamps();
         });

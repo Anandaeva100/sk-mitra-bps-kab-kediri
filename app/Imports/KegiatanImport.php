@@ -3,25 +3,55 @@
 namespace App\Imports;
 
 use App\Models\SurveyActivity;
-use Maatwebsite\Excel\Concerns\ToModel;
+use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
-class KegiatanImport implements ToModel, WithHeadingRow
+class KegiatanImport implements ToCollection, WithHeadingRow
 {
-    public function model(array $row)
-    {
-        if (
-            empty($row['nama_kegiatan']) &&
-            empty($row['tahun']) &&
-            empty($row['status'])
-        ) {
-            return null;
-        }
+    public array $successLogs = [];
+    public array $failedLogs = [];
 
-        return new SurveyActivity([
-            'nama_kegiatan' => $row['nama_kegiatan'],
-            'tahun' => $row['tahun'],
-            'status' => $row['status'],
-        ]);
+    public function collection(Collection $rows)
+    {
+        foreach ($rows as $index => $row) {
+            $rowNum = $index + 2; // Hitung baris Excel (header = 1)
+            $nama = trim($row['nama_kegiatan'] ?? $row['nama'] ?? '');
+            $tahun = trim($row['tahun'] ?? date('Y'));
+            $status = trim($row['status'] ?? 'Aktif');
+
+            if (empty($nama)) {
+                $this->failedLogs[] = [
+                    'baris' => $rowNum,
+                    'data'  => '- Kosong -',
+                    'alasan' => 'Nama kegiatan tidak boleh kosong',
+                ];
+                continue;
+            }
+
+            // Cek Duplikat
+            $existing = SurveyActivity::where('nama_kegiatan', $nama)
+                ->where('tahun', $tahun)
+                ->first();
+
+            if ($existing) {
+                $this->failedLogs[] = [
+                    'baris' => $rowNum,
+                    'data'  => "{$nama} ({$tahun})",
+                    'alasan' => 'Data sudah ada di database (Duplikat)',
+                ];
+            } else {
+                $created = SurveyActivity::create([
+                    'nama_kegiatan' => $nama,
+                    'tahun'         => $tahun,
+                    'status'        => $status,
+                ]);
+
+                $this->successLogs[] = [
+                    'baris' => $rowNum,
+                    'data'  => "{$created->nama_kegiatan} ({$created->tahun})",
+                ];
+            }
+        }
     }
 }

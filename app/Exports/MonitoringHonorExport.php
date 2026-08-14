@@ -31,7 +31,7 @@ class MonitoringHonorExport implements FromCollection, WithHeadings, WithColumnW
         $this->namaKegiatan = $namaKegiatan;
         $this->tahun = $tahun ?? date('Y');
 
-        // Ambil nilai batas honor dari cache/setting (atau gunakan nilai default misal 3.000.000 jika null)
+        // Ambil nilai batas honor dari cache/setting (default 3.000.000 jika null)
         $this->batasHonor = (float) cache('app_batas_honor', 3000000);
     }
 
@@ -42,8 +42,6 @@ class MonitoringHonorExport implements FromCollection, WithHeadings, WithColumnW
         // FILTER TAHUN
         if ($this->tahun) {
             $query->whereYear('created_at', $this->tahun); 
-            // Catatan: Jika di tabel database Anda ada kolom khusus bernama 'tahun' (misal: integer/string),
-            // ganti menjadi: $query->where('tahun', $this->tahun);
         }
 
         // Filter berdasarkan jenis rekapan
@@ -86,7 +84,7 @@ class MonitoringHonorExport implements FromCollection, WithHeadings, WithColumnW
             $rows->push([
                 'no' => '',
                 'bulan' => '',
-                'nama_pcl' => 'TOTAL KESELURUHAN',
+                'nama_pcl' => 'GRAND TOTAL KESELURUHAN',
                 'nama_kegiatan' => '',
                 'beban' => $grandTotalBeban,
                 'honor' => $grandTotalHonor,
@@ -95,7 +93,7 @@ class MonitoringHonorExport implements FromCollection, WithHeadings, WithColumnW
             return $rows;
         }
 
-        // 2. Rekapan Semua Data / Per Bulan (Rincian per PCL & Kegiatan + Subtotal/Total)
+        // 2. Rekapan Semua Data / Per Bulan
         $rawRecords = $query->select(['bulan', 'nama_pcl', 'nama_kegiatan', 'beban_banyak', 'honor_total'])
             ->orderByRaw("
                 FIELD(
@@ -121,7 +119,7 @@ class MonitoringHonorExport implements FromCollection, WithHeadings, WithColumnW
                 $subtotalBeban = 0;
                 $subtotalHonor = 0;
 
-                // Rincian Setiap Kegiatan yang Diikuti PCL
+                // Rincian Setiap Kegiatan
                 foreach ($kegiatans as $item) {
                     $exportData->push([
                         'no' => $no++,
@@ -188,18 +186,19 @@ class MonitoringHonorExport implements FromCollection, WithHeadings, WithColumnW
         ];
     }
 
+    // --- STYLE HEADER UTAMA (BIRU NAVY GAMBAR) ---
     public function styles(Worksheet $sheet): array
     {
         return [
             1 => [
                 'font' => [
                     'bold' => true,
-                    'color' => ['argb' => 'FFFFFF'],
+                    'color' => ['rgb' => 'FFFFFF'],
                     'size' => 11,
                 ],
                 'fill' => [
                     'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['argb' => '1E3A8A'], // Navy Blue
+                    'startColor' => ['rgb' => '1F4E79'], // Biru Navy Header
                 ],
                 'alignment' => [
                     'horizontal' => Alignment::HORIZONTAL_CENTER,
@@ -209,6 +208,7 @@ class MonitoringHonorExport implements FromCollection, WithHeadings, WithColumnW
         ];
     }
 
+    // --- STYLING BARIS DATA, SUBTOTAL, & GRAND TOTAL ---
     public function registerEvents(): array
     {
         return [
@@ -237,43 +237,49 @@ class MonitoringHonorExport implements FromCollection, WithHeadings, WithColumnW
                     ->getAlignment()
                     ->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
-                // Formatting Baris & Pengecekan Batas Honor
+                // Formatting Baris Subtotal & Grand Total Berdasarkan Gambar
                 for ($row = 2; $row <= $highestRow; $row++) {
                     $pclCell = (string) $sheet->getCell("C{$row}")->getValue();
                     $honorValue = (float) $sheet->getCell("F{$row}")->getValue();
 
-                    // 1. Jika Baris Subtotal PCL
+                    // 1. Baris Subtotal PCL (Biru Soft / Periwinkle seperti gambar)
                     if (str_starts_with($pclCell, 'TOTAL ')) {
                         $sheet->getStyle("A{$row}:F{$row}")->applyFromArray([
-                            'font' => ['bold' => true, 'color' => ['argb' => '1E293B']],
+                            'font' => [
+                                'bold' => true,
+                                'color' => ['rgb' => '101828'], // Teks Gelap
+                            ],
                             'fill' => [
                                 'fillType' => Fill::FILL_SOLID,
-                                'startColor' => ['argb' => 'E2E8F0'], // Soft Gray
+                                'startColor' => ['rgb' => 'D9E1F2'], // Soft Periwinkle Blue
                             ],
                         ]);
 
-                        // --- CEK MEMELESAT/MELEBIHI BATAS HONOR ---
+                        // Peringatan jika melebihi batas honor
                         if ($honorValue > $this->batasHonor) {
                             $sheet->getStyle("F{$row}")->applyFromArray([
                                 'font' => [
                                     'bold' => true,
-                                    'color' => ['argb' => 'FFFFFF'], // Teks Putih
+                                    'color' => ['rgb' => 'FFFFFF'],
                                 ],
                                 'fill' => [
                                     'fillType' => Fill::FILL_SOLID,
-                                    'startColor' => ['argb' => 'DC2626'], // Merah Mencolok
+                                    'startColor' => ['rgb' => 'DC2626'], // Merah Mencolok
                                 ],
                             ]);
                         }
                     }
 
-                    // 2. Jika Baris Grand Total Keseluruhan
+                    // 2. Baris Grand Total Keseluruhan (Biru Sangat Gelap seperti gambar)
                     if (str_contains($pclCell, 'GRAND TOTAL')) {
                         $sheet->getStyle("A{$row}:F{$row}")->applyFromArray([
-                            'font' => ['bold' => true, 'color' => ['argb' => 'FFFFFF']],
+                            'font' => [
+                                'bold' => true,
+                                'color' => ['rgb' => 'FFFFFF'], // Teks Putih
+                            ],
                             'fill' => [
                                 'fillType' => Fill::FILL_SOLID,
-                                'startColor' => ['argb' => '0F172A'], // Dark Slate
+                                'startColor' => ['rgb' => '0D1B2A'], // Biru Sangat Gelap
                             ],
                         ]);
                         $sheet->getRowDimension($row)->setRowHeight(24);
@@ -285,7 +291,7 @@ class MonitoringHonorExport implements FromCollection, WithHeadings, WithColumnW
                     'borders' => [
                         'allBorders' => [
                             'borderStyle' => Border::BORDER_THIN,
-                            'color' => ['argb' => 'CBD5E1'],
+                            'color' => ['rgb' => 'CBD5E1'],
                         ],
                     ],
                 ]);

@@ -5,28 +5,23 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\PclResource\Pages;
 use App\Models\Pcl;
 use Filament\Forms;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Table;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
 class PclResource extends Resource
 {
     protected static ?string $model = Pcl::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
-
     protected static ?string $navigationLabel = 'Daftar PCL';
-
     protected static ?string $modelLabel = 'PCL';
-
     protected static ?string $pluralModelLabel = 'Daftar PCL';
-
     protected static ?string $navigationGroup = 'MASTER DATA';
-
     protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form
@@ -35,12 +30,13 @@ class PclResource extends Resource
             ->schema([
                 Section::make('Informasi PCL')
                     ->schema([
-                        TextInput::make('id_pcl')
+                        // Inputan ID PCL ditambahkan di sini
+                        TextInput::make('id')
                             ->label('ID PCL')
                             ->required()
                             ->numeric()
-                            ->maxLength(30)
-                            ->unique(ignoreRecord: true),
+                            ->unique(ignoreRecord: true)
+                            ->disabledOn('edit'), // Tetap di-disable saat Edit agar ID tidak terubah tak sengaja
 
                         TextInput::make('nama_pcl')
                             ->label('Nama PCL')
@@ -59,7 +55,7 @@ class PclResource extends Resource
                     ->alignCenter()
                     ->rowIndex(),
 
-                TextColumn::make('id_pcl')
+                TextColumn::make('id')
                     ->label('ID PCL')
                     ->color('gray')
                     ->icon('heroicon-m-square-2-stack')
@@ -76,7 +72,8 @@ class PclResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\DeleteAction::make()
+                    ->successNotificationTitle('Data PCL berhasil dihapus'),
             ])
             ->actionsColumnLabel('Aksi')
             ->bulkActions([

@@ -12,11 +12,7 @@ class Pcl extends Model
     protected $table = 'pcls';
 
     protected $fillable = [
-        'id_pcl',
+        'id',
         'nama_pcl',
-    ];
-
-    protected $casts = [
-        'id_pcl' => 'string',
     ];
 }
