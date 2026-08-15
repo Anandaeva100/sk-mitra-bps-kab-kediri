@@ -11,7 +11,14 @@ class Pcl extends Model
 
     protected $table = 'pcls';
 
+    protected $primaryKey = 'id_pcl';
+
+    public $incrementing = false;
+
+    protected $keyType = 'string';
+
     protected $fillable = [
+        'id_pcl',
         'nama_pcl',
     ];
 }
