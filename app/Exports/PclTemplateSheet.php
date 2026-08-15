@@ -34,7 +34,7 @@ class PclTemplateSheet extends DefaultValueBinder implements FromArray, WithHead
         $rows = [
             // Baris 3: Sampel Contoh (Diberi tanda petik tunggal awal agar dibaca string murni)
             [
-                "'1234567890123456", // Tanda petik tunggal di awal memaksa Excel membacanya sebagai Teks
+                '1234567890123456',
                 'Contoh Nama PCL',
             ],
         ];
