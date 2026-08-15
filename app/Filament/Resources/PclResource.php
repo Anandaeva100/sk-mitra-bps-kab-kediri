@@ -30,13 +30,12 @@ class PclResource extends Resource
             ->schema([
                 Section::make('Informasi PCL')
                     ->schema([
-                        // Inputan ID PCL ditambahkan di sini
-                        TextInput::make('id')
+                        TextInput::make('id_pcl')
                             ->label('ID PCL')
                             ->required()
-                            ->numeric()
+                            ->maxLength(30)
                             ->unique(ignoreRecord: true)
-                            ->disabledOn('edit'), // Tetap di-disable saat Edit agar ID tidak terubah tak sengaja
+                            ->disabledOn('edit'),
 
                         TextInput::make('nama_pcl')
                             ->label('Nama PCL')
@@ -55,7 +54,7 @@ class PclResource extends Resource
                     ->alignCenter()
                     ->rowIndex(),
 
-                TextColumn::make('id')
+                TextColumn::make('id_pcl')
                     ->label('ID PCL')
                     ->color('gray')
                     ->icon('heroicon-m-square-2-stack')
