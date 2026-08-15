@@ -185,28 +185,45 @@ class ImportData extends Page
                     $idPcl   = trim((string)($row[0] ?? ''));
                     $namaPcl = trim((string)($row[1] ?? ''));
 
-                    // Normalisasi teks
+                    // Normalisasi teks untuk mendeteksi header / dummy
                     $cleanIdPcl   = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $idPcl));
                     $cleanNamaPcl = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $namaPcl));
 
-                    // LEWATI TANPA MENAMBAH $totalSkipped JIKA BARIS KOSONG ATAU DUMMY/HEADER
+                    // Lewati baris kosong
+                    if (empty($idPcl) && empty($namaPcl)) {
+                        continue;
+                    }
+
+                    // Lewati header / dummy / contoh
                     if (
+                        empty($idPcl) ||
                         empty($namaPcl) ||
                         in_array($cleanNamaPcl, $dummyKeywords) ||
                         in_array($cleanIdPcl, $dummyKeywords) ||
                         str_contains($cleanNamaPcl, 'namapcl') ||
                         str_contains($cleanIdPcl, 'idpcl') ||
+                        str_contains($cleanNamaPcl, 'contoh') ||
+                        str_contains($cleanIdPcl, 'contoh') ||
                         $cleanIdPcl === '1234567890123456'
                     ) {
                         continue;
                     }
 
-                    $exists = Pcl::where('nama_pcl', $namaPcl)->exists();
+                    // Pastikan ID PCL berupa angka
+                    if (!ctype_digit($idPcl)) {
+                        $this->totalSkipped++;
+                        continue;
+                    }
+
+                    // Cek apakah ID PCL sudah ada
+                    $exists = Pcl::where('id_pcl', $idPcl)->exists();
 
                     if (!$exists) {
                         Pcl::create([
+                            'id_pcl'   => $idPcl,
                             'nama_pcl' => $namaPcl,
                         ]);
+
                         $this->totalPclSuccess++;
                     } else {
                         $this->totalSkipped++;
