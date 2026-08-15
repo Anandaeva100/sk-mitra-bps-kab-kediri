@@ -8,6 +8,7 @@ use App\Filament\Pages\ImportData;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationGroup;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -54,6 +55,23 @@ class AdminPanelProvider extends PanelProvider
             // Warna utama
             ->colors([
                 'primary' => Color::Amber,
+            ])
+
+            ->navigationGroups([
+                NavigationGroup::make()
+                    ->label('MASTER DATA'),
+
+                NavigationGroup::make()
+                    ->label('INPUT DATA'),
+
+                NavigationGroup::make()
+                    ->label('MONITORING'),
+
+                NavigationGroup::make()
+                    ->label('DOKUMEN'),
+
+                NavigationGroup::make()
+                    ->label('SISTEM'),
             ])
 
             // Custom CSS: Menghilangkan tombol dropdown & merapikan sidebar
