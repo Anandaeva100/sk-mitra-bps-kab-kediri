@@ -14,8 +14,7 @@ class SuratTugas extends Model
     protected $fillable = [
         'nomor_surat',
         'nama_survei',
-        'jenis_mitra',
-        'nama_mitra',
+        'nama_pcl',
         'wilayah_tugas',
         'waktu_tugas',
         'tanggal_surat',
