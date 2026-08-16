@@ -15,6 +15,8 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Enums\FiltersLayout;
 
 class SuratTugasResource extends Resource
 {
@@ -187,6 +189,105 @@ class SuratTugasResource extends Resource
                     ->sortable(),
 
             ])
+
+            ->filters([
+
+                /*
+                |--------------------------------------------------------------------------
+                | KEGIATAN
+                |--------------------------------------------------------------------------
+                */
+
+                SelectFilter::make('nama_survei')
+                    ->label('Kegiatan')
+                    ->options(function () {
+
+                        return SuratTugas::query()
+                            ->whereNotNull('nama_survei')
+                            ->where('nama_survei', '!=', '')
+                            ->select('nama_survei')
+                            ->distinct()
+                            ->orderBy('nama_survei')
+                            ->pluck(
+                                'nama_survei',
+                                'nama_survei'
+                            )
+                            ->toArray();
+
+                    })
+                    ->searchable()
+                    ->preload()
+                    ->native(false),
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | NAMA PCL
+                |--------------------------------------------------------------------------
+                */
+
+                SelectFilter::make('nama_pcl')
+                    ->label('Nama PCL')
+                    ->options(function () {
+
+                        return SuratTugas::query()
+                            ->whereNotNull('nama_pcl')
+                            ->where('nama_pcl', '!=', '')
+                            ->select('nama_pcl')
+                            ->distinct()
+                            ->orderBy('nama_pcl')
+                            ->pluck(
+                                'nama_pcl',
+                                'nama_pcl'
+                            )
+                            ->toArray();
+
+                    })
+                    ->searchable()
+                    ->preload()
+                    ->native(false),
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | TAHUN
+                |--------------------------------------------------------------------------
+                */
+
+                SelectFilter::make('tahun')
+                    ->label('Tahun')
+                    ->options(function () {
+
+                        return SuratTugas::query()
+                            ->whereNotNull('tanggal_surat')
+                            ->selectRaw('YEAR(tanggal_surat) as tahun')
+                            ->distinct()
+                            ->orderByDesc('tahun')
+                            ->pluck(
+                                'tahun',
+                                'tahun'
+                            )
+                            ->toArray();
+
+                    })
+                    ->native(false)
+                    ->query(function ($query, array $data) {
+
+                        if (! empty($data['value'])) {
+
+                            $query->whereYear(
+                                'tanggal_surat',
+                                $data['value']
+                            );
+
+                        }
+
+                    }),
+
+            ])
+            ->filtersLayout(FiltersLayout::AboveContent)
+            ->filtersFormColumns(3)
+            
             ->actions([
 
                 Tables\Actions\Action::make('pdf')
