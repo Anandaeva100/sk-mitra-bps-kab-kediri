@@ -2,53 +2,40 @@
 <html lang="id">
 
 <head>
-
     <meta charset="UTF-8">
 
     <title>Surat Tugas</title>
 
     <style>
-
         /*
         |--------------------------------------------------------------------------
-        | FONT
-        |--------------------------------------------------------------------------
-        */
-
-        body {
-            font-family: "Cambria", Georgia, serif;
-            font-size: 10pt;
-            line-height: 1.5;
-            color: #000;
-            margin: 0;
-            padding: 0;
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | HALAMAN
+        | DASAR
         |--------------------------------------------------------------------------
         */
 
         @page {
-            margin: 2.5cm 2.5cm 2.5cm 2.5cm;
+            margin: 2.5cm;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            color: #000;
+            font-family: "Cambria", Georgia, serif;
+            font-size: 10pt;
+            line-height: 1.5;
         }
 
 
         /*
         |--------------------------------------------------------------------------
-        | SETIAP SURAT = SATU HALAMAN
+        | SATU SURAT = SATU HALAMAN
         |--------------------------------------------------------------------------
         */
 
         .surat {
             page-break-after: always;
         }
-
-        /*
-        | Surat terakhir tidak perlu membuat halaman kosong.
-        */
 
         .surat:last-child {
             page-break-after: auto;
@@ -62,8 +49,8 @@
         */
 
         .kop {
-            text-align: center;
             margin-bottom: 30px;
+            text-align: center;
         }
 
         .logo {
@@ -93,18 +80,18 @@
         */
 
         .judul {
-            text-align: center;
+            margin-bottom: 30px;
             font-family: "Cambria", Georgia, serif;
             font-size: 10pt;
             font-weight: normal;
             line-height: 1.5;
-            margin-bottom: 30px;
+            text-align: center;
         }
 
 
         /*
         |--------------------------------------------------------------------------
-        | TABEL ISI
+        | TABEL
         |--------------------------------------------------------------------------
         */
 
@@ -114,8 +101,8 @@
         }
 
         .isi td {
-            vertical-align: top;
             padding-bottom: 9px;
+            vertical-align: top;
         }
 
         .label {
@@ -136,7 +123,7 @@
 
         /*
         |--------------------------------------------------------------------------
-        | BAGIAN MENGINGAT
+        | MENGINGAT
         |--------------------------------------------------------------------------
         */
 
@@ -148,8 +135,8 @@
         }
 
         .mengingat-list li {
-            padding-left: 4px;
             margin-bottom: 6px;
+            padding-left: 4px;
             text-align: justify;
             text-justify: inter-word;
         }
@@ -162,13 +149,12 @@
         */
 
         .memberi-tugas {
-            text-align: center;
+            margin-top: 24px;
+            margin-bottom: 20px;
             font-family: "Cambria", Georgia, serif;
             font-size: 10pt;
             font-weight: normal;
-
-            margin-top: 24px;
-            margin-bottom: 20px;
+            text-align: center;
         }
 
 
@@ -179,8 +165,8 @@
         */
 
         .detail-penugasan td {
-            vertical-align: top;
             padding-bottom: 9px;
+            vertical-align: top;
         }
 
 
@@ -204,289 +190,240 @@
         }
 
         .nama-kepala {
-            text-align: center;
             font-weight: bold;
             text-decoration: underline;
+            text-align: center;
         }
-
     </style>
-
 </head>
 
 
 <body>
 
-
-@foreach ($suratTugas as $surat)
-
     {{-- =========================================================
-         SATU RECORD = SATU SURAT = SATU HALAMAN
+         PERULANGAN SURAT
+         1 RECORD = 1 SURAT = 1 HALAMAN
     ========================================================== --}}
 
-    <div class="surat">
+    @foreach ($suratTugas as $surat)
 
+        <div class="surat">
 
-        {{-- =====================================================
-             KOP SURAT
-        ====================================================== --}}
+            {{-- =================================================
+                 KOP SURAT
+            ================================================== --}}
 
-        <div class="kop">
+            <div class="kop">
 
-            <img
-                src="{{ public_path('images/logobps.png') }}"
-                class="logo"
-                alt="Logo BPS"
-            >
+                <img
+                    src="{{ public_path('images/logobps.png') }}"
+                    class="logo"
+                    alt="Logo BPS"
+                >
 
-            <div class="kop-title">
-
-                <span>
-                    BADAN PUSAT STATISTIK
-                </span>
-
-                <span class="kabupaten">
-                    KABUPATEN KEDIRI
-                </span>
+                <div class="kop-title">
+                    <span>BADAN PUSAT STATISTIK</span>
+                    <span class="kabupaten">KABUPATEN KEDIRI</span>
+                </div>
 
             </div>
 
+
+            {{-- =================================================
+                 JUDUL SURAT
+            ================================================== --}}
+
+            <div class="judul">
+
+                SURAT PERINTAH/SURAT TUGAS
+
+                <br>
+
+                NOMOR {{ $surat->nomor_surat }}
+
+            </div>
+
+
+            {{-- =================================================
+                 MENIMBANG & MENGINGAT
+            ================================================== --}}
+
+            <table class="isi">
+
+                {{-- MENIMBANG --}}
+                <tr>
+                    <td class="label">
+                        Menimbang
+                    </td>
+
+                    <td class="nomor">
+                        :
+                    </td>
+
+                    <td class="isi-utama">
+                        Bahwa dalam rangka kelancaran kegiatan
+                        <strong>{{ $surat->nama_survei }}</strong>,
+                        Kepala Badan Pusat Statistik Kabupaten Kediri perlu
+                        memberikan tugas/perintah kepada Pegawai BPS Kabupaten
+                        Kediri dalam pelaksanaan kegiatan tersebut.
+                    </td>
+                </tr>
+
+
+                {{-- MENGINGAT --}}
+                <tr>
+                    <td class="label">
+                        Mengingat
+                    </td>
+
+                    <td class="nomor">
+                        :
+                    </td>
+
+                    <td>
+                        <ol class="mengingat-list">
+
+                            <li>
+                                UU No. 16 Tahun 1997 tentang Statistik;
+                            </li>
+
+                            <li>
+                                Undang-Undang Nomor 6 Tahun 2014 tentang Desa;
+                            </li>
+
+                            <li>
+                                Undang-Undang Nomor 23 Tahun 2014 tentang
+                                Pemerintahan Daerah sebagaimana diubah beberapa
+                                kali terakhir dengan Undang-Undang Nomor 9 Tahun
+                                2015 tentang Perubahan Kedua atas Undang-Undang
+                                Nomor 23 Tahun 2014 tentang Pemerintahan Daerah;
+                            </li>
+
+                            <li>
+                                Peraturan Pemerintah Nomor 51 Tahun 1999 tentang
+                                Penyelenggaraan Statistik;
+                            </li>
+
+                            <li>
+                                Peraturan Presiden Republik Indonesia Nomor 86
+                                Tahun 2007 tentang Badan Pusat Statistik;
+                            </li>
+
+                            <li>
+                                Peraturan Badan Pusat Statistik Nomor 2 Tahun 2025
+                                tentang Organisasi dan Tata Kerja Badan Pusat Statistik;
+                            </li>
+
+                        </ol>
+                    </td>
+                </tr>
+
+            </table>
+
+
+            {{-- =================================================
+                 MEMBERI TUGAS
+            ================================================== --}}
+
+            <div class="memberi-tugas">
+                Memberi Perintah/Memberi Tugas
+            </div>
+
+
+            {{-- =================================================
+                 DETAIL PENUGASAN
+            ================================================== --}}
+
+            <table class="isi detail-penugasan">
+
+                {{-- KEPADA --}}
+                <tr>
+                    <td class="label">
+                        Kepada
+                    </td>
+
+                    <td class="nomor">
+                        :
+                    </td>
+
+                    <td>
+                        {{ $surat->nama_pcl }}
+                    </td>
+                </tr>
+
+
+                {{-- UNTUK --}}
+                <tr>
+                    <td class="label">
+                        Untuk
+                    </td>
+
+                    <td class="nomor">
+                        :
+                    </td>
+
+                    <td class="isi-utama">
+                        Melaksanakan Pendataan
+                        <strong>{{ $surat->nama_survei }}</strong>
+                        di Wilayah
+                        <strong>{{ $surat->wilayah_tugas }}</strong>
+                    </td>
+                </tr>
+
+
+                {{-- WAKTU --}}
+                <tr>
+                    <td class="label">
+                        Waktu
+                    </td>
+
+                    <td class="nomor">
+                        :
+                    </td>
+
+                    <td>
+                        {{ $surat->waktu_tugas }}
+                    </td>
+                </tr>
+
+            </table>
+
+
+            {{-- =================================================
+                 TANDA TANGAN
+            ================================================== --}}
+
+            <table class="tanda-tangan">
+
+                <tr>
+
+                    <td width="55%">
+                    </td>
+
+                    <td width="45%" class="tanggal">
+
+                        Kediri,
+                        {{ $surat->tanggal_surat->locale('id')->translatedFormat('d F Y') }}
+
+                        <br>
+
+                        Kepala BPS Kabupaten Kediri,
+
+                        <br><br><br><br>
+
+                        <div class="nama-kepala">
+                            Bambang Indarto S.Si., M.Si
+                        </div>
+
+                    </td>
+
+                </tr>
+
+            </table>
+
         </div>
 
-
-
-        {{-- =====================================================
-             JUDUL SURAT
-        ====================================================== --}}
-
-        <div class="judul">
-
-            SURAT PERINTAH/SURAT TUGAS
-
-            <br>
-
-            NOMOR {{ $surat->nomor_surat }}
-
-        </div>
-
-
-
-        {{-- =====================================================
-             MENIMBANG & MENGINGAT
-        ====================================================== --}}
-
-        <table class="isi">
-
-
-            {{-- MENIMBANG --}}
-
-            <tr>
-
-                <td class="label">
-                    Menimbang
-                </td>
-
-                <td class="nomor">
-                    :
-                </td>
-
-                <td class="isi-utama">
-
-                    Bahwa dalam rangka kelancaran kegiatan
-                    <strong>{{ $surat->nama_survei }}</strong>,
-                    Kepala Badan Pusat Statistik Kabupaten Kediri perlu
-                    memberikan tugas/perintah kepada Pegawai BPS Kabupaten
-                    Kediri dalam pelaksanaan kegiatan tersebut.
-
-                </td>
-
-            </tr>
-
-
-
-            {{-- MENGINGAT --}}
-
-            <tr>
-
-                <td class="label">
-                    Mengingat
-                </td>
-
-                <td class="nomor">
-                    :
-                </td>
-
-                <td>
-
-                    <ol class="mengingat-list">
-
-                        <li>
-                            UU No. 16 Tahun 1997 tentang Statistik;
-                        </li>
-
-                        <li>
-                            Undang-Undang Nomor 6 Tahun 2014 tentang Desa;
-                        </li>
-
-                        <li>
-                            Undang-Undang Nomor 23 Tahun 2014 tentang
-                            Pemerintahan Daerah sebagaimana diubah beberapa
-                            kali terakhir dengan Undang-Undang Nomor 9 Tahun
-                            2015 tentang Perubahan Kedua atas Undang-Undang
-                            Nomor 23 Tahun 2014 tentang Pemerintahan Daerah;
-                        </li>
-
-                        <li>
-                            Peraturan Pemerintah Nomor 51 Tahun 1999 tentang
-                            Penyelenggaraan Statistik;
-                        </li>
-
-                        <li>
-                            Peraturan Presiden Republik Indonesia Nomor 86
-                            Tahun 2007 tentang Badan Pusat Statistik;
-                        </li>
-
-                        <li>
-                            Peraturan Badan Pusat Statistik Nomor 2 Tahun 2025
-                            tentang Organisasi dan Tata Kerja Badan Pusat Statistik;
-                        </li>
-
-                    </ol>
-
-                </td>
-
-            </tr>
-
-        </table>
-
-
-
-        {{-- =====================================================
-             MEMBERI TUGAS
-        ====================================================== --}}
-
-        <div class="memberi-tugas">
-
-            Memberi Perintah/Memberi Tugas
-
-        </div>
-
-
-
-        {{-- =====================================================
-             DETAIL PENUGASAN
-        ====================================================== --}}
-
-        <table class="isi detail-penugasan">
-
-
-            {{-- KEPADA --}}
-
-            <tr>
-
-                <td class="label">
-                    Kepada
-                </td>
-
-                <td class="nomor">
-                    :
-                </td>
-
-                <td>
-                    {{ $surat->nama_pcl }}
-                </td>
-
-            </tr>
-
-
-
-            {{-- UNTUK --}}
-
-            <tr>
-
-                <td class="label">
-                    Untuk
-                </td>
-
-                <td class="nomor">
-                    :
-                </td>
-
-                <td class="isi-utama">
-
-                    Melaksanakan Pendataan
-                    <strong>{{ $surat->nama_survei }}</strong>
-                    di Wilayah
-                    <strong>{{ $surat->wilayah_tugas }}</strong>
-
-                </td>
-
-            </tr>
-
-
-
-            {{-- WAKTU --}}
-
-            <tr>
-
-                <td class="label">
-                    Waktu
-                </td>
-
-                <td class="nomor">
-                    :
-                </td>
-
-                <td>
-                    {{ $surat->waktu_tugas }}
-                </td>
-
-            </tr>
-
-
-        </table>
-
-
-
-        {{-- =====================================================
-             TANDA TANGAN
-        ====================================================== --}}
-
-        <table class="tanda-tangan">
-
-            <tr>
-
-                <td width="55%">
-                </td>
-
-                <td width="45%" class="tanggal">
-
-                    Kediri,
-                    {{ $surat->tanggal_surat->locale('id')->translatedFormat('d F Y') }}
-
-                    <br>
-
-                    Kepala BPS Kabupaten Kediri,
-
-                    <br><br><br><br>
-
-                    <div class="nama-kepala">
-
-                        Bambang Indarto S.Si., M.Si
-
-                    </div>
-
-                </td>
-
-            </tr>
-
-        </table>
-
-
-    </div>
-
-
-@endforeach
-
+    @endforeach
 
 </body>
 

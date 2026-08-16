@@ -9,36 +9,30 @@ class SuratTugasController extends Controller
 {
     public function pdf(SuratTugas $surat)
     {
-        /*
-        |--------------------------------------------------------------------------
-        | Ambil semua Surat Tugas berdasarkan kegiatan yang sama
-        |--------------------------------------------------------------------------
-        */
-
-        $suratTugas = SuratTugas::query()
-            ->where('nama_survei', $surat->nama_survei)
-            ->orderBy('id')
-            ->get();
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Buat nama file PDF
-        |--------------------------------------------------------------------------
-        */
-
-        $namaSurvei = str_replace(
-            ['/', '\\'],
-            '-',
-            $surat->nama_survei
+        $pdf = Pdf::loadView(
+            'surat-tugas',
+            [
+                'suratTugas' => collect([$surat]),
+            ]
         );
 
+        $namaPcl = str_replace(
+            ['/', '\\'],
+            '-',
+            $surat->nama_pcl
+        );
 
-        /*
-        |--------------------------------------------------------------------------
-        | Generate PDF
-        |--------------------------------------------------------------------------
-        */
+        return $pdf->stream(
+            'Surat_Tugas_' . $namaPcl . '.pdf'
+        );
+    }
+
+    public function pdfSemua(string $namaSurvei)
+    {
+        $suratTugas = SuratTugas::query()
+            ->where('nama_survei', $namaSurvei)
+            ->orderBy('id')
+            ->get();
 
         $pdf = Pdf::loadView(
             'surat-tugas',
@@ -47,15 +41,14 @@ class SuratTugasController extends Controller
             ]
         );
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Nama file PDF
-        |--------------------------------------------------------------------------
-        */
+        $namaSurveiFile = str_replace(
+            ['/', '\\'],
+            '-',
+            $namaSurvei
+        );
 
         return $pdf->stream(
-            'Surat_Tugas_' . $namaSurvei . '.pdf'
+            'Surat_Tugas_' . $namaSurveiFile . '.pdf'
         );
     }
 }

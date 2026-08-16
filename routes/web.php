@@ -13,3 +13,8 @@ Route::get(
     '/surat-tugas/{surat}/pdf',
     [SuratTugasController::class, 'pdf']
 )->name('surat-tugas.pdf');
+
+Route::get(
+    '/surat-tugas/semua/{namaSurvei}/pdf',
+    [SuratTugasController::class, 'pdfSemua']
+)->name('surat-tugas.semua.pdf');

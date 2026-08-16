@@ -3,7 +3,9 @@
 namespace App\Filament\Resources\SuratTugasResource\Pages;
 
 use App\Filament\Resources\SuratTugasResource;
+use App\Models\SuratTugas;
 use Filament\Actions;
+use Filament\Forms\Components\Select;
 use Filament\Resources\Pages\ListRecords;
 
 class ListSuratTugas extends ListRecords
@@ -13,10 +15,59 @@ class ListSuratTugas extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-
-            Actions\CreateAction::make()
+     
+           Actions\CreateAction::make()
                 ->label('Buat Surat Tugas')
                 ->icon('heroicon-o-document-plus'),
+
+            Actions\Action::make('cetakSemuaPcl')
+                ->label('Cetak Semua Surat Tugas')
+                ->icon('heroicon-o-document-arrow-down')
+                ->color('success')
+                ->modalHeading('Cetak Semua Surat Tugas')
+                ->modalDescription(
+                    'Pilih kegiatan untuk mencetak seluruh Surat Tugas PCL pada kegiatan tersebut.'
+                )
+                ->modalSubmitActionLabel('Cetak PDF')
+                ->modalCancelActionLabel('Batal')
+
+                ->form([
+
+                    Select::make('nama_survei')
+                        ->label('Kegiatan')
+                        ->options(function () {
+
+                            return SuratTugas::query()
+                                ->whereNotNull('nama_survei')
+                                ->where('nama_survei', '!=', '')
+                                ->select('nama_survei')
+                                ->distinct()
+                                ->orderBy('nama_survei')
+                                ->pluck(
+                                    'nama_survei',
+                                    'nama_survei'
+                                )
+                                ->toArray();
+
+                        })
+                        ->searchable()
+                        ->preload()
+                        ->native(false)
+                        ->required()
+                        ->placeholder('Pilih kegiatan'),
+
+                ])
+
+                ->action(function (array $data) {
+
+                    return redirect()->route(
+                        'surat-tugas.semua.pdf',
+                        [
+                            'namaSurvei' => $data['nama_survei'],
+                        ]
+                    );
+
+                }),
 
         ];
     }
