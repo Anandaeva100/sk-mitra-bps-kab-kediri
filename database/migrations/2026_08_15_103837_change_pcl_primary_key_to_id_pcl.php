@@ -8,26 +8,34 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('pcls', function (Blueprint $table) {
-            // Hapus primary key lama
-            $table->dropPrimary();
+        // 1. Lepas sifat AUTO_INCREMENT pada kolom 'id' lama terlebih dahulu
+        if (Schema::hasColumn('pcls', 'id')) {
+            Schema::table('pcls', function (Blueprint $table) {
+                $table->unsignedBigInteger('id')->change();
+            });
 
-            // Hapus kolom id lama
-            $table->dropColumn('id');
+            // 2. Hapus Primary Key & Kolom 'id' lama
+            Schema::table('pcls', function (Blueprint $table) {
+                $table->dropPrimary('id');
+                $table->dropColumn('id');
+            });
+        }
 
-            // Buat ID PCL sebagai primary key manual
-            $table->string('id_pcl', 30)->primary()->first();
-        });
+        // 3. Ubah kolom 'id_pcl' yang SUDAH ADA menjadi Primary Key
+        if (Schema::hasColumn('pcls', 'id_pcl')) {
+            Schema::table('pcls', function (Blueprint $table) {
+                $table->string('id_pcl', 30)->primary()->change();
+            });
+        }
     }
 
     public function down(): void
     {
         Schema::table('pcls', function (Blueprint $table) {
-            $table->dropPrimary();
-
-            $table->dropColumn('id_pcl');
-
-            $table->id();
+            $table->dropPrimary(['id_pcl']);
+            if (!Schema::hasColumn('pcls', 'id')) {
+                $table->bigIncrements('id')->first();
+            }
         });
     }
 };
