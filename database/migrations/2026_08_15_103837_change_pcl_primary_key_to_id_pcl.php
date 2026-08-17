@@ -8,25 +8,71 @@ return new class extends Migration
 {
     public function up(): void
     {
+        /*
+        |--------------------------------------------------------------------------
+        | Lepaskan AUTO_INCREMENT dari kolom id
+        |--------------------------------------------------------------------------
+        */
+
         Schema::table('pcls', function (Blueprint $table) {
-            // Hapus primary key lama
+            $table->unsignedBigInteger('id')->change();
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Hapus primary key lama
+        |--------------------------------------------------------------------------
+        */
+
+        Schema::table('pcls', function (Blueprint $table) {
             $table->dropPrimary();
+        });
 
-            // Hapus kolom id lama
+        /*
+        |--------------------------------------------------------------------------
+        | Jadikan id_pcl sebagai primary key
+        |--------------------------------------------------------------------------
+        |
+        | Kolom id_pcl sudah ada pada tabel pcls,
+        | sehingga tidak perlu dibuat ulang.
+        |
+        */
+
+        Schema::table('pcls', function (Blueprint $table) {
+            $table->primary('id_pcl');
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Hapus kolom id lama
+        |--------------------------------------------------------------------------
+        */
+
+        Schema::table('pcls', function (Blueprint $table) {
             $table->dropColumn('id');
-
-            // Buat ID PCL sebagai primary key manual
-            $table->string('id_pcl', 30)->primary()->first();
         });
     }
 
+
     public function down(): void
     {
+        /*
+        |--------------------------------------------------------------------------
+        | Lepaskan primary key dari id_pcl
+        |--------------------------------------------------------------------------
+        */
+
         Schema::table('pcls', function (Blueprint $table) {
             $table->dropPrimary();
+        });
 
-            $table->dropColumn('id_pcl');
+        /*
+        |--------------------------------------------------------------------------
+        | Tambahkan kembali id sebagai primary key auto increment
+        |--------------------------------------------------------------------------
+        */
 
+        Schema::table('pcls', function (Blueprint $table) {
             $table->id();
         });
     }
