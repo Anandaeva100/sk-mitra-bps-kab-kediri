@@ -283,14 +283,17 @@
                     <td>
                         <ol class="mengingat-list">
 
+                            {{-- MENGINGAT DEFAULT 1 --}}
                             <li>
                                 UU No. 16 Tahun 1997 tentang Statistik;
                             </li>
 
+                            {{-- MENGINGAT DEFAULT 2 --}}
                             <li>
                                 Undang-Undang Nomor 6 Tahun 2014 tentang Desa;
                             </li>
 
+                            {{-- MENGINGAT DEFAULT 3 --}}
                             <li>
                                 Undang-Undang Nomor 23 Tahun 2014 tentang
                                 Pemerintahan Daerah sebagaimana diubah beberapa
@@ -299,20 +302,43 @@
                                 Nomor 23 Tahun 2014 tentang Pemerintahan Daerah;
                             </li>
 
+                            {{-- MENGINGAT DEFAULT 4 --}}
                             <li>
                                 Peraturan Pemerintah Nomor 51 Tahun 1999 tentang
                                 Penyelenggaraan Statistik;
                             </li>
 
+                            {{-- MENGINGAT DEFAULT 5 --}}
                             <li>
                                 Peraturan Presiden Republik Indonesia Nomor 86
                                 Tahun 2007 tentang Badan Pusat Statistik;
                             </li>
 
+                            {{-- MENGINGAT DEFAULT 6 --}}
                             <li>
                                 Peraturan Badan Pusat Statistik Nomor 2 Tahun 2025
                                 tentang Organisasi dan Tata Kerja Badan Pusat Statistik;
                             </li>
+
+
+                            {{-- =====================================================
+                                MENGINGAT TAMBAHAN
+                                Dimulai dari nomor 7
+                            ====================================================== --}}
+
+                            @if (!empty($surat->mengingat))
+
+                                @foreach ($surat->mengingat as $item)
+
+                                    @if (!empty($item['isi']))
+                                        <li>
+                                            {{ $item['isi'] }};
+                                        </li>
+                                    @endif
+
+                                @endforeach
+
+                            @endif
 
                         </ol>
                     </td>
@@ -363,10 +389,7 @@
                     </td>
 
                     <td class="isi-utama">
-                        Melaksanakan Pendataan
-                        <strong>{{ $surat->nama_survei }}</strong>
-                        di Wilayah
-                        <strong>{{ $surat->wilayah_tugas }}</strong>
+                        {{ $surat->untuk }}
                     </td>
                 </tr>
 
