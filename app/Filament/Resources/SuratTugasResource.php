@@ -7,9 +7,11 @@ use App\Models\SuratTugas;
 use App\Models\SurveyActivity;
 use App\Models\MonitoringSurvey;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -39,7 +41,7 @@ class SuratTugasResource extends Resource
         return $form
             ->schema([
 
-                Section::make('Informasi Surat')
+                Section::make('Informasi Surat Tugas')
                     ->schema([
 
                         TextInput::make('nomor_surat')
@@ -51,7 +53,7 @@ class SuratTugasResource extends Resource
                             ),
 
                         Select::make('nama_survei')
-                            ->label('Nama Survei')
+                            ->label('Nama Kegiatan / Survei')
                             ->options(function () {
                                 return SurveyActivity::query()
                                     ->where('status', 'Aktif')
@@ -79,6 +81,43 @@ class SuratTugasResource extends Resource
 
                     ])
                     ->columns(2),
+                
+                Section::make('Mengingat')
+                    ->description('Tambahkan dasar hukum jika diperlukan.')
+                    ->schema([
+
+                        Repeater::make('mengingat')
+                            ->label('Dasar Hukum Tambahan')
+                            ->schema([
+
+                                Textarea::make('isi')
+                                    ->label('Isi Dasar Hukum')
+                                    ->placeholder(
+                                        'Contoh: UU No. 16 Tahun 1997 tentang Statistik'
+                                    )
+                                    ->required()
+                                    ->rows(2)
+                                    ->autosize(),
+
+                            ])
+                            ->defaultItems(0)
+                            ->addAction(
+                                fn ($action) => $action
+                                    ->label('Tambah Dasar Hukum')
+                                    ->icon('heroicon-m-plus')
+                            )
+                            ->reorderable()
+                            ->collapsible()
+                            ->itemLabel(
+                                fn (array $state): ?string =>
+                                    ! empty($state['isi'])
+                                        ? str($state['isi'])->limit(60)
+                                        : 'Dasar Hukum'
+                            )
+                            ->columnSpanFull(),
+
+                    ])
+                    ->columns(1),
 
                 Section::make('Informasi PCL')
                     ->schema([
@@ -132,11 +171,24 @@ class SuratTugasResource extends Resource
                 Section::make('Detail Penugasan')
                     ->schema([
 
+                        Textarea::make('untuk')
+                            ->label('Untuk')
+                            ->required()
+                            ->rows(3)
+                            ->placeholder(
+                                'Contoh: Untuk melaksanakan kegiatan IBS Triwulan 4 di wilayah kerja yang telah ditentukan.'
+                            )
+                            ->columnSpanFull(),
+
                         TextInput::make('wilayah_tugas')
                             ->label('Wilayah Tugas')
-                            ->disabled()
-                            ->dehydrated()
-                            ->placeholder('Wilayah tugas akan terisi otomatis berdasarkan Nama PCL'),
+                            ->required()
+                            ->placeholder(
+                                'Contoh: Kecamatan Puncu dan Kecamatan Badas'
+                            )
+                            ->helperText(
+                                'Wilayah akan diisi otomatis berdasarkan Nama PCL, tetapi dapat diubah jika diperlukan.'
+                            ),
 
                         TextInput::make('waktu_tugas')
                             ->label('Waktu / Rentang Tugas')

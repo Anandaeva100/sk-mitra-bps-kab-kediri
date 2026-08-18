@@ -15,6 +15,8 @@ class SuratTugas extends Model
         'nomor_surat',
         'nama_survei',
         'nama_pcl',
+        'mengingat',
+        'untuk',
         'wilayah_tugas',
         'waktu_tugas',
         'tanggal_surat',
@@ -22,5 +24,6 @@ class SuratTugas extends Model
 
     protected $casts = [
         'tanggal_surat' => 'date',
+        'mengingat' => 'array',
     ];
 }
