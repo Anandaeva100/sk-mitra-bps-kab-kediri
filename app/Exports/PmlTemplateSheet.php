@@ -17,19 +17,22 @@ class PmlTemplateSheet implements FromArray, WithHeadings, WithTitle, WithStyles
     public function headings(): array
     {
         return [
-            'Nama PML',
+            ['* Keterangan: Isikan Nama PML sesuai data mitra.'],
+            [
+                'Nama PML',
+            ],
         ];
     }
 
     public function array(): array
     {
         $rows = [
-            // Baris 2: Sampel Contoh
+            // Baris 3: Sampel Contoh
             ['Contoh Nama PML'],
         ];
 
-        // Baris 3 - 100: Area Input
-        for ($i = 3; $i <= 100; $i++) {
+        // Baris 4 - 100: Area Input Pengguna
+        for ($i = 4; $i <= 100; $i++) {
             $rows[] = [''];
         }
 
@@ -43,12 +46,37 @@ class PmlTemplateSheet implements FromArray, WithHeadings, WithTitle, WithStyles
 
     public function styles(Worksheet $sheet)
     {
+        // 1. Kunci seluruh sheet
         $sheet->getProtection()->setSheet(true);
-        $sheet->getStyle('A3:A100')->getProtection()->setLocked(Protection::PROTECTION_UNPROTECTED);
+
+        // 2. Buka kuncian khusus area input pengguna
+        $sheet->getStyle('A4:A100')
+            ->getProtection()
+            ->setLocked(Protection::PROTECTION_UNPROTECTED);
+
+        // 3. Merge cell A1
+        $sheet->mergeCells('A1:A1');
+
+        // 4. Tinggi baris keterangan
+        $sheet->getRowDimension(1)->setRowHeight(25);
 
         return [
-            // Header (Baris 1)
+            // Baris 1: Catatan Keterangan
             1 => [
+                'font' => [
+                    'italic' => true,
+                    'size' => 10,
+                    'color' => ['rgb' => 'C00000'],
+                ],
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_LEFT,
+                    'vertical' => Alignment::VERTICAL_CENTER,
+                    'wrapText' => true,
+                ],
+            ],
+
+            // Baris 2: Header Tabel
+            2 => [
                 'font' => [
                     'bold' => true,
                     'color' => ['rgb' => 'FFFFFF'],
@@ -60,10 +88,12 @@ class PmlTemplateSheet implements FromArray, WithHeadings, WithTitle, WithStyles
                 ],
                 'alignment' => [
                     'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical' => Alignment::VERTICAL_CENTER,
                 ],
             ],
-            // Sampel Contoh (Baris 2)
-            2 => [
+
+            // Baris 3: Sampel Contoh
+            3 => [
                 'font' => [
                     'italic' => true,
                     'color' => ['rgb' => '595959'],
@@ -71,6 +101,10 @@ class PmlTemplateSheet implements FromArray, WithHeadings, WithTitle, WithStyles
                 'fill' => [
                     'fillType' => Fill::FILL_SOLID,
                     'startColor' => ['rgb' => 'D9D9D9'],
+                ],
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_LEFT,
+                    'vertical' => Alignment::VERTICAL_CENTER,
                 ],
             ],
         ];

@@ -21,8 +21,8 @@ class ListSuratTugas extends ListRecords
                 ->icon('heroicon-o-document-plus'),
 
             Actions\Action::make('cetakSemuaPcl')
-                ->label('Cetak Semua Surat Tugas')
-                ->icon('heroicon-o-document-arrow-down')
+                ->label('Cetak Surat Tugas')
+                ->icon('heroicon-o-printer')
                 ->color('success')
                 ->modalHeading('Cetak Semua Surat Tugas')
                 ->modalDescription(

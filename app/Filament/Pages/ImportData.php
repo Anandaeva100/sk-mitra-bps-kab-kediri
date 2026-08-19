@@ -8,52 +8,89 @@ use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
-// Export Class sesuai projek
+// Export
 use App\Exports\MasterDataTemplateExport;
 
-// Models
-use App\Models\SurveyActivity;
-use App\Models\Pml;
-use App\Models\Pcl;
+// Import
+use App\Imports\MasterDataImport;
 
 class ImportData extends Page
 {
     use WithFileUploads;
 
     protected static string $view = 'filament.pages.import-data';
+
     protected static ?string $navigationIcon = 'heroicon-o-document-arrow-up';
+
     protected static ?string $title = 'Import Data Excel';
 
-    // Set Group & Urutan Navigasi
     protected static ?string $navigationGroup = 'MASTER DATA';
+
     protected static ?int $navigationSort = 4;
 
-    /** @var mixed */
+    /**
+     * File Excel yang dipilih.
+     */
     public $excelFile;
 
-    public bool $hasImported = false;
+    /**
+     * Status apakah file sudah siap untuk preview.
+     */
+    public bool $hasFile = false;
 
-    // Data Preview
-    public $previewKegiatan = [];
-    public $previewPml = [];
-    public $previewPcl = [];
+    /**
+     * Status apakah preview validasi sudah dibuka.
+     */
+    public bool $showPreview = false;
 
-    // Counter Statistik
-    public int $totalKegiatanSuccess = 0;
-    public int $totalPmlSuccess = 0;
-    public int $totalPclSuccess = 0;
+    /**
+     * Counter validasi.
+     */
+    public int $totalKegiatanValid = 0;
+    public int $totalPmlValid = 0;
+    public int $totalPclValid = 0;
+
+    /**
+     * Total data gagal / dilewati.
+     */
     public int $totalSkipped = 0;
 
     /**
-     * Method untuk menangani tombol Download Template secara otomatis
+     * Log preview validasi.
+     */
+    public array $previewValidLogs = [];
+
+    public array $previewFailedLogs = [];
+
+    /**
+     * Statistik hasil import.
+     */
+    public int $totalKegiatanSuccess = 0;
+    public int $totalPmlSuccess = 0;
+    public int $totalPclSuccess = 0;
+
+    /**
+     * Digunakan untuk memaksa refresh input file
+     * ketika pengguna memilih "Ganti File".
+     */
+    public int $fileInputKey = 0;
+
+    /**
+     * Download template Excel.
      */
     public function downloadTemplate()
     {
-        return Excel::download(new MasterDataTemplateExport(), 'Template_Import_Master_Data.xlsx');
+        return Excel::download(
+            new MasterDataTemplateExport(),
+            'Template_Import_Master_Data.xlsx'
+        );
     }
 
     /**
-     * Jalankan proses import otomatis setelah file dipilih
+     * Dipanggil ketika file Excel selesai dipilih.
+     *
+     * PENTING:
+     * Pada tahap ini BELUM ada data yang disimpan.
      */
     public function updatedExcelFile(): void
     {
@@ -61,209 +98,202 @@ class ImportData extends Page
             'excelFile' => 'required|mimes:xlsx,xls|max:10240',
         ]);
 
-        $this->processImport();
+        $this->hasFile = true;
+
+        $this->showPreview = false;
+
+        $this->resetPreviewData();
     }
 
-    public function processImport(): void
+    /**
+     * Membuka preview dan melakukan validasi file.
+     *
+     * Tidak menyimpan data ke database.
+     */
+    public function openPreview(): void
     {
-        if (!$this->excelFile) return;
+        if (!$this->excelFile) {
+            Notification::make()
+                ->title('File Excel belum dipilih')
+                ->body('Silakan pilih file Excel terlebih dahulu.')
+                ->warning()
+                ->send();
 
-        // Reset Counter
-        $this->totalKegiatanSuccess = 0;
-        $this->totalPmlSuccess = 0;
-        $this->totalPclSuccess = 0;
-        $this->totalSkipped = 0;
+            return;
+        }
 
         try {
+
+            $import = new MasterDataImport(false);
+
+            Excel::import(
+                $import,
+                $this->excelFile->getRealPath()
+            );
+
+            $logs = $import->getCombinedLogs();
+
+            $this->previewValidLogs = $logs['valid'];
+            $this->previewFailedLogs = $logs['failed'];
+
+            $this->totalKegiatanValid =
+                count($import->kegiatanSheet->validLogs);
+
+            $this->totalPmlValid =
+                count($import->pmlSheet->validLogs);
+
+            $this->totalPclValid =
+                count($import->pclSheet->validLogs);
+
+            $this->totalSkipped =
+                count($logs['failed']);
+
+            $this->showPreview = true;
+
+        } catch (\Exception $e) {
+
+            Notification::make()
+                ->title('Gagal Membaca File Excel')
+                ->body('Terjadi kesalahan saat memvalidasi file: ' . $e->getMessage())
+                ->danger()
+                ->persistent()
+                ->send();
+        }
+    }
+
+    /**
+     * Mengganti file Excel.
+     */
+    public function replaceFile(): void
+    {
+        $this->excelFile = null;
+
+        $this->hasFile = false;
+
+        $this->showPreview = false;
+
+        $this->resetPreviewData();
+
+        $this->fileInputKey++;
+    }
+
+    /**
+     * Membatalkan preview dan kembali ke file yang dipilih.
+     */
+    public function closePreview(): void
+    {
+        $this->showPreview = false;
+    }
+
+    /**
+     * Import final.
+     *
+     * BARU PADA METHOD INI DATA DISIMPAN KE DATABASE.
+     */
+    public function confirmImport(): void
+    {
+        if (!$this->excelFile) {
+            Notification::make()
+                ->title('File Excel tidak ditemukan')
+                ->body('Silakan pilih file Excel terlebih dahulu.')
+                ->warning()
+                ->send();
+
+            return;
+        }
+
+        try {
+
             DB::beginTransaction();
 
-            $path = $this->excelFile->getRealPath();
-            
-            // Mengambil seluruh data sheet dari file Excel
-            $sheets = Excel::toArray([], $path);
+            /*
+             * true = simpan ke database.
+             */
+            $import = new MasterDataImport(true);
 
-            // Kata kunci terlarang (dummy / placeholder header)
-            $dummyKeywords = [
-                'namapcl', 'idpcl', 'namapml', 'idpml', 
-                'contoh', 'sample', 'dummy', 'nama', 
-                'namapetugas', 'petunjuk', 'template', 'keterangan'
-            ];
+            Excel::import(
+                $import,
+                $this->excelFile->getRealPath()
+            );
 
-            // ==========================================
-            // --- 1. SHEET KEGIATAN / SURVEI (Index 0) ---
-            // ==========================================
-            if (isset($sheets[0])) {
-                foreach ($sheets[0] as $index => $row) {
-                    if ($index <= 2) {
-                        continue; // Lewati header template
-                    }
+            $this->totalKegiatanSuccess =
+                count($import->kegiatanSheet->successLogs);
 
-                    $namaKegiatan = trim((string)($row[0] ?? ''));
-                    $tahunRaw     = trim((string)($row[1] ?? ''));
-                    $statusRaw    = trim((string)($row[2] ?? ''));
+            $this->totalPmlSuccess =
+                count($import->pmlSheet->successLogs);
 
-                    $namaLower = strtolower($namaKegiatan);
+            $this->totalPclSuccess =
+                count($import->pclSheet->successLogs);
 
-                    // LEWATI TANPA MENAMBAH $totalSkipped JIKA BARIS KOSONG ATAU DUMMY/HEADER
-                    if (
-                        empty($namaKegiatan) || 
-                        $namaLower === 'nama kegiatan' || 
-                        $namaLower === 'nama kegiatan / survei' ||
-                        str_contains($namaLower, 'contoh') ||
-                        str_contains($namaLower, 'petunjuk') ||
-                        str_contains($namaLower, 'template') ||
-                        str_contains($namaLower, 'keterangan')
-                    ) {
-                        continue;
-                    }
-
-                    if (str_starts_with($statusRaw, '=') || empty($statusRaw) || (!in_array($statusRaw, ['Aktif', 'Non-Aktif', 'Selesai']))) {
-                        $status = 'Aktif';
-                    } else {
-                        $status = $statusRaw;
-                    }
-
-                    if (str_starts_with($tahunRaw, '=') || strtolower($tahunRaw) === 'tahun' || !is_numeric($tahunRaw) || empty($tahunRaw)) {
-                        $tahun = (int) date('Y');
-                    } else {
-                        $tahun = (int) $tahunRaw;
-                    }
-
-                    $exists = SurveyActivity::where('nama_kegiatan', $namaKegiatan)
-                        ->where('tahun', $tahun)
-                        ->exists();
-
-                    if (!$exists) {
-                        SurveyActivity::create([
-                            'nama_kegiatan' => $namaKegiatan,
-                            'tahun'         => $tahun,
-                            'status'        => $status,
-                        ]);
-                        $this->totalKegiatanSuccess++;
-                    } else {
-                        // HANYA TAMBAH SKIPPED JIKA KANSER/DATA TERBUTI DUPLIKAT DI DATABASE
-                        $this->totalSkipped++;
-                    }
-                }
-            }
-
-            // ==========================================
-            // --- 2. SHEET PML (Index 1) ---
-            // ==========================================
-            if (isset($sheets[1])) {
-                foreach ($sheets[1] as $index => $row) {
-                    $namaPml = trim((string)($row[0] ?? ''));
-                    $cleanNamaPml = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $namaPml));
-
-                    // LEWATI TANPA MENAMBAH $totalSkipped JIKA BARIS KOSONG ATAU DUMMY
-                    if (
-                        empty($namaPml) || 
-                        in_array($cleanNamaPml, $dummyKeywords) || 
-                        str_contains($cleanNamaPml, 'namapml')
-                    ) {
-                        continue;
-                    }
-
-                    $exists = Pml::where('nama_pml', $namaPml)->exists();
-
-                    if (!$exists) {
-                        Pml::create([
-                            'nama_pml' => $namaPml,
-                        ]);
-                        $this->totalPmlSuccess++;
-                    } else {
-                        $this->totalSkipped++;
-                    }
-                }
-            }
-
-            // ==========================================
-            // --- 3. SHEET PCL (Index 2) ---
-            // ==========================================
-            if (isset($sheets[2])) {
-                foreach ($sheets[2] as $index => $row) {
-                    $idPcl   = trim((string)($row[0] ?? ''));
-                    $namaPcl = trim((string)($row[1] ?? ''));
-
-                    // Normalisasi teks untuk mendeteksi header / dummy
-                    $cleanIdPcl   = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $idPcl));
-                    $cleanNamaPcl = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $namaPcl));
-
-                    // Lewati baris kosong
-                    if (empty($idPcl) && empty($namaPcl)) {
-                        continue;
-                    }
-
-                    // Lewati header / dummy / contoh
-                    if (
-                        empty($idPcl) ||
-                        empty($namaPcl) ||
-                        in_array($cleanNamaPcl, $dummyKeywords) ||
-                        in_array($cleanIdPcl, $dummyKeywords) ||
-                        str_contains($cleanNamaPcl, 'namapcl') ||
-                        str_contains($cleanIdPcl, 'idpcl') ||
-                        str_contains($cleanNamaPcl, 'contoh') ||
-                        str_contains($cleanIdPcl, 'contoh') ||
-                        $cleanIdPcl === '1234567890123456'
-                    ) {
-                        continue;
-                    }
-
-                    // Pastikan ID PCL berupa angka
-                    if (!ctype_digit($idPcl)) {
-                        $this->totalSkipped++;
-                        continue;
-                    }
-
-                    // Cek apakah ID PCL sudah ada
-                    $exists = Pcl::where('id_pcl', $idPcl)->exists();
-
-                    if (!$exists) {
-                        Pcl::create([
-                            'id_pcl'   => $idPcl,
-                            'nama_pcl' => $namaPcl,
-                        ]);
-
-                        $this->totalPclSuccess++;
-                    } else {
-                        $this->totalSkipped++;
-                    }
-                }
-            }
+            $logs = $import->getCombinedLogs();
 
             DB::commit();
 
-            // Refresh data preview dari database
-            $this->loadPreviewData();
-            $this->hasImported = true;
+            $totalBerhasil =
+                $this->totalKegiatanSuccess +
+                $this->totalPmlSuccess +
+                $this->totalPclSuccess;
 
-            $totalBerhasil = $this->totalKegiatanSuccess + $this->totalPmlSuccess + $this->totalPclSuccess;
+            $totalGagal = count($logs['failed']);
 
+            /*
+             * Tutup preview.
+             */
+            $this->showPreview = false;
+
+            /*
+             * Reset file.
+             */
+            $this->excelFile = null;
+
+            $this->hasFile = false;
+
+            $this->resetPreviewData();
+
+            $this->fileInputKey++;
+
+            /*
+             * Popup hasil akhir.
+             */
             Notification::make()
                 ->title('Import Data Berhasil!')
-                ->body("Berhasil menyimpan {$totalBerhasil} data baru ke database. ({$this->totalSkipped} duplikat dilewati)")
+                ->body(
+                    "Berhasil menyimpan {$totalBerhasil} data baru ke database."
+                    . ($totalGagal > 0
+                        ? " {$totalGagal} data dilewati karena duplikat atau tidak valid."
+                        : '')
+                )
                 ->success()
-                ->duration(6000)
+                ->duration(7000)
                 ->send();
 
         } catch (\Exception $e) {
+
             DB::rollBack();
 
             Notification::make()
                 ->title('Gagal Mengimpor Data')
-                ->body('Terjadi kesalahan: ' . $e->getMessage())
+                ->body(
+                    'Tidak ada data yang disimpan karena terjadi kesalahan: '
+                    . $e->getMessage()
+                )
                 ->danger()
                 ->persistent()
                 ->send();
-        } finally {
-            $this->reset('excelFile');
         }
     }
 
-    public function loadPreviewData(): void
+    /**
+     * Reset seluruh data preview.
+     */
+    protected function resetPreviewData(): void
     {
-        $this->previewKegiatan = SurveyActivity::latest()->take(10)->get();
-        $this->previewPml      = Pml::latest()->take(10)->get();
-        $this->previewPcl      = Pcl::latest()->take(10)->get();
+        $this->previewValidLogs = [];
+        $this->previewFailedLogs = [];
+
+        $this->totalKegiatanValid = 0;
+        $this->totalPmlValid = 0;
+        $this->totalPclValid = 0;
+        $this->totalSkipped = 0;
     }
 }

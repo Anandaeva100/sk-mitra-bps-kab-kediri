@@ -18,7 +18,7 @@ class ListSuratPerjanjianKerja extends ListRecords
             // 1. Tombol Buat (Sebelah Kiri)
             Actions\CreateAction::make()
                 ->label('Buat Surat Perjanjian Kerja')
-                ->icon('heroicon-o-plus'),
+                ->icon('heroicon-o-document-plus'),
 
             // 2. Tombol Cetak PDF (Sebelah Kanan)
             Actions\Action::make('cetak_pdf_kegiatan')

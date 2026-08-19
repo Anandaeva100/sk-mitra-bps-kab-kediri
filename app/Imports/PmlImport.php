@@ -11,61 +11,119 @@ class PmlImport implements ToCollection, WithHeadingRow
 {
     public array $successLogs = [];
     public array $failedLogs = [];
+    public array $validLogs = [];
+
+    /**
+     * true  = simpan ke database
+     * false = hanya preview / validasi
+     */
+    public bool $saveToDatabase = false;
+
+    protected array $seenData = [];
+
+    public function __construct(bool $saveToDatabase = false)
+    {
+        $this->saveToDatabase = $saveToDatabase;
+    }
+
+    /**
+     * Header Excel berada di baris ke-2
+     */
+    public function headingRow(): int
+    {
+        return 2;
+    }
 
     public function collection(Collection $rows)
     {
-        // Daftar kata kunci terlarang (placeholder/contoh input template)
         $dummyKeywords = [
-            'namapml', 
-            'idpml', 
-            'contoh', 
-            'sample', 
-            'dummy', 
-            'nama', 
-            'namapetugas'
+            'namapml',
+            'idpml',
+            'contoh',
+            'sample',
+            'dummy',
+            'nama',
+            'namapetugas',
         ];
 
         foreach ($rows as $index => $row) {
-            $rowNum  = $index + 2; // Baris ke-2 di Excel (Baris 1 = Header)
-            $idPml   = trim($row['id_pml'] ?? $row['id'] ?? '');
-            $namaRaw = trim($row['nama_pml'] ?? $row['nama'] ?? '');
 
-            // Normalisasi Teks: Hapus SEMUA simbol, spasi, underscore (_), dan ubah ke huruf kecil
-            $cleanNama = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $namaRaw));
-            $cleanId   = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $idPml));
+            $rowNum = $index + 3;
 
             // =========================================================
-            // FILTER 1: CEK DATA DUMMY / CONTOH INPUT TEMPLATE
+            // 1. AMBIL DATA PML
             // =========================================================
-            if (
-                in_array($cleanNama, $dummyKeywords) || 
-                in_array($cleanId, $dummyKeywords) || 
-                str_contains($cleanNama, 'namapml') || 
-                str_contains($cleanNama, 'contoh')
-            ) {
-                $this->failedLogs[] = [
-                    'baris'  => $rowNum,
-                    'data'   => "{$idPml} - {$namaRaw}",
-                    'alasan' => 'Baris contoh / placeholder template diabaikan',
-                ];
-                continue; // STOP & LEWATI (JANGAN MASUK DATABASE)
-            }
+
+            $namaRaw = trim((string) (
+                $row['nama_pml']
+                ?? $row['nama']
+                ?? ''
+            ));
 
             // =========================================================
-            // FILTER 2: CEK KOSONG
+            // 2. CEK BARIS KOSONG
             // =========================================================
+
             if (empty($namaRaw)) {
-                $this->failedLogs[] = [
-                    'baris'  => $rowNum,
-                    'data'   => '- Kosong -',
-                    'alasan' => 'Nama PML tidak boleh kosong',
-                ];
                 continue;
             }
 
             // =========================================================
-            // FILTER 3: CEK DUPLIKASI DATABASE
+            // 3. NORMALISASI
             // =========================================================
+
+            $cleanNama = strtolower(
+                preg_replace('/[^a-zA-Z0-9]/', '', $namaRaw)
+            );
+
+            // =========================================================
+            // 4. FILTER PLACEHOLDER
+            // =========================================================
+
+            if (
+                in_array($cleanNama, $dummyKeywords) ||
+                str_contains($cleanNama, 'namapml') ||
+                str_contains($cleanNama, 'contoh')
+            ) {
+                continue;
+            }
+
+            // =========================================================
+            // 5. VALIDASI
+            // =========================================================
+
+            if (empty($namaRaw)) {
+                $this->failedLogs[] = [
+                    'baris'  => $rowNum,
+                    'data'   => '-',
+                    'alasan' => 'Nama PML tidak boleh kosong',
+                ];
+
+                continue;
+            }
+
+            // =========================================================
+            // 6. CEK DUPLIKAT DALAM FILE
+            // =========================================================
+
+            $uniqueKey = strtolower(trim($namaRaw));
+
+            if (isset($this->seenData[$uniqueKey])) {
+                $this->failedLogs[] = [
+                    'baris'  => $rowNum,
+                    'data'   => $namaRaw,
+                    'alasan' => 'Data duplikat dalam file Excel',
+                ];
+
+                continue;
+            }
+
+            $this->seenData[$uniqueKey] = true;
+
+            // =========================================================
+            // 7. CEK DUPLIKAT DATABASE
+            // =========================================================
+
             $existing = Pml::where('nama_pml', $namaRaw)->first();
 
             if ($existing) {
@@ -74,17 +132,35 @@ class PmlImport implements ToCollection, WithHeadingRow
                     'data'   => $namaRaw,
                     'alasan' => 'Data PML sudah terdaftar (Duplikat)',
                 ];
-            } else {
-                // =========================================================
-                // PROSES SIMPAN HANYA DATA VALID
-                // =========================================================
-                $created = Pml::create([
-                    'nama_pml' => $namaRaw,
-                ]);
+
+                continue;
+            }
+
+            // =========================================================
+            // 8. DATA VALID
+            // =========================================================
+
+            $data = [
+                'nama_pml' => $namaRaw,
+            ];
+
+            $this->validLogs[] = [
+                'baris'  => $rowNum,
+                'data'   => $namaRaw,
+                'detail' => $data,
+            ];
+
+            // =========================================================
+            // 9. SIMPAN JIKA MODE IMPORT
+            // =========================================================
+
+            if ($this->saveToDatabase) {
+
+                $created = Pml::create($data);
 
                 $this->successLogs[] = [
-                    'baris'  => $rowNum,
-                    'data'   => $created->nama_pml,
+                    'baris' => $rowNum,
+                    'data'  => $created->nama_pml,
                 ];
             }
         }

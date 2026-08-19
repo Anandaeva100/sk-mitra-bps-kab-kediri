@@ -11,71 +11,169 @@ class KegiatanImport implements ToCollection, WithHeadingRow
 {
     public array $successLogs = [];
     public array $failedLogs = [];
+    public array $validLogs = [];
+
+    /**
+     * true  = data disimpan ke database
+     * false = hanya preview / validasi
+     */
+    public bool $saveToDatabase = false;
+
+    /**
+     * Menyimpan data yang sudah ditemukan di file Excel
+     * untuk mendeteksi duplikat dalam file yang sama.
+     */
+    protected array $seenData = [];
+
+    public function __construct(bool $saveToDatabase = false)
+    {
+        $this->saveToDatabase = $saveToDatabase;
+    }
+
+    /**
+     * Header Excel berada di baris ke-2
+     */
+    public function headingRow(): int
+    {
+        return 2;
+    }
 
     public function collection(Collection $rows)
     {
-        // Daftar kata kunci terlarang (placeholder / contoh input template)
         $dummyKeywords = [
-            'namakegiatan', 
-            'namasurvei', 
-            'contohkegiatan', 
-            'contoh', 
-            'sample', 
-            'dummy', 
-            'nama'
+            'namakegiatan',
+            'namasurvei',
+            'contohkegiatan',
+            'contoh',
+            'sample',
+            'dummy',
+            'nama',
         ];
 
         foreach ($rows as $index => $row) {
-            $rowNum = $index + 2; // Hitung baris Excel (header = 1)
-            $nama   = trim($row['nama_kegiatan'] ?? $row['nama'] ?? '');
-            $tahun  = trim($row['tahun'] ?? date('Y'));
-            $status = trim($row['status'] ?? 'Aktif');
 
-            // Normalisasi Teks: Hapus simbol/spasi/underscore & ubah ke huruf kecil
-            $cleanNama = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $nama));
+            $rowNum = $index + 3;
 
-            // 1. FILTER: Cek Kosong
-            if (empty($nama)) {
-                $this->failedLogs[] = [
-                    'baris' => $rowNum,
-                    'data'  => '- Kosong -',
-                    'alasan' => 'Nama kegiatan tidak boleh kosong',
-                ];
+            // =========================================================
+            // 1. AMBIL DATA
+            // =========================================================
+
+            $namaRaw = trim((string) (
+                $row['nama_kegiatan']
+                ?? $row['nama']
+                ?? ''
+            ));
+
+            $tahunRaw = trim((string) (
+                $row['tahun']
+                ?? ''
+            ));
+
+            $statusRaw = trim((string) (
+                $row['status']
+                ?? ''
+            ));
+
+            // =========================================================
+            // 2. CEK BARIS KOSONG
+            // =========================================================
+
+            if (empty($namaRaw)) {
                 continue;
             }
 
-            // 2. FILTER: Abaikan Data Contoh / Placeholder Template
+            $nama = $namaRaw;
+
+            $tahun = $tahunRaw !== '' && is_numeric($tahunRaw)
+                ? (int) $tahunRaw
+                : (int) date('Y');
+
+            $status = in_array(
+                $statusRaw,
+                ['Aktif', 'Non-Aktif', 'Selesai']
+            )
+                ? $statusRaw
+                : 'Aktif';
+
+            // =========================================================
+            // 3. NORMALISASI
+            // =========================================================
+
+            $cleanNama = strtolower(
+                preg_replace('/[^a-zA-Z0-9]/', '', $nama)
+            );
+
+            // =========================================================
+            // 4. FILTER PLACEHOLDER
+            // =========================================================
+
             if (
-                in_array($cleanNama, $dummyKeywords) || 
-                str_contains($cleanNama, 'namakegiatan') || 
+                in_array($cleanNama, $dummyKeywords) ||
+                str_contains($cleanNama, 'namakegiatan') ||
                 str_contains($cleanNama, 'contoh')
             ) {
-                $this->failedLogs[] = [
-                    'baris'  => $rowNum,
-                    'data'   => $nama,
-                    'alasan' => 'Baris contoh / placeholder template diabaikan',
-                ];
-                continue; // Skip baris contoh
+                continue;
             }
 
-            // 3. Cek Duplikat di Database
+            // =========================================================
+            // 5. CEK DUPLIKAT DALAM FILE EXCEL
+            // =========================================================
+
+            $uniqueKey = strtolower(trim($nama)) . '|' . $tahun;
+
+            if (isset($this->seenData[$uniqueKey])) {
+                $this->failedLogs[] = [
+                    'baris'  => $rowNum,
+                    'data'   => "{$nama} ({$tahun})",
+                    'alasan' => 'Data duplikat dalam file Excel',
+                ];
+
+                continue;
+            }
+
+            $this->seenData[$uniqueKey] = true;
+
+            // =========================================================
+            // 6. CEK DUPLIKAT DATABASE
+            // =========================================================
+
             $existing = SurveyActivity::where('nama_kegiatan', $nama)
                 ->where('tahun', $tahun)
                 ->first();
 
             if ($existing) {
                 $this->failedLogs[] = [
-                    'baris' => $rowNum,
-                    'data'  => "{$nama} ({$tahun})",
+                    'baris'  => $rowNum,
+                    'data'   => "{$nama} ({$tahun})",
                     'alasan' => 'Data sudah ada di database (Duplikat)',
                 ];
-            } else {
-                // 4. Simpan Hanya Data Valid
-                $created = SurveyActivity::create([
-                    'nama_kegiatan' => $nama,
-                    'tahun'         => $tahun,
-                    'status'        => $status,
-                ]);
+
+                continue;
+            }
+
+            // =========================================================
+            // 7. DATA VALID
+            // =========================================================
+
+            $data = [
+                'nama_kegiatan' => $nama,
+                'tahun'         => $tahun,
+                'status'        => $status,
+            ];
+
+            $this->validLogs[] = [
+                'baris' => $rowNum,
+                'data'  => "{$nama} ({$tahun})",
+                'detail' => $data,
+            ];
+
+            // =========================================================
+            // 8. SIMPAN JIKA MODE IMPORT
+            // =========================================================
+
+            if ($this->saveToDatabase) {
+
+                $created = SurveyActivity::create($data);
 
                 $this->successLogs[] = [
                     'baris' => $rowNum,

@@ -11,6 +11,20 @@ class PclImport implements ToCollection, WithHeadingRow
 {
     public array $successLogs = [];
     public array $failedLogs = [];
+    public array $validLogs = [];
+
+    /**
+     * true  = simpan ke database
+     * false = hanya preview / validasi
+     */
+    public bool $saveToDatabase = false;
+
+    protected array $seenData = [];
+
+    public function __construct(bool $saveToDatabase = false)
+    {
+        $this->saveToDatabase = $saveToDatabase;
+    }
 
     /**
      * Header Excel berada di baris ke-2
@@ -22,7 +36,6 @@ class PclImport implements ToCollection, WithHeadingRow
 
     public function collection(Collection $rows)
     {
-        // Daftar teks terlarang / placeholder template
         $dummyKeywords = [
             'namapcl',
             'idpcl',
@@ -36,15 +49,12 @@ class PclImport implements ToCollection, WithHeadingRow
 
         foreach ($rows as $index => $row) {
 
-            /*
-             * Karena header berada di baris 2,
-             * data pertama dimulai dari baris 3.
-             */
             $rowNum = $index + 3;
 
             // =========================================================
             // 1. AMBIL ID PCL
             // =========================================================
+
             $excelId = trim((string) (
                 $row['id_pcl']
                 ?? $row['id']
@@ -54,6 +64,7 @@ class PclImport implements ToCollection, WithHeadingRow
             // =========================================================
             // 2. AMBIL NAMA PCL
             // =========================================================
+
             $namaPcl = trim((string) (
                 $row['nama_pcl']
                 ?? $row['nama']
@@ -61,7 +72,10 @@ class PclImport implements ToCollection, WithHeadingRow
                 ?? ''
             ));
 
-            // Normalisasi untuk pengecekan placeholder
+            // =========================================================
+            // 3. NORMALISASI
+            // =========================================================
+
             $cleanNama = strtolower(
                 preg_replace('/[^a-zA-Z0-9]/', '', $namaPcl)
             );
@@ -71,37 +85,36 @@ class PclImport implements ToCollection, WithHeadingRow
             );
 
             // =========================================================
-            // 3. CEK BARIS KOSONG
+            // 4. CEK BARIS KOSONG
             // =========================================================
+
             if (empty($excelId) && empty($namaPcl)) {
                 continue;
             }
 
             // =========================================================
-            // 4. FILTER DUMMY / CONTOH TEMPLATE
+            // 5. FILTER PLACEHOLDER
             // =========================================================
+
             if (
-                in_array($cleanNama, $dummyKeywords) ||
-                in_array($cleanId, $dummyKeywords) ||
+                in_array($cleanNama, $dummyKeywords, true) ||
+                in_array($cleanId, $dummyKeywords, true) ||
                 str_contains($cleanNama, 'namapcl') ||
                 str_contains($cleanNama, 'contoh')
             ) {
-                $this->failedLogs[] = [
-                    'baris' => $rowNum,
-                    'data' => "ID: {$excelId} - Nama: {$namaPcl}",
-                    'alasan' => 'Baris contoh / placeholder template diabaikan',
-                ];
-
+                // Placeholder template sengaja diabaikan
+                // dan tidak dimasukkan ke failedLogs.
                 continue;
             }
 
             // =========================================================
-            // 5. VALIDASI ID PCL
+            // 6. VALIDASI ID
             // =========================================================
+
             if (empty($excelId)) {
                 $this->failedLogs[] = [
-                    'baris' => $rowNum,
-                    'data' => $namaPcl ?: '-',
+                    'baris'  => $rowNum,
+                    'data'   => $namaPcl ?: '-',
                     'alasan' => 'ID PCL wajib diisi',
                 ];
 
@@ -109,12 +122,13 @@ class PclImport implements ToCollection, WithHeadingRow
             }
 
             // =========================================================
-            // 6. VALIDASI NAMA PCL
+            // 7. VALIDASI NAMA
             // =========================================================
+
             if (empty($namaPcl)) {
                 $this->failedLogs[] = [
-                    'baris' => $rowNum,
-                    'data' => $excelId,
+                    'baris'  => $rowNum,
+                    'data'   => $excelId,
                     'alasan' => 'Nama PCL wajib diisi',
                 ];
 
@@ -122,14 +136,33 @@ class PclImport implements ToCollection, WithHeadingRow
             }
 
             // =========================================================
-            // 7. CEK DUPLIKAT BERDASARKAN ID PCL
+            // 8. CEK DUPLIKAT DALAM FILE
             // =========================================================
+
+            $uniqueKey = strtolower(trim($excelId));
+
+            if (isset($this->seenData[$uniqueKey])) {
+                $this->failedLogs[] = [
+                    'baris'  => $rowNum,
+                    'data'   => "ID: {$excelId} - {$namaPcl}",
+                    'alasan' => 'Data duplikat dalam file Excel',
+                ];
+
+                continue;
+            }
+
+            $this->seenData[$uniqueKey] = true;
+
+            // =========================================================
+            // 9. CEK DUPLIKAT DATABASE
+            // =========================================================
+
             $existing = Pcl::where('id_pcl', $excelId)->first();
 
             if ($existing) {
                 $this->failedLogs[] = [
-                    'baris' => $rowNum,
-                    'data' => "ID: {$excelId} - {$namaPcl}",
+                    'baris'  => $rowNum,
+                    'data'   => "ID: {$excelId} - {$namaPcl}",
                     'alasan' => 'ID PCL sudah ada di database (Duplikat)',
                 ];
 
@@ -137,20 +170,33 @@ class PclImport implements ToCollection, WithHeadingRow
             }
 
             // =========================================================
-            // 8. SIMPAN DATA
+            // 10. DATA VALID
             // =========================================================
-            $created = Pcl::create([
-                'id_pcl' => $excelId,
+
+            $data = [
+                'id_pcl'   => $excelId,
                 'nama_pcl' => $namaPcl,
-            ]);
+            ];
+
+            $this->validLogs[] = [
+                'baris'  => $rowNum,
+                'data'   => "ID: {$excelId} - {$namaPcl}",
+                'detail' => $data,
+            ];
 
             // =========================================================
-            // 9. LOG BERHASIL
+            // 11. SIMPAN JIKA MODE IMPORT
             // =========================================================
-            $this->successLogs[] = [
-                'baris' => $rowNum,
-                'data' => "ID: {$created->id_pcl} - {$created->nama_pcl}",
-            ];
+
+            if ($this->saveToDatabase) {
+
+                $created = Pcl::create($data);
+
+                $this->successLogs[] = [
+                    'baris' => $rowNum,
+                    'data'  => "ID: {$created->id_pcl} - {$created->nama_pcl}",
+                ];
+            }
         }
     }
 }
