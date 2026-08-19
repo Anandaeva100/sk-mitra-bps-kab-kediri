@@ -15,16 +15,17 @@ class ListSuratPerjanjianKerja extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            // 1. Tombol Buat (Sebelah Kiri)
             Actions\CreateAction::make()
-                ->label('Buat Surat Perjanjian Kerja')
+                ->label('Buat Surat')
                 ->icon('heroicon-o-document-plus'),
 
-            // 2. Tombol Cetak PDF (Sebelah Kanan)
             Actions\Action::make('cetak_pdf_kegiatan')
-                ->label('Cetak Surat Perjanjian (PDF)')
-                ->color('success')
+                ->label('Cetak Surat (PDF)')
                 ->icon('heroicon-o-printer')
+                ->color('success')
+                ->modalHeading('Cetak Surat Perjanjian Kerja (PDF)')
+                ->modalSubmitActionLabel('Cetak PDF')
+                ->modalCancelActionLabel('Batal')
                 ->form([
                     Forms\Components\Select::make('nama_kegiatan')
                         ->label('Pilih Nama Kegiatan / Survei')

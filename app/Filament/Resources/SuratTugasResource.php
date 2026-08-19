@@ -236,6 +236,14 @@ class SuratTugasResource extends Resource
                         fn ($record) => $record->wilayah_tugas
                     ),
 
+                TextColumn::make('waktu_tugas')
+                    ->label('Waktu / Rentang Tugas')
+                    ->limit(35)
+                    ->tooltip(
+                        fn ($record) => $record->waktu_tugas
+                    )
+                    ->searchable(),
+
                 TextColumn::make('tanggal_surat')
                     ->label('Tanggal Surat')
                     ->date('d F Y')
@@ -345,7 +353,7 @@ class SuratTugasResource extends Resource
 
                 Tables\Actions\Action::make('pdf')
                     ->label('Cetak PDF')
-                    ->icon('heroicon-o-document-arrow-down')
+                    ->icon('heroicon-o-printer')
                     ->color('success')
                     ->url(
                         fn ($record) => route(

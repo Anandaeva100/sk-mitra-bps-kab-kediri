@@ -137,7 +137,7 @@ class SuratPerjanjianKerjaResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('nomor_spk')
-                    ->label('Nomor SPK')
+                    ->label('Nomor Surat')
                     ->searchable()
                     ->sortable(),
 
@@ -212,7 +212,7 @@ class SuratPerjanjianKerjaResource extends Resource
                     }),
 
                 Tables\Columns\TextColumn::make('tanggal_spk')
-                    ->label('Tanggal SPK')
+                    ->label('Tanggal Surat')
                     ->date('d F Y')
                     ->sortable(),
             ])

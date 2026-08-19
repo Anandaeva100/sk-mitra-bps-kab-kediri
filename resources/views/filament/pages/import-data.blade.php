@@ -34,39 +34,39 @@
 
                 </div>
 
-    <div class="flex items-center gap-2 flex-nowrap shrink-0">
+                <div class="flex items-center gap-2 flex-nowrap shrink-0">
 
-        <!-- Tombol Lihat Template -->
-        <button
-            type="button"
-            @click="showTemplate = true"
-            class="inline-flex h-8 whitespace-nowrap items-center justify-center gap-1.5 rounded-lg border border-gray-300 bg-white px-2.5 text-xs font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
-        >
-            <x-heroicon-o-eye class="h-3.5 w-3.5" />
-            <span>Lihat Template</span>
-        </button>
+                    <!-- Tombol Lihat Template -->
+                    <button
+                        type="button"
+                        @click="showTemplate = true"
+                        class="inline-flex h-8 whitespace-nowrap items-center justify-center gap-1.5 rounded-lg border border-gray-300 bg-white px-2.5 text-xs font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+                    >
+                        <x-heroicon-o-eye class="h-3.5 w-3.5" />
+                        <span>Lihat Template</span>
+                    </button>
 
-        <!-- Tombol Download Template -->
-        <x-filament::button
-            type="button"
-            wire:click="downloadTemplate"
-            wire:loading.attr="disabled"
-            wire:target="downloadTemplate"
-            color="success"
-            icon="heroicon-o-arrow-down-tray"
-            size="xs"
-            class="whitespace-nowrap"
-        >
-            <span wire:loading.remove wire:target="downloadTemplate">
-                Download Template
-            </span>
+                    <!-- Tombol Download Template -->
+                    <x-filament::button
+                        type="button"
+                        wire:click="downloadTemplate"
+                        wire:loading.attr="disabled"
+                        wire:target="downloadTemplate"
+                        color="success"
+                        icon="heroicon-o-arrow-down-tray"
+                        size="xs"
+                        class="whitespace-nowrap"
+                    >
+                        <span wire:loading.remove wire:target="downloadTemplate">
+                            Download Template
+                        </span>
 
-            <span wire:loading wire:target="downloadTemplate">
-                Mengunduh...
-            </span>
-        </x-filament::button>
+                        <span wire:loading wire:target="downloadTemplate">
+                            Mengunduh...
+                        </span>
+                    </x-filament::button>
 
-    </div>
+                </div>
             </div>
 
         </div>
@@ -78,11 +78,12 @@
 
         <div class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10">
 
+            <!-- Title Header Upload Card (Gunakan space-y-3 atau mt-3 agar berdempetan presisi) -->
             <div class="flex items-start gap-3">
 
-                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-success-50 dark:bg-success-500/10">
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-50 dark:bg-primary-500/10">
                     <x-heroicon-o-cloud-arrow-up
-                        class="h-5 w-5 text-success-600 dark:text-success-400"
+                        class="h-5 w-5 text-primary-600 dark:text-primary-400"
                     />
                 </div>
 
@@ -92,8 +93,7 @@
                     </h3>
 
                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        Upload file Excel yang berisi data Kegiatan / Survei,
-                        PML, dan PCL.
+                        Upload file Excel yang berisi data Kegiatan / Survei, PML, dan PCL.
                     </p>
                 </div>
 
@@ -105,7 +105,7 @@
             {{-- ===================================================== --}}
 
             @error('excelFile')
-                <div class="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-900/40 dark:bg-red-900/20">
+                <div class="mt-3 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-900/40 dark:bg-red-900/20">
 
                     <div class="flex gap-2">
 
@@ -133,25 +133,26 @@
 
             @if (!$hasFile)
 
-                <div class="mt-6 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-8 text-center transition hover:border-primary-400 hover:bg-primary-50/30 dark:border-gray-700 dark:bg-gray-950 dark:hover:border-primary-500 dark:hover:bg-primary-500/5">
+                <!-- Disesuaikan ke margin mt-3/mt-4 agar berdempetan pas dengan header -->
+                <div class="mt-6 rounded-xl border-2 border-dashed border-gray-300 bg-gray-100 p-6 text-center transition hover:border-primary-500 hover:bg-primary-50/30 dark:border-gray-600 dark:bg-gray-950 dark:hover:border-primary-500 dark:hover:bg-primary-500/10">
 
-                    <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary-50 dark:bg-primary-500/10">
+                    <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-500/20">
 
                         <x-heroicon-o-cloud-arrow-up
-                            class="h-6 w-6 text-primary-600 dark:text-primary-400"
+                            class="h-5 w-5 text-primary-600 dark:text-primary-400"
                         />
 
                     </div>
 
-                    <p class="mt-4 text-sm font-semibold text-gray-950 dark:text-white">
+                    <p class="mt-2 text-sm font-semibold text-gray-950 dark:text-white">
                         Upload file Excel
                     </p>
 
-                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                         Format yang didukung: .xlsx dan .xls
                     </p>
 
-                    <div class="mt-4">
+                    <div class="mt-3">
 
                         <input
                             wire:key="excel-upload-{{ $fileInputKey }}"
@@ -164,10 +165,11 @@
 
                         <label
                             for="excel-upload"
-                            class="inline-flex h-9 cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary-600 px-4 text-sm font-medium text-white shadow-sm transition hover:bg-primary-700"
+                            class="inline-flex h-9 cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500/40 dark:bg-primary-500 dark:hover:bg-primary-400"
                         >
-                            <x-heroicon-o-document-arrow-up class="h-4 w-4" />
-                            Pilih File Excel
+                            <x-heroicon-o-document-arrow-up class="h-4 w-4 text-white" />
+
+                            <span>Pilih File Excel</span>
                         </label>
 
                     </div>
@@ -175,12 +177,12 @@
                     <div
                         wire:loading
                         wire:target="excelFile"
-                        class="mt-3 text-xs font-medium text-primary-600 dark:text-primary-400"
+                        class="mt-2 text-xs font-medium text-primary-600 dark:text-primary-400"
                     >
                         Mengunggah file...
                     </div>
 
-                    <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">
+                    <p class="mt-2 text-[11px] text-gray-400 dark:text-gray-500">
                         Gunakan file Excel sesuai template yang telah disediakan.
                     </p>
 
@@ -192,66 +194,120 @@
                 {{-- FILE SUDAH DIPILIH --}}
                 {{-- ================================================= --}}
 
-                <div class="mt-6 rounded-xl border border-success-200 bg-success-50 p-4 dark:border-success-500/20 dark:bg-success-500/10">
+                <div
+                    class="mt-6 rounded-xl border-2 border-dashed border-gray-300 bg-gray-100 p-6 text-center transition dark:border-gray-600 dark:bg-gray-950"
+                >
 
-                    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    {{-- ICON --}}
+                    <div
+                        class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-500/20"
+                    >
 
-                        <div class="flex min-w-0 items-center gap-3">
-
-                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm dark:bg-gray-800">
-                                <x-heroicon-o-document-text
-                                    class="h-5 w-5 text-success-600 dark:text-success-400"
-                                />
-                            </div>
-
-                            <div class="min-w-0">
-
-                                <p class="text-xs font-medium text-success-700 dark:text-success-400">
-                                    File Excel dipilih
-                                </p>
-
-                                <p class="mt-0.5 truncate text-sm font-semibold text-gray-950 dark:text-white">
-                                    {{ $excelFile?->getClientOriginalName() ?? 'File Excel' }}
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                        <div class="flex shrink-0 gap-2">
-
-                            <x-filament::button
-                                type="button"
-                                wire:click="replaceFile"
-                                color="gray"
-                                outlined
-                                icon="heroicon-o-arrow-path"
-                                size="sm"
-                            >
-                                Ganti File
-                            </x-filament::button>
-
-                            <x-filament::button
-                                type="button"
-                                wire:click="openPreview"
-                                wire:loading.attr="disabled"
-                                wire:target="openPreview"
-                                color="success"
-                                icon="heroicon-o-arrow-right"
-                                size="sm"
-                            >
-                                <span wire:loading.remove wire:target="openPreview">
-                                    Lanjut
-                                </span>
-
-                                <span wire:loading wire:target="openPreview">
-                                    Memvalidasi...
-                                </span>
-                            </x-filament::button>
-
-                        </div>
+                        <x-heroicon-o-document-check
+                            class="h-5 w-5 text-primary-600 dark:text-primary-400"
+                        />
 
                     </div>
+
+
+                    {{-- TITLE --}}
+                    <p
+                        class="mt-2 text-sm font-semibold text-gray-950 dark:text-white"
+                    >
+                        File Excel berhasil dipilih
+                    </p>
+
+
+                    {{-- NAMA FILE --}}
+                    <div
+                        class="mx-auto mt-1.5 max-w-xl"
+                    >
+
+                        <p
+                            class="truncate text-xs text-gray-500 dark:text-gray-400"
+                            title="{{ $excelFile?->getClientOriginalName() }}"
+                        >
+                            {{ $excelFile?->getClientOriginalName() ?? 'File Excel' }}
+                        </p>
+
+                    </div>
+
+
+                    {{-- STATUS FILE --}}
+                    <div
+                        class="mt-3 inline-flex items-center gap-1.5 rounded-full bg-primary-50 px-3 py-1 text-[11px] font-medium text-primary-700 dark:bg-primary-500/10 dark:text-primary-400"
+                    >
+                        <x-heroicon-o-check-circle
+                            class="h-5 w-5 text-primary-600 dark:text-primary-400"
+                        />
+
+                        <span>
+                            File siap untuk divalidasi
+                        </span>
+                    </div>
+
+
+                    {{-- BUTTON --}}
+                    <div
+                        class="mt-4 flex flex-col justify-center gap-2 sm:flex-row"
+                    >
+
+                        {{-- GANTI FILE --}}
+                        <button
+                            type="button"
+                            wire:click="replaceFile"
+                            class="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500/40 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+                        >
+
+                            <x-heroicon-o-arrow-path
+                                class="h-4 w-4"
+                            />
+
+                            <span>
+                                Ganti File
+                            </span>
+
+                        </button>
+
+
+                        {{-- LANJUT VALIDASI --}}
+                        <button
+                            type="button"
+                            wire:click="openPreview"
+                            wire:loading.attr="disabled"
+                            wire:target="openPreview"
+                            class="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-primary-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500/40 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-primary-500 dark:hover:bg-primary-400"
+                        >
+
+                            <x-heroicon-o-arrow-right
+                                class="h-4 w-4 text-white"
+                            />
+
+                            <span
+                                wire:loading.remove
+                                wire:target="openPreview"
+                            >
+                                Lanjut Validasi
+                            </span>
+
+                            <span
+                                wire:loading
+                                wire:target="openPreview"
+                            >
+                                Memvalidasi...
+                            </span>
+
+                        </button>
+
+                    </div>
+
+
+                    {{-- KETERANGAN --}}
+                    <p
+                        class="mt-3 text-[11px] text-gray-400 dark:text-gray-500"
+                    >
+                        File siap diperiksa sebelum data diimport ke sistem.
+                    </p>
 
                 </div>
 
@@ -280,7 +336,7 @@
                     {{-- ===================================================== --}}
 
                     <div
-                        class="relative flex h-full max-h-[calc(100vh-24px)] w-full max-w-6xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/5 dark:bg-gray-900 dark:ring-white/10 sm:max-h-[calc(100vh-40px)]"
+                        class="relative flex h-full max-h-[calc(100vh-24px)] w-full max-w-6xl flex-col overflow-hidden rounded-xl bg-white shadow-2xl ring-1 ring-black/5 dark:bg-gray-900 dark:ring-white/10 sm:max-h-[calc(100vh-40px)]"
                     >
 
                         {{-- ================================================= --}}
@@ -288,19 +344,19 @@
                         {{-- ================================================= --}}
 
                         <div
-                            class="flex shrink-0 items-center justify-between border-b border-gray-200 bg-white px-5 py-4 dark:border-gray-700 dark:bg-gray-900"
+                            class="flex shrink-0 items-center justify-between border-b border-gray-200 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-900 sm:px-7"
                         >
 
                             {{-- HEADER LEFT --}}
 
-                            <div class="flex min-w-0 items-center gap-3">
+                            <div class="flex min-w-0 items-center gap-4">
 
                                 <div
-                                    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-50 dark:bg-primary-500/10"
+                                    class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-50 ring-1 ring-primary-100/70 dark:bg-primary-500/10 dark:ring-primary-500/20"
                                 >
 
                                     <x-heroicon-o-clipboard-document-check
-                                        class="h-5 w-5 text-primary-600 dark:text-primary-400"
+                                        class="h-6 w-6 text-primary-600 dark:text-primary-400"
                                     />
 
                                 </div>
@@ -330,11 +386,9 @@
                                 type="button"
                                 wire:click="closePreview"
                                 aria-label="Tutup preview"
-                                class="ml-3 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-transparent text-gray-400 transition hover:border-gray-200 hover:bg-gray-50 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:hover:border-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+                                class="ml-3 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-gray-100 text-gray-500 shadow-sm transition hover:bg-gray-200 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:border-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-100"
                             >
-
                                 <x-heroicon-o-x-mark class="h-5 w-5" />
-
                             </button>
 
                         </div>
@@ -384,123 +438,118 @@
 
                             </div>
 
-
                             {{-- ================================================= --}}
                             {{-- STATISTIK --}}
                             {{-- ================================================= --}}
 
-                            <div class="mt-5">
-
-                                <div class="grid grid-cols-4 gap-3">
+                            <div
+                                class="mt-6 rounded-xl border border-gray-200 bg-white px-4 py-4 dark:border-gray-700 dark:bg-gray-950"
+                            >
+                                <div
+                                    style="
+                                        display: grid !important;
+                                        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+                                        gap: 12px !important;
+                                        width: 100% !important;
+                                    "
+                                >
 
                                     {{-- KEGIATAN --}}
                                     <div
-                                        class="flex min-w-0 items-center justify-between gap-3 rounded-xl border border-blue-100 bg-white px-4 py-3 shadow-sm dark:border-blue-900/30 dark:bg-gray-950"
+                                        class="flex min-w-0 flex-col items-center justify-center rounded-xl border border-blue-100 bg-white px-3 py-4 text-center shadow-sm transition hover:shadow-md dark:border-blue-900/30 dark:bg-gray-950"
                                     >
-
-                                        <div class="min-w-0">
-
-                                            <p class="truncate text-xs font-medium text-gray-500 dark:text-gray-400">
-                                                Kegiatan Valid
-                                            </p>
-
-                                            <p class="mt-1 text-xl font-bold tracking-tight text-gray-950 dark:text-white">
-                                                {{ $totalKegiatanValid }}
-                                            </p>
-
-                                        </div>
 
                                         <div
                                             class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-500/10"
                                         >
-                                            <x-heroicon-o-clipboard-document-list
-                                                class="h-5 w-5 text-blue-600 dark:text-blue-400"
+                                            <x-heroicon-s-clipboard-document-list
+                                                class="h-6 w-6"
+                                                style="color: #16a34a !important;"
                                             />
                                         </div>
+
+                                        <p class="mt-2 truncate text-xs font-medium text-gray-500 dark:text-gray-400">
+                                            Kegiatan Valid
+                                        </p>
+
+                                        <p class="mt-1 text-2xl font-bold tracking-tight text-gray-950 dark:text-white">
+                                            {{ $totalKegiatanValid }}
+                                        </p>
 
                                     </div>
 
 
                                     {{-- PML --}}
                                     <div
-                                        class="flex min-w-0 items-center justify-between gap-3 rounded-xl border border-emerald-100 bg-white px-4 py-3 shadow-sm dark:border-emerald-900/30 dark:bg-gray-950"
+                                        class="flex min-w-0 flex-col items-center justify-center rounded-xl border border-emerald-100 bg-white px-3 py-4 text-center shadow-sm transition hover:shadow-md dark:border-emerald-900/30 dark:bg-gray-950"
                                     >
-
-                                        <div class="min-w-0">
-
-                                            <p class="truncate text-xs font-medium text-gray-500 dark:text-gray-400">
-                                                PML Valid
-                                            </p>
-
-                                            <p class="mt-1 text-xl font-bold tracking-tight text-gray-950 dark:text-white">
-                                                {{ $totalPmlValid }}
-                                            </p>
-
-                                        </div>
 
                                         <div
                                             class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-500/10"
                                         >
-                                            <x-heroicon-o-user-group
-                                                class="h-5 w-5 text-emerald-600 dark:text-emerald-400"
+                                            <x-heroicon-s-user-group
+                                                class="h-6 w-6"
+                                                style="color: #16a34a !important;"
                                             />
                                         </div>
+
+                                        <p class="mt-2 truncate text-xs font-medium text-gray-500 dark:text-gray-400">
+                                            PML Valid
+                                        </p>
+
+                                        <p class="mt-1 text-2xl font-bold tracking-tight text-gray-950 dark:text-white">
+                                            {{ $totalPmlValid }}
+                                        </p>
 
                                     </div>
 
 
                                     {{-- PCL --}}
                                     <div
-                                        class="flex min-w-0 items-center justify-between gap-3 rounded-xl border border-purple-100 bg-white px-4 py-3 shadow-sm dark:border-purple-900/30 dark:bg-gray-950"
+                                        class="flex min-w-0 flex-col items-center justify-center rounded-xl border border-purple-100 bg-white px-3 py-4 text-center shadow-sm transition hover:shadow-md dark:border-purple-900/30 dark:bg-gray-950"
                                     >
-
-                                        <div class="min-w-0">
-
-                                            <p class="truncate text-xs font-medium text-gray-500 dark:text-gray-400">
-                                                PCL Valid
-                                            </p>
-
-                                            <p class="mt-1 text-xl font-bold tracking-tight text-gray-950 dark:text-white">
-                                                {{ $totalPclValid }}
-                                            </p>
-
-                                        </div>
 
                                         <div
                                             class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-purple-50 dark:bg-purple-500/10"
                                         >
-                                            <x-heroicon-o-users
-                                                class="h-5 w-5 text-purple-600 dark:text-purple-400"
+                                            <x-heroicon-s-users
+                                                class="h-6 w-6"
+                                                style="color: #16a34a !important;"
                                             />
                                         </div>
+
+                                        <p class="mt-2 truncate text-xs font-medium text-gray-500 dark:text-gray-400">
+                                            PCL Valid
+                                        </p>
+
+                                        <p class="mt-1 text-2xl font-bold tracking-tight text-gray-950 dark:text-white">
+                                            {{ $totalPclValid }}
+                                        </p>
 
                                     </div>
 
 
                                     {{-- DATA DILEWATI --}}
                                     <div
-                                        class="flex min-w-0 items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50/70 px-4 py-3 shadow-sm dark:border-amber-900/30 dark:bg-amber-500/10"
+                                        class="flex min-w-0 flex-col items-center justify-center rounded-xl border border-amber-200 bg-amber-50/70 px-3 py-4 text-center shadow-sm transition hover:shadow-md dark:border-amber-900/30 dark:bg-amber-500/10"
                                     >
-
-                                        <div class="min-w-0">
-
-                                            <p class="truncate text-xs font-medium text-amber-700 dark:text-amber-400">
-                                                Data Dilewati
-                                            </p>
-
-                                            <p class="mt-1 text-xl font-bold tracking-tight text-amber-800 dark:text-amber-300">
-                                                {{ $totalSkipped }}
-                                            </p>
-
-                                        </div>
 
                                         <div
                                             class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-500/10"
                                         >
-                                            <x-heroicon-o-exclamation-triangle
-                                                class="h-5 w-5 text-amber-600 dark:text-amber-400"
+                                            <x-heroicon-s-exclamation-triangle
+                                                class="h-6 w-6"
+                                                style="color: #dc2626 !important;"
                                             />
                                         </div>
+
+                                        <p class="mt-2 truncate text-xs font-medium text-amber-700 dark:text-amber-400">
+                                            Data Dilewati
+                                        </p>
+
+                                        <p class="mt-1 text-2xl font-bold tracking-tight text-amber-800 dark:text-amber-300">
+                                            {{ $totalSkipped }}
+                                        </p>
 
                                     </div>
 
@@ -517,18 +566,17 @@
 
                                 <div class="mt-6">
 
-                                    <div class="mb-3">
+                                    <div class="mb-5">
 
                                         <h4 class="text-sm font-semibold text-gray-900 dark:text-white">
                                             Data yang Akan Diimport
                                         </h4>
 
-                                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                        <p class="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-400">
                                             Data berikut lolos validasi dan siap disimpan.
                                         </p>
 
                                     </div>
-
 
                                     <div
                                         class="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700"
@@ -599,24 +647,29 @@
                             @else
 
                                 <div
-                                    class="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-900/40 dark:bg-red-900/20"
+                                    class="mt-6 rounded-xl border border-red-200 bg-red-50/70 px-4 py-3.5 dark:border-red-900/40 dark:bg-red-900/20"
                                 >
 
-                                    <div class="flex gap-2.5">
+                                    <div class="flex items-start gap-3">
 
-                                        <x-heroicon-o-exclamation-triangle
-                                            class="h-5 w-5 shrink-0 text-red-600 dark:text-red-400"
-                                        />
+                                        {{-- ICON --}}
+                                        <div
+                                            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-100 dark:bg-red-500/10"
+                                        >
+                                            <x-heroicon-o-exclamation-triangle
+                                                class="h-5 w-5 text-red-600 dark:text-red-400"
+                                            />
+                                        </div>
 
-                                        <div>
+                                        {{-- CONTENT --}}
+                                        <div class="min-w-0">
 
-                                            <p class="text-sm font-semibold text-red-800 dark:text-red-300">
+                                            <p class="text-sm font-semibold text-red-900 dark:text-red-300">
                                                 Tidak ada data yang dapat diimport
                                             </p>
 
-                                            <p class="mt-1 text-xs text-red-700 dark:text-red-400">
-                                                Semua data pada file tidak lolos validasi atau
-                                                sudah terdapat di database.
+                                            <p class="mt-1 text-xs leading-5 text-red-800 dark:text-red-400">
+                                                Semua data pada file tidak lolos validasi atau sudah terdapat di database.
                                             </p>
 
                                         </div>
@@ -636,13 +689,13 @@
 
                                 <div class="mt-6">
 
-                                    <div class="mb-3">
+                                    <div class="mb-5">
 
                                         <h4 class="text-sm font-semibold text-gray-900 dark:text-white">
                                             Data yang Dilewati
                                         </h4>
 
-                                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                        <p class="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-400">
                                             Data berikut tidak akan disimpan karena tidak memenuhi
                                             validasi atau merupakan duplikat.
                                         </p>
@@ -738,7 +791,7 @@
                         {{-- ================================================= --}}
 
                         <div
-                            class="flex shrink-0 items-center justify-between gap-4 border-t border-gray-200 bg-gray-50 px-5 py-4 dark:border-gray-700 dark:bg-gray-900 sm:px-6"
+                            class="flex shrink-0 items-center justify-between gap-4 border-t border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-900 sm:px-7"
                         >
 
                             {{-- GANTI FILE --}}
@@ -765,7 +818,7 @@
                                 <button
                                     type="button"
                                     wire:click="closePreview"
-                                    class="inline-flex h-10 shrink-0 items-center justify-center rounded-lg border border-gray-300 bg-white px-5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+                                    class="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
                                 >
                                     Kembali
                                 </button>
@@ -855,26 +908,50 @@
                 {{-- HEADER --}}
                 {{-- ================================================= --}}
 
-                <div class="sticky top-0 z-10 flex items-center justify-between border-b border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800">
+                <div
+                    class="sticky top-0 z-10 flex items-center justify-between border-b border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800"
+                >
 
-                    <div>
+                    {{-- HEADER LEFT --}}
+                    <div class="flex min-w-0 items-center gap-3">
 
-                        <h3 class="text-sm font-bold text-gray-900 dark:text-white">
-                            Preview Template Import Data
-                        </h3>
+                        {{-- ICON --}}
+                        <div
+                            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-50 ring-1 ring-primary-100/70 dark:bg-primary-500/10 dark:ring-primary-500/20"
+                        >
+                            <x-heroicon-o-document-text
+                                class="h-5 w-5 text-primary-600 dark:text-primary-400"
+                            />
+                        </div>
 
-                        <p class="text-xs text-gray-500 dark:text-gray-400">
-                            Struktur kolom Excel sesuai template
-                        </p>
+                        {{-- TITLE --}}
+                        <div class="min-w-0">
+
+                            <h3
+                                class="text-sm font-semibold leading-5 text-gray-900 dark:text-white"
+                            >
+                                Preview Template Import Data
+                            </h3>
+
+                            <p
+                                class="mt-0.5 text-xs leading-4 text-gray-500 dark:text-gray-400"
+                            >
+                                Struktur kolom Excel sesuai template
+                            </p>
+
+                        </div>
 
                     </div>
 
+
+                    {{-- CLOSE --}}
                     <button
                         type="button"
                         @click="showTemplate = false"
-                        class="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700"
+                        aria-label="Tutup preview template"
+                        class="ml-3 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-gray-50 text-gray-500 shadow-sm transition hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
                     >
-                        <x-heroicon-o-x-mark class="h-5 w-5" />
+                        <x-heroicon-o-x-mark class="h-4.5 w-4.5" />
                     </button>
 
                 </div>
@@ -884,15 +961,15 @@
                 {{-- CONTENT --}}
                 {{-- ================================================= --}}
 
-                <div class="space-y-5 p-4">
+                <div class="space-y-10 p-4">
 
                     {{-- ================================================= --}}
                     {{-- KEGIATAN --}}
                     {{-- ================================================= --}}
 
-                    <div>
+                    <div class="space-y-3">
 
-                        <div class="mb-1.5 flex items-center gap-1.5">
+                        <div class="flex items-center gap-1.5">
 
                             <span class="flex h-5 w-5 items-center justify-center rounded bg-emerald-100 text-[10px] font-bold text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400">
                                 1
@@ -904,8 +981,9 @@
 
                         </div>
 
-                        <div class="overflow-hidden rounded-md border border-gray-200 dark:border-gray-700">
-
+                        <div
+                            class="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700"
+                        >
                             <table class="w-full text-xs">
 
                                 <thead>
@@ -961,9 +1039,9 @@
                     {{-- PML --}}
                     {{-- ================================================= --}}
 
-                    <div>
+                    <div class="space-y-3">
 
-                        <div class="mb-1.5 flex items-center gap-1.5">
+                        <div class="flex items-center gap-1.5">
 
                             <span class="flex h-5 w-5 items-center justify-center rounded bg-blue-100 text-[10px] font-bold text-blue-700 dark:bg-blue-900/40 dark:text-blue-400">
                                 2
@@ -975,7 +1053,9 @@
 
                         </div>
 
-                        <div class="overflow-hidden rounded-md border border-gray-200 dark:border-gray-700">
+                        <div
+                            class="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700"
+                        >
 
                             <table class="w-full text-xs">
 
@@ -1012,9 +1092,9 @@
                     {{-- PCL --}}
                     {{-- ================================================= --}}
 
-                    <div>
+                    <div class="space-y-3">
 
-                        <div class="mb-1.5 flex items-center gap-1.5">
+                        <div class="flex items-center gap-1.5">
 
                             <span class="flex h-5 w-5 items-center justify-center rounded bg-purple-100 text-[10px] font-bold text-purple-700 dark:bg-purple-900/40 dark:text-purple-400">
                                 3
@@ -1026,7 +1106,9 @@
 
                         </div>
 
-                        <div class="overflow-hidden rounded-md border border-gray-200 dark:border-gray-700">
+                        <div
+                            class="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700"
+                        >
 
                             <table class="w-full text-xs">
 
@@ -1114,43 +1196,6 @@
                         </div>
 
                     </div>
-
-                </div>
-
-
-                {{-- ================================================= --}}
-                {{-- FOOTER --}}
-                {{-- ================================================= --}}
-
-                <div class="flex justify-end gap-2 border-t border-gray-200 bg-gray-50/50 px-4 py-2.5 dark:border-gray-700 dark:bg-gray-800/50">
-
-                    <button
-                        type="button"
-                        @click="showTemplate = false"
-                        class="inline-flex h-7 items-center rounded-md border border-gray-300 px-2.5 text-xs font-medium text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"
-                    >
-                        Tutup
-                    </button>
-
-                    <button
-                        type="button"
-                        wire:click="downloadTemplate"
-                        @click="showTemplate = false"
-                        wire:loading.attr="disabled"
-                        wire:target="downloadTemplate"
-                        class="inline-flex h-7 items-center gap-1 rounded-md !bg-emerald-600 px-2.5 text-xs font-medium !text-white hover:!bg-emerald-700 disabled:opacity-60"
-                    >
-                        <x-heroicon-o-arrow-down-tray class="h-3.5 w-3.5 !text-white" />
-
-                        <span wire:loading.remove wire:target="downloadTemplate">
-                            Download Template
-                        </span>
-
-                        <span wire:loading wire:target="downloadTemplate">
-                            Mengunduh...
-                        </span>
-
-                    </button>
 
                 </div>
 
