@@ -129,53 +129,34 @@
             $angka = (int) $angka;
             $baca = ['', 'Satu', 'Dua', 'Tiga', 'Empat', 'Lima', 'Enam', 'Tujuh', 'Delapan', 'Sembilan', 'Sepuluh', 'Sebelas'];
             
-            if ($angka < 12) {
-                return $baca[$angka];
-            } elseif ($angka < 20) {
-                return terbilangTahun($angka - 10) . ' Belas';
-            } elseif ($angka < 100) {
-                return terbilangTahun((int)($angka / 10)) . ' Puluh ' . terbilangTahun($angka % 10);
-            } elseif ($angka < 200) {
-                return 'Seratus ' . terbilangTahun($angka - 100);
-            } elseif ($angka < 1000) {
-                return terbilangTahun((int)($angka / 100)) . ' Ratus ' . terbilangTahun($angka % 100);
-            } elseif ($angka < 2000) {
-                return 'Seribu ' . terbilangTahun($angka - 1000);
-            } elseif ($angka < 10000) {
-                return terbilangTahun((int)($angka / 1000)) . ' Ribu ' . terbilangTahun($angka % 1000);
-            }
+            if ($angka < 12) return $baca[$angka];
+            if ($angka < 20) return terbilangTahun($angka - 10) . ' Belas';
+            if ($angka < 100) return terbilangTahun((int)($angka / 10)) . ' Puluh ' . terbilangTahun($angka % 10);
+            if ($angka < 200) return 'Seratus ' . terbilangTahun($angka - 100);
+            if ($angka < 1000) return terbilangTahun((int)($angka / 100)) . ' Ratus ' . terbilangTahun($angka % 100);
+            if ($angka < 2000) return 'Seribu ' . terbilangTahun($angka - 1000);
+            if ($angka < 10000) return terbilangTahun((int)($angka / 1000)) . ' Ribu ' . terbilangTahun($angka % 1000);
             return (string) $angka;
         }
     }
 
-    if (!function_exists('terbilangRupiah')) {
-        function terbilangRupiah($angka) {
+    if (!function_exists('terbilangAngkaMurni')) {
+        function terbilangAngkaMurni($angka) {
             $angka = (float) $angka;
-            if ($angka <= 0) return 'Nol Rupiah';
+            if ($angka <= 0) return '';
             
             $baca = ['', 'Satu', 'Dua', 'Tiga', 'Empat', 'Lima', 'Enam', 'Tujuh', 'Delapan', 'Sembilan', 'Sepuluh', 'Sebelas'];
             
-            if ($angka < 12) {
-                $hasil = $baca[(int)$angka];
-            } elseif ($angka < 20) {
-                $hasil = terbilangRupiah($angka - 10) . ' Belas';
-            } elseif ($angka < 100) {
-                $hasil = terbilangRupiah((int)($angka / 10)) . ' Puluh ' . terbilangRupiah($angka % 10);
-            } elseif ($angka < 200) {
-                $hasil = 'Seratus ' . terbilangRupiah($angka - 100);
-            } elseif ($angka < 1000) {
-                $hasil = terbilangRupiah((int)($angka / 100)) . ' Ratus ' . terbilangRupiah($angka % 100);
-            } elseif ($angka < 2000) {
-                $hasil = 'Seribu ' . terbilangRupiah($angka - 1000);
-            } elseif ($angka < 1000000) {
-                $hasil = terbilangRupiah((int)($angka / 1000)) . ' Ribu ' . terbilangRupiah($angka % 1000);
-            } elseif ($angka < 1000000000) {
-                $hasil = terbilangRupiah((int)($angka / 1000000)) . ' Juta ' . terbilangRupiah($angka % 1000000);
-            } elseif ($angka < 1000000000000) {
-                $hasil = terbilangRupiah((int)($angka / 1000000000)) . ' Miliar ' . terbilangRupiah($angka % 1000000000);
-            } else {
-                $hasil = (string) $angka;
-            }
+            if ($angka < 12) $hasil = $baca[(int)$angka];
+            elseif ($angka < 20) $hasil = terbilangAngkaMurni($angka - 10) . ' Belas';
+            elseif ($angka < 100) $hasil = terbilangAngkaMurni((int)($angka / 10)) . ' Puluh ' . terbilangAngkaMurni($angka % 10);
+            elseif ($angka < 200) $hasil = 'Seratus ' . terbilangAngkaMurni($angka - 100);
+            elseif ($angka < 1000) $hasil = terbilangAngkaMurni((int)($angka / 100)) . ' Ratus ' . terbilangAngkaMurni($angka % 100);
+            elseif ($angka < 2000) $hasil = 'Seribu ' . terbilangAngkaMurni($angka - 1000);
+            elseif ($angka < 1000000) $hasil = terbilangAngkaMurni((int)($angka / 1000)) . ' Ribu ' . terbilangAngkaMurni($angka % 1000);
+            elseif ($angka < 1000000000) $hasil = terbilangAngkaMurni((int)($angka / 1000000)) . ' Juta ' . terbilangAngkaMurni($angka % 1000000);
+            elseif ($angka < 1000000000000) $hasil = terbilangAngkaMurni((int)($angka / 1000000000)) . ' Miliar ' . terbilangAngkaMurni($angka % 1000000000);
+            else $hasil = (string) $angka;
             
             return trim(preg_replace('/\s+/', ' ', $hasil));
         }
@@ -205,14 +186,24 @@
         $tahunAngka = $tglSpk ? $tglSpk->format('Y') : date('Y');
         $tahunTerbilang = trim(terbilangTahun($tahunAngka));
 
-        // Menggunakan Accessor Dinamis dari Model SuratPerjanjianKerja
         $volumeAuto = $spk->volume_display ?? 0;
         $rateHonorAuto = $spk->harga_satuan_display ?? 0;
         $honorTotalAuto = $spk->nilai_perjanjian_display ?? ($volumeAuto * $rateHonorAuto);
 
-        $terbilangHonor = $survey?->terbilang_honor 
+        // 1. Ambil teks mentah
+        $teksAwal = $survey?->terbilang_honor 
             ?? $spk->terbilang_honor 
-            ?? (terbilangRupiah($honorTotalAuto) . ' Rupiah');
+            ?? terbilangAngkaMurni($honorTotalAuto);
+
+        // 2. Sapu bersih SEMUA kata "Rupiah" / "rupiah" yang ada di teks awal
+        $tanpaRupiah = trim(str_ireplace('rupiah', '', $teksAwal));
+
+        // 3. Jika kosong/nol, beri nilai default "Nol", lalu tambahkan tepat 1 kata "Rupiah" di akhir
+        if (empty($tanpaRupiah)) {
+            $terbilangHonor = 'Nol Rupiah';
+        } else {
+            $terbilangHonor = trim(preg_replace('/\s+/', ' ', $tanpaRupiah)) . ' Rupiah';
+        }
     @endphp
 
     <!-- HALAMAN UTAMA (PORTRAIT) -->
@@ -292,7 +283,7 @@
     <p class="text-justify">(2) Pada saat terjadi Keadaan Kahar, pelaksanaan pekerjaan oleh <b>PIHAK KEDUA</b> dihentikan sementara dan dilanjutkan kembali setelah Keadaan Kahar berakhir, namun apabila akibat Keadaan Kahar tidak memungkinkan dilanjutkan/diselesaikannya pelaksanaan pekerjaan, <b>PIHAK KEDUA</b> berhak menerima honorarium secara proporsional sesuai pekerjaan yang telah dilaksanakan.</p>
 
     <div class="pasal-header">Pasal 11</div>
-    <p class="text-justify">Segala sesuatu yang belum atau tidak cukup diatur dalam Perjanjian ini, dituangkan dalam perjanjian tambahan/addendum dan merupakan bagian tidak terpisahkan dari perjanjian ini.</p>
+    <p class="text-justify">Segala sesuatu yang belum atau tidak cukup diatur dalam Perjanjian ini, dituangkan dalam perjanjian tambahan/<i>addendum</i> dan merupakan bagian tidak terpisahkan dari perjanjian ini.</p>
 
     <div class="pasal-header">Pasal 12</div>
     <p class="text-justify">(1) Segala perselisihan atau perbedaan pendapat yang timbul sebagai akibat adanya Perjanjian ini akan diselesaikan secara musyawarah untuk mufakat.</p>
