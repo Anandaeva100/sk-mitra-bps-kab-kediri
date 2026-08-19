@@ -23,7 +23,7 @@ class PegawaiResource extends Resource
 
     protected static ?string $navigationGroup = 'MASTER DATA';
 
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 1;
 
     protected static ?string $navigationLabel = 'Daftar Pegawai BPS';
 

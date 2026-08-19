@@ -34,37 +34,39 @@
 
                 </div>
 
-                <div class="flex flex-wrap gap-2">
+    <div class="flex items-center gap-2 flex-nowrap shrink-0">
 
-                    <button
-                        type="button"
-                        @click="showTemplate = true"
-                        class="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-3 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
-                    >
-                        <x-heroicon-o-eye class="h-4 w-4" />
-                        Lihat Template
-                    </button>
+        <!-- Tombol Lihat Template -->
+        <button
+            type="button"
+            @click="showTemplate = true"
+            class="inline-flex h-8 whitespace-nowrap items-center justify-center gap-1.5 rounded-lg border border-gray-300 bg-white px-2.5 text-xs font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+        >
+            <x-heroicon-o-eye class="h-3.5 w-3.5" />
+            <span>Lihat Template</span>
+        </button>
 
-                    <x-filament::button
-                        type="button"
-                        wire:click="downloadTemplate"
-                        wire:loading.attr="disabled"
-                        wire:target="downloadTemplate"
-                        color="success"
-                        icon="heroicon-o-arrow-down-tray"
-                        size="sm"
-                    >
-                        <span wire:loading.remove wire:target="downloadTemplate">
-                            Download Template
-                        </span>
+        <!-- Tombol Download Template -->
+        <x-filament::button
+            type="button"
+            wire:click="downloadTemplate"
+            wire:loading.attr="disabled"
+            wire:target="downloadTemplate"
+            color="success"
+            icon="heroicon-o-arrow-down-tray"
+            size="xs"
+            class="whitespace-nowrap"
+        >
+            <span wire:loading.remove wire:target="downloadTemplate">
+                Download Template
+            </span>
 
-                        <span wire:loading wire:target="downloadTemplate">
-                            Mengunduh...
-                        </span>
-                    </x-filament::button>
+            <span wire:loading wire:target="downloadTemplate">
+                Mengunduh...
+            </span>
+        </x-filament::button>
 
-                </div>
-
+    </div>
             </div>
 
         </div>
