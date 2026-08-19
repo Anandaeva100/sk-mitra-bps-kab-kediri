@@ -76,7 +76,8 @@ class SuratTugasResource extends Resource
                         DatePicker::make('tanggal_surat')
                             ->label('Tanggal Surat')
                             ->default(now())
-                            ->displayFormat('d F Y')
+                            ->displayFormat('d/m/Y')
+                            ->native(false)
                             ->required(),
 
                     ])
