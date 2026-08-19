@@ -1,28 +1,28 @@
 <x-filament-panels::page.simple>
     <div class="flex flex-col items-center mb-2 text-center">
 
-        <!-- Margin top dikurangi dari mt-6 menjadi mt-1 / -mt-2 agar judul naik ke atas -->
+        <!-- Judul Form Register -->
         <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white -mt-2">
-            Masuk
+            Daftar Akun
         </h1>
 
-        <!-- Teks Ajakan Daftar -->
-        @if (filament()->hasRegistration())
+        <!-- Teks Tautan Masuk -->
+        @if (filament()->hasLogin())
             <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
                 atau 
                 <a 
-                    href="{{ filament()->getRegistrationUrl() }}" 
+                    href="{{ filament()->getLoginUrl() }}" 
                     class="font-bold underline"
                     style="color: #d97706;"
                 >
-                    daftar akun baru jika belum punya akun
+                    masuk ke akun Anda
                 </a>
             </p>
         @endif
     </div>
 
-    <!-- Form Login Filament -->
-    <x-filament-panels::form wire:submit="authenticate">
+    <!-- Form Register Filament -->
+    <x-filament-panels::form wire:submit="register">
         {{ $this->form }}
 
         <x-filament-panels::form.actions

@@ -2,6 +2,8 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Auth\Login;
+use App\Filament\Auth\Register;
 use App\Filament\Resources\MonitoringSurveyResource;
 use App\Filament\Pages\RekapanSemuaData;
 use App\Filament\Pages\ImportData;
@@ -32,8 +34,8 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            ->login()
-            ->registration()
+            ->login(Login::class)
+            ->registration(Register::class)
 
             // -----------------------------------------------------------------
             // Brand
