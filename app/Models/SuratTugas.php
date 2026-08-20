@@ -25,5 +25,6 @@ class SuratTugas extends Model
     protected $casts = [
         'tanggal_surat' => 'date',
         'mengingat' => 'array',
+        'untuk'         => 'array',
     ];
 }

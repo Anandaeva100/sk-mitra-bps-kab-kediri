@@ -270,7 +270,7 @@
                 </tr>
 
 
-                {{-- MENGINGAT --}}
+               {{-- MENGINGAT --}}
                 <tr>
                     <td class="label">
                         Mengingat
@@ -281,66 +281,26 @@
                     </td>
 
                     <td>
-                        <ol class="mengingat-list">
+                        @php
+                            // Mengantisipasi jika data tersimpan sebagai JSON String
+                            $mengingatItems = is_string($surat->mengingat) 
+                                ? json_decode($surat->mengingat, true) 
+                                : $surat->mengingat;
+                        @endphp
 
-                            {{-- MENGINGAT DEFAULT 1 --}}
-                            <li>
-                                UU No. 16 Tahun 1997 tentang Statistik;
-                            </li>
-
-                            {{-- MENGINGAT DEFAULT 2 --}}
-                            <li>
-                                Undang-Undang Nomor 6 Tahun 2014 tentang Desa;
-                            </li>
-
-                            {{-- MENGINGAT DEFAULT 3 --}}
-                            <li>
-                                Undang-Undang Nomor 23 Tahun 2014 tentang
-                                Pemerintahan Daerah sebagaimana diubah beberapa
-                                kali terakhir dengan Undang-Undang Nomor 9 Tahun
-                                2015 tentang Perubahan Kedua atas Undang-Undang
-                                Nomor 23 Tahun 2014 tentang Pemerintahan Daerah;
-                            </li>
-
-                            {{-- MENGINGAT DEFAULT 4 --}}
-                            <li>
-                                Peraturan Pemerintah Nomor 51 Tahun 1999 tentang
-                                Penyelenggaraan Statistik;
-                            </li>
-
-                            {{-- MENGINGAT DEFAULT 5 --}}
-                            <li>
-                                Peraturan Presiden Republik Indonesia Nomor 86
-                                Tahun 2007 tentang Badan Pusat Statistik;
-                            </li>
-
-                            {{-- MENGINGAT DEFAULT 6 --}}
-                            <li>
-                                Peraturan Badan Pusat Statistik Nomor 2 Tahun 2025
-                                tentang Organisasi dan Tata Kerja Badan Pusat Statistik;
-                            </li>
-
-
-                            {{-- =====================================================
-                                MENGINGAT TAMBAHAN
-                                Dimulai dari nomor 7
-                            ====================================================== --}}
-
-                            @if (!empty($surat->mengingat))
-
-                                @foreach ($surat->mengingat as $item)
-
-                                    @if (!empty($item['isi']))
+                        @if (!empty($mengingatItems) && is_array($mengingatItems))
+                            <ol class="mengingat-list">
+                                @foreach ($mengingatItems as $item)
+                                    @if (!empty($item['poin']))
                                         <li>
-                                            {{ $item['isi'] }};
+                                            {{ $item['poin'] }}
                                         </li>
                                     @endif
-
                                 @endforeach
-
-                            @endif
-
-                        </ol>
+                            </ol>
+                        @else
+                            -
+                        @endif
                     </td>
                 </tr>
 

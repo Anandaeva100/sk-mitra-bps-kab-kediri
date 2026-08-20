@@ -7,12 +7,16 @@ use App\Models\SuratTugas;
 use App\Models\SurveyActivity;
 use App\Models\MonitoringSurvey;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Actions\Action as FormAction;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -83,42 +87,79 @@ class SuratTugasResource extends Resource
                     ])
                     ->columns(2),
                 
-                Section::make('Mengingat')
-                    ->description('Tambahkan dasar hukum jika diperlukan.')
+          Section::make('Mengingat')
+    ->description('Klik tombol di kanan untuk mengelola atau mengedit dasar hukum.')
+    ->headerActions([
+        // Tombol Modal Pop-up untuk Mengedit/Menambah Dasar Hukum
+        FormAction::make('kelola_mengingat')
+            ->label('Tambah / Kelola Dasar Hukum')
+            ->icon('heroicon-o-pencil-square')
+            ->color('warning')
+            ->modalHeading('Kelola Dasar Hukum (Mengingat)')
+            ->modalSubmitActionLabel('Simpan Dasar Hukum')
+            ->fillForm(fn ($record, Get $get) => [
+                'mengingat_modal' => $get('mengingat') ?: [
+                    ['poin' => 'UU No. 16 Tahun 1997 tentang Statistik;'],
+                    ['poin' => 'Undang-Undang Nomor 6 Tahun 2014 tentang Desa;'],
+                    ['poin' => 'Undang-Undang Nomor 23 Tahun 2014 tentang Pemerintahan Daerah sebagaimana diubah beberapa kali terakhir dengan Undang-Undang Nomor 9 Tahun 2015 tentang Perubahan Kedua atas Undang-Undang Nomor 23 Tahun 2014 tentang Pemerintahan Daerah;'],
+                    ['poin' => 'Peraturan Pemerintah Nomor 51 Tahun 1999 tentang Penyelenggaraan Statistik;'],
+                    ['poin' => 'Peraturan Presiden Republik Indonesia Nomor 86 Tahun 2007 tentang Badan Pusat Statistik;'],
+                    ['poin' => 'Peraturan Badan Pusat Statistik Nomor 2 Tahun 2025 tentang Organisasi dan Tata Kerja Badan Pusat Statistik;'],
+                ],
+            ])
+            ->form([
+                Repeater::make('mengingat_modal')
+                    ->hiddenLabel()
+                    ->itemLabel(function (array $state, Repeater $component): ?string {
+                        $items = array_values($component->getState() ?? []);
+                        $index = array_search($state, $items, true);
+
+                        return 'Dasar Hukum ' . ($index !== false ? $index + 1 : '');
+                    })
                     ->schema([
-
-                        Repeater::make('mengingat')
-                            ->label('Dasar Hukum Tambahan')
-                            ->schema([
-
-                                Textarea::make('isi')
-                                    ->label('Isi Dasar Hukum')
-                                    ->placeholder(
-                                        'Contoh: UU No. 16 Tahun 1997 tentang Statistik'
-                                    )
-                                    ->required()
-                                    ->rows(2)
-                                    ->autosize(),
-
-                            ])
-                            ->defaultItems(0)
-                            ->addAction(
-                                fn ($action) => $action
-                                    ->label('Tambah Dasar Hukum')
-                                    ->icon('heroicon-m-plus')
-                            )
-                            ->reorderable()
-                            ->collapsible()
-                            ->itemLabel(
-                                fn (array $state): ?string =>
-                                    ! empty($state['isi'])
-                                        ? str($state['isi'])->limit(60)
-                                        : 'Dasar Hukum'
-                            )
+                        Textarea::make('poin')
+                            ->hiddenLabel()
+                            ->rows(2)
+                            ->required()
                             ->columnSpanFull(),
-
                     ])
-                    ->columns(1),
+                    ->addAction(
+                        fn (\Filament\Forms\Components\Actions\Action $action) => $action
+                            ->label('Tambah Dasar Hukum Baru')
+                            ->icon('heroicon-o-plus')
+                    )
+                    ->reorderable()
+                    ->deletable(true)
+                    ->collapsible(false)
+                    ->columnSpanFull(),
+            ])
+            ->action(function (array $data, Set $set) {
+                // Menyimpan hasil editan modal ke field 'mengingat'
+                $set('mengingat', $data['mengingat_modal']);
+            }),
+
+        // Tombol Preview PDF
+        FormAction::make('preview_pdf')
+            ->label('Preview Surat')
+            ->icon('heroicon-o-eye')
+            ->color('info')
+            ->url(fn ($record) => $record ? route('surat-tugas.pdf', $record) : null)
+            ->openUrlInNewTab()
+            ->visible(fn ($record) => $record !== null),
+    ])
+    ->schema([
+        // Hidden input untuk menyimpan state array dasar hukum dari modal
+        Hidden::make('mengingat')
+            ->default([
+                ['poin' => 'UU No. 16 Tahun 1997 tentang Statistik;'],
+                ['poin' => 'Undang-Undang Nomor 6 Tahun 2014 tentang Desa;'],
+                ['poin' => 'Undang-Undang Nomor 23 Tahun 2014 tentang Pemerintahan Daerah sebagaimana diubah beberapa kali terakhir dengan Undang-Undang Nomor 9 Tahun 2015 tentang Perubahan Kedua atas Undang-Undang Nomor 23 Tahun 2014 tentang Pemerintahan Daerah;'],
+                ['poin' => 'Peraturan Pemerintah Nomor 51 Tahun 1999 tentang Penyelenggaraan Statistik;'],
+                ['poin' => 'Peraturan Presiden Republik Indonesia Nomor 86 Tahun 2007 tentang Badan Pusat Statistik;'],
+                ['poin' => 'Peraturan Badan Pusat Statistik Nomor 2 Tahun 2025 tentang Organisasi dan Tata Kerja Badan Pusat Statistik;'],
+            ]),
+    ])
+    ->columns(1),
 
                 Section::make('Informasi PCL')
                     ->schema([
