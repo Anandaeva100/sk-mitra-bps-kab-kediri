@@ -262,7 +262,7 @@
 
                     <td class="isi-utama">
                         Bahwa dalam rangka kelancaran kegiatan
-                        <strong>{{ $surat->nama_survei }}</strong>,
+                        {{ $surat->nama_survei }},
                         Kepala Badan Pusat Statistik Kabupaten Kediri perlu
                         memberikan tugas/perintah kepada Pegawai BPS Kabupaten
                         Kediri dalam pelaksanaan kegiatan tersebut.

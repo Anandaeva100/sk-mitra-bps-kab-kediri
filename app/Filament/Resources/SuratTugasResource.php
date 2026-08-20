@@ -56,27 +56,34 @@ class SuratTugasResource extends Resource
                                 'Contoh: 100.1/3506/SS.220/2026'
                             ),
 
-                        Select::make('nama_survei')
-                            ->label('Nama Kegiatan / Survei')
-                            ->options(function () {
-                                return SurveyActivity::query()
-                                    ->where('status', 'Aktif')
-                                    ->orderBy('nama_kegiatan')
-                                    ->pluck(
-                                        'nama_kegiatan',
-                                        'nama_kegiatan'
-                                    )
-                                    ->toArray();
-                            })
-                            ->searchable()
-                            ->preload()
-                            ->live()
-                            ->afterStateUpdated(function ($set) {
-                                $set('nama_pcl', null);
-                                $set('wilayah_tugas', null);
-                            })
-                            ->required(),
+                            Select::make('nama_survei')
+                                ->label('Nama Kegiatan / Survei')
+                                ->options(function () {
+                                    return SurveyActivity::query()
+                                        ->where('status', 'Aktif')
+                                        ->orderBy('nama_kegiatan')
+                                        ->pluck(
+                                            'nama_kegiatan',
+                                            'nama_kegiatan'
+                                        )
+                                        ->toArray();
+                                })
+                                ->searchable()
+                                ->preload()
+                                ->live()
+                                ->afterStateUpdated(function ($state, Set $set) {
+                                    $set('nama_pcl', null);
+                                    $set('wilayah_tugas', null);
 
+                                    // Mengisi otomatis Textarea 'untuk' saat Nama Kegiatan dipilih
+                                    if ($state) {
+                                        $set('untuk', "Melaksanakan Pendataan {$state} di wilayah kerja yang telah ditentukan.");
+                                    } else {
+                                        $set('untuk', null);
+                                    }
+                                })
+                                ->required(),
+                                
                         DatePicker::make('tanggal_surat')
                             ->label('Tanggal Surat')
                             ->default(now())
@@ -217,6 +224,15 @@ class SuratTugasResource extends Resource
                             ->label('Untuk')
                             ->required()
                             ->rows(3)
+                            ->default(function (Get $get) {
+                                $namaSurvei = $get('nama_survei');
+
+                                if ($namaSurvei) {
+                                    return "Melaksanakan Pendataan {$namaSurvei} di wilayah kerja yang telah ditentukan.";
+                                }
+
+                                return "Melaksanakan Pendataan di wilayah kerja yang telah ditentukan.";
+                            })
                             ->placeholder(
                                 'Contoh: Untuk melaksanakan kegiatan IBS Triwulan 4 di wilayah kerja yang telah ditentukan.'
                             )
